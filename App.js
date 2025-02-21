@@ -18,6 +18,8 @@ import Search from './Components/Search';
 // import Icons
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MyProfile from './Components/MyProfile';
+import Help from './Components/Help';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -115,7 +117,7 @@ export default function App() {
         {/* <Tab.Screen name="ProductDetails" component={ProductDetails} /> */}
         <Tab.Screen
           name="Profile"
-          component={Profile}
+          component={StackNavigation}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ alignItems: "center", justifyContent: "center" }}>
@@ -133,7 +135,37 @@ export default function App() {
     </NavigationContainer>
   );
 }
-
+function StackNavigation(){
+      return (
+        <Stack.Navigator initialRouteName="ProfileScreen">
+          <Stack.Screen
+            name="About"
+            component={About}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="MyProfile"
+            component={MyProfile}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Help"
+            component={Help}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ProfileScreen"
+            component={Profile}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Settings"
+            component={Settings}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+      );
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
