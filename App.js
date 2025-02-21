@@ -1,0 +1,144 @@
+import { StatusBar } from 'expo-status-bar';
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
+import { StyleSheet, Text, View } from 'react-native';
+
+import About from './Components/About';
+import Cart from "./Components/Cart";
+import Checkout from './Components/Checkout';
+import Home from './Components/Home';
+import ProductList from './Components/ProductList';
+import ProductDetails from './Components/ProductDetails';
+import Profile from './Components/Profile';
+import Settings from './Components/Settings';
+import Search from './Components/Search';
+
+// import Icons
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+const screenOptions = {
+  tabBarShowLabel: false,
+  headerShown: false,
+  tabBarStyle: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    right: 0,
+    elevation: 0,
+    backgroundColor: '#e5e5e5',
+    borderRadius: 30,
+    height: 55,
+    marginHorizontal: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 'auto',
+    paddingVertical: 'auto',
+    shadowColor: '#000000',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
+  }
+};
+export default function App() {
+  return (
+    /*<NavigationContainer>
+        <Stack.Navigator initialRouteName="Home">
+          <Stack.Screen name="About" component={About} />
+          <Stack.Screen name="Cart" component={Cart} />
+          <Stack.Screen name="Checkout" component={Checkout} />
+          <Stack.Screen name="Home" component={Home} />
+          <Stack.Screen name="ProductList" component={ProductList} />
+          <Stack.Screen name="ProductDetails" component={ProductDetails} />
+          <Stack.Screen name="Profile" component={Profile} />
+          <Stack.Screen name="Settings" component={Settings} />
+        </Stack.Navigator>
+      </NavigationContainer> */
+
+    <NavigationContainer>
+      <Tab.Navigator screenOptions={screenOptions} initialRouteName="Home">
+        <Tab.Screen
+          name="Home"
+          component={Home}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <AntDesign
+                  name="home"
+                  size={focused ? 25 : 22}
+                  color={focused ? "#6055D8" : "black"}
+                />
+              </View>
+            ),
+          }}
+        />
+        {/* <Tab.Screen name="About" component={About} /> */}
+        <Tab.Screen
+          name="Search"
+          component={Search}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <AntDesign
+                  name="search1"
+                  size={focused ? 25 : 22}
+                  color={focused ? "#6055D8" : "black"}
+                />
+              </View>
+            ),
+          }}
+        />
+        <Tab.Screen
+          name="Cart"
+          component={Cart}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <AntDesign
+                  name="shoppingcart"
+                  size={focused ? 25 : 22}
+                  color={focused ? "#6055D8" : "black"}
+                />
+              </View>
+            ),
+          }}
+        />
+        {/* <Tab.Screen name="Checkout" component={Checkout} /> */}
+        {/* <Tab.Screen name="ProductList" component={ProductList} /> */}
+        {/* <Tab.Screen name="ProductDetails" component={ProductDetails} /> */}
+        <Tab.Screen
+          name="Profile"
+          component={Profile}
+          options={{
+            tabBarIcon: ({ focused }) => (
+              <View style={{ alignItems: "center", justifyContent: "center" }}>
+                <Ionicons
+                  name="person"
+                  size={focused ? 25 : 22}
+                  color={focused ? "#6055D8" : "black"}
+                />
+              </View>
+            ),
+          }}
+        />
+        {/* <Tab.Screen name="Settings" component={Settings} /> */}
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
