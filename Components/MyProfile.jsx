@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 
 const MyProfile = () => {
   return (
-    <View>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text>My Profile</Text>
     </View>
   );

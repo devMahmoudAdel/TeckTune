@@ -30,8 +30,8 @@ export default function Profile({ navigation }) {
             color="black"
             style={styles.imageProfile}
           />
-          <Text style={styles.userText}>User Profile</Text>
-          <Text style={styles.emailText}>User email</Text>
+          <Text style={styles.userText}>User Name</Text>
+          <Text style={styles.emailText}>user-email@email.com</Text>
         </View>
         <TouchableOpacity onPress={() => navigation.navigate("MyProfile")}>
           <ProfileTags name="Profile" image={"person"} />

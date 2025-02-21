@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import About from './Components/About';
@@ -13,13 +13,17 @@ import ProductList from './Components/ProductList';
 import ProductDetails from './Components/ProductDetails';
 import Profile from './Components/Profile';
 import Settings from './Components/Settings';
-import Search from './Components/Search';
+import Search from './Components/Wishlist';
 
 // import Icons
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MyProfile from './Components/MyProfile';
 import Help from './Components/Help';
+import Wishlist from './Components/Wishlist';
+import { use } from 'react';
+import Splash from './Components/Splash';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -34,7 +38,7 @@ const screenOptions = {
     elevation: 0,
     backgroundColor: '#e5e5e5',
     borderRadius: 30,
-    height: 55,
+    height: 50,
     marginHorizontal: 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -50,6 +54,11 @@ const screenOptions = {
   }
 };
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 3000)}, []);
   return (
     /*<NavigationContainer>
         <Stack.Navigator initialRouteName="Home">
@@ -68,7 +77,7 @@ export default function App() {
       <Tab.Navigator screenOptions={screenOptions} initialRouteName="Home">
         <Tab.Screen
           name="Home"
-          component={Home}
+          component={isLoading ? Splash : Home}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ alignItems: "center", justifyContent: "center" }}>
@@ -84,12 +93,12 @@ export default function App() {
         {/* <Tab.Screen name="About" component={About} /> */}
         <Tab.Screen
           name="Search"
-          component={Search}
+          component={Wishlist}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <AntDesign
-                  name="search1"
+                <MaterialIcons
+                  name="favorite-border"
                   size={focused ? 25 : 22}
                   color={focused ? "#6055D8" : "black"}
                 />

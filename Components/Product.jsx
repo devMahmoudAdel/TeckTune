@@ -1,0 +1,72 @@
+import React from 'react';
+import { View, Text, Image,StyleSheet } from 'react-native';
+import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+const Product = ({ navigation ,title,price,image,rating}) => {
+  return (
+    <View style={styles.container}>
+      <Image source={require("../assets/icon.png")} style={styles.image} />
+      <Text style={styles.productTitle}>{title}</Text>
+      <View style={styles.secContainer}>
+        <View style={styles.stars}>
+          <AntDesign name="star" size={16} color="#ffb305" />
+          <AntDesign name="star" size={16} color="#ffb305" />
+          <AntDesign name="star" size={16} color="grey" />
+          <AntDesign name="star" size={16} color="grey" />
+          <AntDesign name="star" size={16} color="grey" />
+        </View>
+        <Text>{rating}</Text>
+      </View>
+      <Text style={styles.productPrice}>${Number(price).toFixed(2)}</Text>
+      <MaterialIcons
+        name="favorite-border"
+        size={25}
+        color={"#6055D8"}
+        style={styles.favProduct}
+      />
+    </View>
+  );
+}
+const styles = StyleSheet.create({
+  container: {
+    width: "220",
+    height: "230",
+    justifyContent: "flex-start",
+    alignItems: "center",
+    backgroundColor: "#e5e5e5",
+    borderRadius: 10,
+    margin: 10,
+  },
+  productTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginTop: 7,
+  },
+  productPrice: {
+    fontSize: 14,
+    color: "#2f2baa",
+    fontWeight: "bold",
+    alignSelf: "flex-start",
+    marginLeft: 10,
+    marginBottom: 10,
+  },
+  image: {
+    width: 220,
+    height: 150,
+  },
+  stars: {
+    flexDirection: "row",
+  },
+  secContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  favProduct: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+  },
+});
+
+export default Product;

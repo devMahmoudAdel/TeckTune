@@ -1,6 +1,7 @@
-import { Button, Text, View, Image, TextInput, StyleSheet } from "react-native";
+import { Button,ScrollView, Text, View, Image, TextInput, StyleSheet } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Product from "./Product";
 export default function Home({ navigation }) {
   return (
     // <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -25,9 +26,9 @@ export default function Home({ navigation }) {
     //     onPress={() => navigation.navigate("Settings")}
     //   />
     // </View>
-  
+
     <>
-    {/* Header */}
+      {/* Header */}
       <View style={styles.header}>
         <View style={styles.userContainer}>
           {/* <Image source={} /> */}
@@ -42,13 +43,53 @@ export default function Home({ navigation }) {
             <Text style={styles.userNameText}>User Name</Text>
           </View>
         </View>
-        <MaterialIcons name="notifications-none" size={24} color="black" style={styles.notificationIcon}/>
+        <MaterialIcons
+          name="notifications-none"
+          size={24}
+          color="black"
+          style={styles.notificationIcon}
+        />
       </View>
       {/* // Search */}
       <View style={styles.searchContainer}>
         <MaterialIcons name="search" size={24} color="grey" />
-        <TextInput placeholder="Search" style={styles.inputSearch}/>
+        <TextInput placeholder="Search" style={styles.inputSearch} />
       </View>
+      <ScrollView
+        style={{
+          flex: 1,
+          paddingHorizontal: 10,
+          paddingVertical: 10,
+          backgroundColor: "#eeeeee",
+        }}
+      >
+        <View style={{ flexDirection: "row", flexWrap: "wrap" ,justifyContent:"center"}}>
+          <Product
+            title="Dell"
+            price="1000"
+            rating="4.5"
+            image={require("../assets/icon.png")}
+          />
+          <Product
+            title="Dell"
+            price="1000"
+            rating="4.5"
+            image={require("../assets/icon.png")}
+          />
+          <Product
+            title="Dell"
+            price="1000"
+            rating="4.5"
+            image={require("../assets/icon.png")}
+          />
+          <Product
+            title="Dell"
+            price="1000"
+            rating="4.5"
+            image={require("../assets/icon.png")}
+          />
+        </View>
+      </ScrollView>
     </>
   );
 }
@@ -61,7 +102,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#eeeeee",
   },
   userContainer: {
     flexDirection: "row",
