@@ -16,6 +16,20 @@ const members = [
     email: "karim3del04@gmail.com",
     phone: "01033612081",
   },
+    {
+    name: "youssef.ah",
+    nickName: "Ebn_ahmed",
+    image: require("../assets/icon.png"),
+    description: "description not needed",
+    socialMedia: {
+      facebook: "https://www.facebook.com",
+      github: "https://github.com/YousseefAh",
+      linkedin: "https://www.linkedin.com/in/yousseefah/",
+      whatsapp: "https://www.whatsapp.com",
+    },
+    email: "yousseef.ah@gmail.com",
+    phone: "1234567890",
+  },
   {
     name: "hazem",
     nickName: " نقاش",
@@ -44,20 +58,7 @@ const members = [
       github: "https://github.com/Capa11 ",
     },
   },
-  {
-    name: "youssef.ah",
-    nickName: "Ebn_ahmed",
-    image: require("../assets/icon.png"),
-    description: "",
-    socialMedia: {
-      facebook: "https://www.facebook.com",
-      github: "https://github.com/YousseefAh",
-      linkedin: "https://www.linkedin.com/in/yousseefah/",
-      whatsapp: "https://www.whatsapp.com",
-    },
-    email: "yousseef.ah@gmail.com",
-    phone: "1234567890",
-  },
+
   {
     name: "Member 5",
     nickName: "Role 5",
