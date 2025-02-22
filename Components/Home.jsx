@@ -63,7 +63,13 @@ export default function Home({ navigation }) {
           backgroundColor: "#eeeeee",
         }}
       >
-        <View style={{ flexDirection: "row", flexWrap: "wrap" ,justifyContent:"center"}}>
+        <View
+          style={{
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "center",
+          }}
+        >
           <Product
             title="Dell"
             price="1000"
@@ -80,6 +86,18 @@ export default function Home({ navigation }) {
             title="Dell"
             price="1000"
             rating="4.5"
+            image={require("../assets/icon.png")}
+          />
+          <Product
+            title="Dell"
+            price="1000"
+            rating="4.5"
+            image={require("../assets/icon.png")}
+          />
+          <Product
+            title="Dell"
+            price="1000"
+            rating="3"
             image={require("../assets/icon.png")}
           />
           <Product

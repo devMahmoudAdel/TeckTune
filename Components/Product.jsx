@@ -2,20 +2,22 @@ import React from 'react';
 import { View, Text, Image,StyleSheet } from 'react-native';
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Stars from './Stars';
 const Product = ({ navigation ,title,price,image,rating}) => {
   return (
     <View style={styles.container}>
-      <Image source={require("../assets/icon.png")} style={styles.image} />
-      <Text style={styles.productTitle}>{title}</Text>
+      <Image
+        source={image}
+        style={styles.image}
+        resizeMode="cover"
+        defaultSource={require("../assets/icon.png")}
+      />
+      <Text numberOfLines={1} style={styles.productTitle}>{title}</Text>
       <View style={styles.secContainer}>
         <View style={styles.stars}>
-          <AntDesign name="star" size={16} color="#ffb305" />
-          <AntDesign name="star" size={16} color="#ffb305" />
-          <AntDesign name="star" size={16} color="grey" />
-          <AntDesign name="star" size={16} color="grey" />
-          <AntDesign name="star" size={16} color="grey" />
+          <Stars number={rating} />
         </View>
-        <Text>{rating}</Text>
+        <Text>({rating})</Text>
       </View>
       <Text style={styles.productPrice}>${Number(price).toFixed(2)}</Text>
       <MaterialIcons
@@ -29,7 +31,7 @@ const Product = ({ navigation ,title,price,image,rating}) => {
 }
 const styles = StyleSheet.create({
   container: {
-    width: "220",
+    width: "160",
     height: "230",
     justifyContent: "flex-start",
     alignItems: "center",
@@ -51,7 +53,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   image: {
-    width: 220,
+    width: "100%",
     height: 150,
   },
   stars: {

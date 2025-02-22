@@ -24,9 +24,11 @@ import Help from './Components/Help';
 import Wishlist from './Components/Wishlist';
 import { use } from 'react';
 import Splash from './Components/Splash';
+import MemberDetails from './Components/MemberDetails';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const AboutStack = createNativeStackNavigator();
 const screenOptions = {
   tabBarShowLabel: false,
   headerShown: false,
@@ -79,6 +81,10 @@ export default function App() {
           name="Home"
           component={isLoading ? Splash : Home}
           options={{
+            tabBarStyle: {
+              display: isLoading ? 'none' : 'flex',
+            },
+
             tabBarIcon: ({ focused }) => (
               <View style={{ alignItems: "center", justifyContent: "center" }}>
                 <AntDesign
@@ -149,7 +155,7 @@ function StackNavigation(){
         <Stack.Navigator initialRouteName="ProfileScreen">
           <Stack.Screen
             name="About"
-            component={About}
+            component={AboutStackNavigation}
             options={{ headerShown: false }}
           />
           <Stack.Screen
@@ -175,6 +181,24 @@ function StackNavigation(){
         </Stack.Navigator>
       );
 }
+
+function AboutStackNavigation() {
+  return (
+    <AboutStack.Navigator initialRouteName="AboutSc">
+      <AboutStack.Screen
+        name="AboutSc"
+        component={About}
+        options={{ headerShown: false }}
+      />
+      <AboutStack.Screen
+        name="MemberDetails"
+        component={MemberDetails}
+        options={{ headerShown: false }}
+      />
+    </AboutStack.Navigator>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
