@@ -45,17 +45,17 @@ const members = [
     },
   },
   {
-    name: "Member 4",
-    nickName: "Role 4",
+    name: "youssef.ah",
+    nickName: "Ebn_ahmed",
     image: require("../assets/icon.png"),
-    description: "Description 1",
+    description: "",
     socialMedia: {
       facebook: "https://www.facebook.com",
-      github: "https://www.github.com",
-      linkedin: "https://www.linkedin.com",
+      github: "https://github.com/YousseefAh",
+      linkedin: "https://www.linkedin.com/in/yousseefah/",
       whatsapp: "https://www.whatsapp.com",
     },
-    email: "email@domain",
+    email: "yousseef.ah@gmail.com",
     phone: "1234567890",
   },
   {
