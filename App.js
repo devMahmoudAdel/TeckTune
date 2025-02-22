@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import About from './Components/About';
@@ -13,14 +13,22 @@ import ProductList from './Components/ProductList';
 import ProductDetails from './Components/ProductDetails';
 import Profile from './Components/Profile';
 import Settings from './Components/Settings';
-import Search from './Components/Search';
+import Search from './Components/Wishlist';
 
 // import Icons
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MyProfile from './Components/MyProfile';
+import Help from './Components/Help';
+import Wishlist from './Components/Wishlist';
+import { use } from 'react';
+import Splash from './Components/Splash';
+import MemberDetails from './Components/MemberDetails';
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
+const AboutStack = createNativeStackNavigator();
 const screenOptions = {
   tabBarShowLabel: false,
   headerShown: false,
@@ -32,7 +40,7 @@ const screenOptions = {
     elevation: 0,
     backgroundColor: '#e5e5e5',
     borderRadius: 30,
-    height: 55,
+    height: 50,
     marginHorizontal: 10,
     justifyContent: 'center',
     alignItems: 'center',
@@ -48,6 +56,11 @@ const screenOptions = {
   }
 };
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  useEffect(() => {
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 3000)}, []);
   return (
     /*<NavigationContainer>
         <Stack.Navigator initialRouteName="Home">
@@ -66,8 +79,12 @@ export default function App() {
       <Tab.Navigator screenOptions={screenOptions} initialRouteName="Home">
         <Tab.Screen
           name="Home"
-          component={Home}
+          component={isLoading ? Splash : Home}
           options={{
+            tabBarStyle: {
+              display: isLoading ? 'none' : 'flex',
+            },
+
             tabBarIcon: ({ focused }) => (
               <View style={{ alignItems: "center", justifyContent: "center" }}>
                 <AntDesign
@@ -82,12 +99,12 @@ export default function App() {
         {/* <Tab.Screen name="About" component={About} /> */}
         <Tab.Screen
           name="Search"
-          component={Search}
+          component={Wishlist}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <AntDesign
-                  name="search1"
+                <MaterialIcons
+                  name="favorite-border"
                   size={focused ? 25 : 22}
                   color={focused ? "#6055D8" : "black"}
                 />
@@ -115,7 +132,7 @@ export default function App() {
         {/* <Tab.Screen name="ProductDetails" component={ProductDetails} /> */}
         <Tab.Screen
           name="Profile"
-          component={Profile}
+          component={StackNavigation}
           options={{
             tabBarIcon: ({ focused }) => (
               <View style={{ alignItems: "center", justifyContent: "center" }}>
@@ -131,6 +148,54 @@ export default function App() {
         {/* <Tab.Screen name="Settings" component={Settings} /> */}
       </Tab.Navigator>
     </NavigationContainer>
+  );
+}
+function StackNavigation(){
+      return (
+        <Stack.Navigator initialRouteName="ProfileScreen">
+          <Stack.Screen
+            name="About"
+            component={AboutStackNavigation}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="MyProfile"
+            component={MyProfile}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Help"
+            component={Help}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ProfileScreen"
+            component={Profile}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Settings"
+            component={Settings}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+      );
+}
+
+function AboutStackNavigation() {
+  return (
+    <AboutStack.Navigator initialRouteName="AboutSc">
+      <AboutStack.Screen
+        name="AboutSc"
+        component={About}
+        options={{ headerShown: false }}
+      />
+      <AboutStack.Screen
+        name="MemberDetails"
+        component={MemberDetails}
+        options={{ headerShown: false }}
+      />
+    </AboutStack.Navigator>
   );
 }
 
