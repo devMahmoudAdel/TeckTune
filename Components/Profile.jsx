@@ -14,7 +14,7 @@ import ProductList from "./ProductList";
 import ProductDetails from "./ProductDetails";
 import Settings from "./Settings";
 
-const Stack = createNativeStackNavigator();
+
 export default function Profile({ navigation }) {
   return (      
       <View style={styles.container}>

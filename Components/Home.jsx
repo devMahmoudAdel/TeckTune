@@ -2,6 +2,7 @@ import { Button,ScrollView, Text, View, Image, TextInput, StyleSheet } from "rea
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Product from "./Product";
+import ProductList from "./ProductList";
 export default function Home({ navigation }) {
   return (
     // <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -55,59 +56,10 @@ export default function Home({ navigation }) {
         <MaterialIcons name="search" size={24} color="grey" />
         <TextInput placeholder="Search" style={styles.inputSearch} />
       </View>
-      <ScrollView
-        style={{
-          flex: 1,
-          paddingHorizontal: 10,
-          paddingVertical: 10,
-          backgroundColor: "#eeeeee",
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            flexWrap: "wrap",
-            justifyContent: "center",
-          }}
-        >
-          <Product
-            title="Dell"
-            price="1000"
-            rating="4.5"
-            image={require("../assets/icon.png")}
-          />
-          <Product
-            title="Dell"
-            price="1000"
-            rating="4.5"
-            image={require("../assets/icon.png")}
-          />
-          <Product
-            title="Dell"
-            price="1000"
-            rating="4.5"
-            image={require("../assets/icon.png")}
-          />
-          <Product
-            title="Dell"
-            price="1000"
-            rating="4.5"
-            image={require("../assets/icon.png")}
-          />
-          <Product
-            title="Dell"
-            price="1000"
-            rating="3"
-            image={require("../assets/icon.png")}
-          />
-          <Product
-            title="Dell"
-            price="1000"
-            rating="4.5"
-            image={require("../assets/icon.png")}
-          />
-        </View>
-      </ScrollView>
+
+      <View style={{ flex: 1 }}>
+        <ProductList navigation={navigation} />
+      </View>
     </>
   );
 }

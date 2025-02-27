@@ -29,17 +29,17 @@ import MemberDetails from './Components/MemberDetails';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 const AboutStack = createNativeStackNavigator();
+const ProductStack = createNativeStackNavigator();
 const screenOptions = {
   tabBarShowLabel: false,
   headerShown: false,
   tabBarStyle: {
     position: 'absolute',
-    bottom: 10,
+    bottom: 0,
     left: 0,
     right: 0,
     elevation: 0,
-    backgroundColor: '#e5e5e5',
-    borderRadius: 30,
+    backgroundColor: '#ffffff',
     height: 50,
     marginHorizontal: 10,
     justifyContent: 'center',
@@ -74,80 +74,90 @@ export default function App() {
           <Stack.Screen name="Settings" component={Settings} />
         </Stack.Navigator>
       </NavigationContainer> */
+    <>
+      <StatusBar style="auto" />
+      <NavigationContainer>
+        <Tab.Navigator screenOptions={screenOptions} initialRouteName="Home">
+          <Tab.Screen
+            name="Home"
+            component={isLoading ? Splash : ProductStackNavigation}
+            options={{
+              tabBarStyle: {
+                display: isLoading ? "none" : "flex",
+              },
 
-    <NavigationContainer>
-      <Tab.Navigator screenOptions={screenOptions} initialRouteName="Home">
-        <Tab.Screen
-          name="Home"
-          component={isLoading ? Splash : Home}
-          options={{
-            tabBarStyle: {
-              display: isLoading ? 'none' : 'flex',
-            },
-
-            tabBarIcon: ({ focused }) => (
-              <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <AntDesign
-                  name="home"
-                  size={focused ? 25 : 22}
-                  color={focused ? "#6055D8" : "black"}
-                />
-              </View>
-            ),
-          }}
-        />
-        {/* <Tab.Screen name="About" component={About} /> */}
-        <Tab.Screen
-          name="Search"
-          component={Wishlist}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <MaterialIcons
-                  name="favorite-border"
-                  size={focused ? 25 : 22}
-                  color={focused ? "#6055D8" : "black"}
-                />
-              </View>
-            ),
-          }}
-        />
-        <Tab.Screen
-          name="Cart"
-          component={Cart}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <AntDesign
-                  name="shoppingcart"
-                  size={focused ? 25 : 22}
-                  color={focused ? "#6055D8" : "black"}
-                />
-              </View>
-            ),
-          }}
-        />
-        {/* <Tab.Screen name="Checkout" component={Checkout} /> */}
-        {/* <Tab.Screen name="ProductList" component={ProductList} /> */}
-        {/* <Tab.Screen name="ProductDetails" component={ProductDetails} /> */}
-        <Tab.Screen
-          name="Profile"
-          component={StackNavigation}
-          options={{
-            tabBarIcon: ({ focused }) => (
-              <View style={{ alignItems: "center", justifyContent: "center" }}>
-                <Ionicons
-                  name="person"
-                  size={focused ? 25 : 22}
-                  color={focused ? "#6055D8" : "black"}
-                />
-              </View>
-            ),
-          }}
-        />
-        {/* <Tab.Screen name="Settings" component={Settings} /> */}
-      </Tab.Navigator>
-    </NavigationContainer>
+              tabBarIcon: ({ focused }) => (
+                <View
+                  style={{ alignItems: "center", justifyContent: "center" }}
+                >
+                  <AntDesign
+                    name="home"
+                    size={focused ? 25 : 22}
+                    color={focused ? "#6055D8" : "black"}
+                  />
+                </View>
+              ),
+            }}
+          />
+          {/* <Tab.Screen name="About" component={About} /> */}
+          <Tab.Screen
+            name="Search"
+            component={Wishlist}
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <View
+                  style={{ alignItems: "center", justifyContent: "center" }}
+                >
+                  <MaterialIcons
+                    name="favorite-border"
+                    size={focused ? 25 : 22}
+                    color={focused ? "#6055D8" : "black"}
+                  />
+                </View>
+              ),
+            }}
+          />
+          <Tab.Screen
+            name="Cart"
+            component={Cart}
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <View
+                  style={{ alignItems: "center", justifyContent: "center" }}
+                >
+                  <AntDesign
+                    name="shoppingcart"
+                    size={focused ? 25 : 22}
+                    color={focused ? "#6055D8" : "black"}
+                  />
+                </View>
+              ),
+            }}
+          />
+          {/* <Tab.Screen name="Checkout" component={Checkout} /> */}
+          {/* <Tab.Screen name="ProductList" component={ProductList} /> */}
+          {/* <Tab.Screen name="ProductDetails" component={ProductDetails} /> */}
+          <Tab.Screen
+            name="Profile"
+            component={StackNavigation}
+            options={{
+              tabBarIcon: ({ focused }) => (
+                <View
+                  style={{ alignItems: "center", justifyContent: "center" }}
+                >
+                  <Ionicons
+                    name="person"
+                    size={focused ? 25 : 22}
+                    color={focused ? "#6055D8" : "black"}
+                  />
+                </View>
+              ),
+            }}
+          />
+          {/* <Tab.Screen name="Settings" component={Settings} /> */}
+        </Tab.Navigator>
+      </NavigationContainer>
+    </>
   );
 }
 function StackNavigation(){
@@ -198,7 +208,27 @@ function AboutStackNavigation() {
     </AboutStack.Navigator>
   );
 }
-
+function ProductStackNavigation() {
+  return (
+    <ProductStack.Navigator initialRouteName="HomeS">
+      <ProductStack.Screen
+        name="HomeS"
+        component={Home}
+        options={{ headerShown: false }}
+      />
+      <ProductStack.Screen
+        name="ProductDetails"
+        component={ProductDetails}
+        options={{ headerShown: false }}
+      />
+      <ProductStack.Screen
+        name="ProductList"
+        component={ProductList}
+        options={{ headerShown: false }}
+      />
+    </ProductStack.Navigator>
+  );
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
