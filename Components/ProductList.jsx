@@ -1,4 +1,4 @@
-import { Text, View,FlatList,Pressable } from "react-native";
+import { Text, View,FlatList,Pressable,RefreshControl } from "react-native";
 import Product from "./Product";
 export default function ProductList({ navigation }) {
   const products = [
@@ -79,6 +79,7 @@ export default function ProductList({ navigation }) {
   return (
     <FlatList
       keyExtractor={(item) => item.title}
+      refreshControl={<RefreshControl refreshing={false} />}
       contentContainerStyle={{
         flexDirection: "row",
         flexWrap: "wrap",

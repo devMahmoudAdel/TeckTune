@@ -210,23 +210,26 @@ function AboutStackNavigation() {
 }
 function ProductStackNavigation() {
   return (
-    <ProductStack.Navigator initialRouteName="HomeS">
-      <ProductStack.Screen
-        name="HomeS"
-        component={Home}
-        options={{ headerShown: false }}
-      />
-      <ProductStack.Screen
-        name="ProductDetails"
-        component={ProductDetails}
-        options={{ headerShown: false }}
-      />
-      <ProductStack.Screen
-        name="ProductList"
-        component={ProductList}
-        options={{ headerShown: false }}
-      />
-    </ProductStack.Navigator>
+    <>
+      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <ProductStack.Navigator initialRouteName="HomeS">
+        <ProductStack.Screen
+          name="HomeS"
+          component={Home}
+          options={{ headerShown: false }}
+        />
+        <ProductStack.Screen
+          name="ProductDetails"
+          component={ProductDetails}
+          options={{ headerShown: false }}
+        />
+        <ProductStack.Screen
+          name="ProductList"
+          component={ProductList}
+          options={{ headerShown: false }}
+        />
+      </ProductStack.Navigator>
+    </>
   );
 }
 const styles = StyleSheet.create({
