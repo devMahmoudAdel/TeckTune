@@ -7,7 +7,7 @@ export default function ProductDetails(props) {
 
     <View style={[styles.container, { marginTop: StatusBar.currentHeight }]}>
       <Text>{title}wdfsdsf</Text>
-      <TopsectionPD
+      {/* <TopsectionPD
             title={title}
             price={price}
             images={images}
@@ -22,7 +22,7 @@ export default function ProductDetails(props) {
             rating={rating}
             colors={colors}
             navigation={navigation}
-            />
+            /> */}
     </View>
   );
   
@@ -47,3 +47,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
+// hello 
