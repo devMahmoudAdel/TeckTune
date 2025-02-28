@@ -10,7 +10,7 @@ import Cart from "./Components/Cart";
 import Checkout from './Components/Checkout';
 import Home from './Components/Home';
 import ProductList from './Components/ProductList';
-import ProductDetails from './Components/ProductDetails';
+import ProductDetails from './Components/ProductDetails/ProductDetails';
 import Profile from './Components/Profile';
 import Settings from './Components/Settings';
 import Search from './Components/Wishlist';

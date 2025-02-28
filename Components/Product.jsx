@@ -1,37 +1,38 @@
 import React from 'react';
 import { View, Text, Image,StyleSheet,Pressable } from 'react-native';
-import ProductDetails from './ProductDetails';
+import ProductDetails from './ProductDetails/ProductDetails';
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Stars from './Stars';
-const Product = ({ title, image, rating, price, navigation }) => {
+const Product = ({ title, images, rating, price, navigation }) => {
   return (
-    
-      <View style={styles.container}>
-        <Image
-          source={image}
-          style={styles.image}
-          resizeMode="cover"
-          defaultSource={require("../assets/icon.png")}
-        />
-        <Text numberOfLines={1} style={styles.productTitle}>
-          {title}
-        </Text>
-        <View style={styles.secContainer}>
-          <View style={styles.stars}>
-            <Stars number={rating} />
-          </View>
-          <Text>({rating})</Text>
+
+    <View style={styles.container}>
+      <Image
+        source={images[0]}
+        style={styles.image}
+        resizeMode="cover"
+        defaultSource={require("../assets/icon.png")}
+      />
+      <Text numberOfLines={1} style={styles.productTitle}>
+        {title}
+      </Text>
+      <View style={styles.secContainer}>
+        <View style={styles.stars}>
+          <Stars number={rating} />
         </View>
-        <Text style={styles.productPrice}>${Number(price).toFixed(2)}</Text>
-        <MaterialIcons
-          name="favorite-border"
-          size={25}
-          color={"#6055D8"}
-          style={styles.favProduct}
-        />
+        <Text>({rating})</Text>
       </View>
-    
+      <Text style={styles.productPrice}>${Number(price).toFixed(2)}</Text>
+      <MaterialIcons
+        name="favorite-border"
+        size={25}
+        color={"#6055D8"}
+        st
+yle={styles.vProduct}
+      />
+    </View>
+
   );
 };
 const styles = StyleSheet.create({

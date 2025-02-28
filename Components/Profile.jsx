@@ -11,7 +11,7 @@ import Cart from "./Cart";
 import Checkout from "./Checkout";
 import Home from "./Home";
 import ProductList from "./ProductList";
-import ProductDetails from "./ProductDetails";
+import ProductDetails from "./ProductDetails/ProductDetails";
 import Settings from "./Settings";
 
 
