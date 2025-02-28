@@ -1,35 +1,197 @@
-import React from "react";
-import { Text, View ,StyleSheet,Image,Pressable,StatusBar} from "react-native";
-import TopsectionPD from "./TopsectionPD";
-import BottomsectionPD from "./BottomsectionPD";
+import React, { useState } from "react";
+import { Text, View, StyleSheet, Image, FlatList, TouchableOpacity, StatusBar, Dimensions } from "react-native";
+import Icon from "@expo/vector-icons/AntDesign"; // Ensure you have the correct import for the Icon component
+
+const { width, height } = Dimensions.get('window');
+
 export default function ProductDetails(props) {
-  const { navigation} = props;
-  const { title ,price,images,rating,colors,description} = props.route.params;
+  const [selectedColor, setSelectedColor] = useState(null);
+  const { navigation } = props;
+  const { title, price, images, rating, colors, description } = props.route.params;
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  const handleScroll = (event) => {
+    const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+    setActiveIndex(slideIndex);
+  };
+
   return (
-    <View style={[styles.container, { marginTop: StatusBar.currentHeight }]}>
+    <View style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent" />
+      <View style={styles.topsection}>
+        <FlatList
+          data={images}
+          renderItem={({ item }) => (
+            <View style={styles.imageContainer}>
+              <Image source={item} style={styles.image} resizeMode="cover" />
+            </View>
+          )}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={200}
+          keyExtractor={(_, index) => index.toString()}
+        />
 
-      {/* <TopsectionPD title={title} images={images} rating={rating} price={price} colors={colors} description={description} style={styles.topsection} /> */}
+        <View style={styles.pagination}>
+          {images.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.paginationDot,
+                index === activeIndex && styles.paginationDotActive
+              ]}
+            />
+          ))}
+        </View>
+      </View>
+      <View style={styles.bottomsection}>
+        <View style={styles.header}>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.price}>{price}</Text>
+        </View>
 
-      <TopsectionPD images={images}  style={styles.topsection} />
+        <View style={styles.ratingContainer}>
+          <Icon name="star" size={18} color="#FFD700" />
+          <Text style={styles.rating}>{rating} </Text>
+          <Text style={styles.reviews}>({props.reviews} Reviews)</Text>
+        </View>
 
-      <BottomsectionPD title={title} images={images} rating={rating} price={price} colors={colors} description={description} style={styles.bottomsection}/>
+        <Text style={styles.description}>{description}</Text>
+
+        <Text style={styles.colorTitle}>Colors</Text>
+        <FlatList
+          data={colors}
+          horizontal
+          keyExtractor={(item) => item.toString()}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={[
+                styles.colorBox,
+                selectedColor === item && styles.selectedColorBox,
+              ]}
+              onPress={() => setSelectedColor(item)}
+            >
+              <Text
+                style={[
+                  styles.colorText,
+                  selectedColor === item && styles.selectedColorText,
+                ]}
+              >
+                {item}
+              </Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
     </View>
   );
-  
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-    alignItems: "center",
-    justifyContent: "center",
   },
   topsection: {
-    flex: 1,
-    backgroundColor: "blue",
+    flex: 2,
+    backgroundColor: "#fff",
+    width: '100%',
+    position: 'relative',
+  },
+  imageContainer: {
+    width: width,
+    height: height / 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  pagination: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 10,
+    alignSelf: 'center',
+  },
+  paginationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  paginationDotActive: {
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
   },
   bottomsection: {
     flex: 1,
-    backgroundColor: "red",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  price: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#5A31F4",
+  },
+  ratingContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  rating: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    marginLeft: 5,
+  },
+  reviews: {
+    fontSize: 14,
+    color: "#777",
+    marginLeft: 5,
+  },
+  description: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 10,
+    lineHeight: 20,
+  },
+  colorTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginTop: 15,
+  },
+  colorBox: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: "#eee",
+    marginRight: 10,
+    marginTop: 10,
+  },
+  selectedColorBox: {
+    backgroundColor: "#000", 
+  },
+  colorText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  selectedColorText: {
+    color: "#fff", 
   },
 });
