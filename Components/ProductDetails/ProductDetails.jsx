@@ -7,7 +7,11 @@ export default function ProductDetails(props) {
   const { title ,price,images,rating,colors,description} = props.route.params;
   return (
     <View style={[styles.container, { marginTop: StatusBar.currentHeight }]}>
-      <TopsectionPD title={title} images={images} rating={rating} price={price} colors={colors} description={description} style={styles.topsection}/>
+
+      {/* <TopsectionPD title={title} images={images} rating={rating} price={price} colors={colors} description={description} style={styles.topsection} /> */}
+
+      <TopsectionPD images={images}  style={styles.topsection} />
+
       <BottomsectionPD title={title} images={images} rating={rating} price={price} colors={colors} description={description} style={styles.bottomsection}/>
     </View>
   );
