@@ -1,47 +1,48 @@
+
+
 import React, { useState } from "react";
 import { 
   View, 
   StyleSheet, 
   Image, 
-  Dimensions,
+  Dimensions, 
   FlatList 
 } from "react-native";
 
 const { width } = Dimensions.get('window');
 
-export default function TopsectionPD(props) {
+export default function ImageSlider({ images = [] }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const renderItem = ({ item }) => {
-    return (
-      <View style={styles.imageContainer}>
-        <Image source={item} style={styles.image} resizeMode="contain" />
-      </View>
-    );
+  const handleScroll = (event) => {
+    const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+    setActiveIndex(slideIndex);
   };
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={props.images || []}
-        renderItem={renderItem}
+        data={images}
+        renderItem={({ item }) => (
+          <View style={styles.imageContainer}>
+            <Image source={item} style={styles.image} resizeMode="cover" />
+          </View>
+        )}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(event) => {
-          const slideIndex = Math.floor(event.nativeEvent.contentOffset.x / width);
-          setActiveIndex(slideIndex);
-        }}
+        onScroll={handleScroll}
+        scrollEventThrottle={200}
         keyExtractor={(_, index) => index.toString()}
       />
-      
+
       <View style={styles.pagination}>
-        {(props.images || []).map((_, index) => (
-          <View
-            key={index}
+        {images.map((_, index) => (
+          <View 
+            key={index} 
             style={[
-              styles.paginationDot,
-              index === activeIndex ? styles.paginationDotActive : {}
+              styles.paginationDot, 
+              index === activeIndex && styles.paginationDotActive
             ]}
           />
         ))}
@@ -54,6 +55,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
     height: 300,
+    width: '100%',
     position: 'relative',
   },
   imageContainer: {
@@ -63,8 +65,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: '90%',
-    height: '90%',
+    width: width,
+    height: '100%',
   },
   pagination: {
     flexDirection: 'row',
