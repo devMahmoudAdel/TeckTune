@@ -1,28 +1,15 @@
 import React from "react";
 import { Text, View ,StyleSheet,Image,Pressable,StatusBar} from "react-native";
+import TopsectionPD from "./topsectionPD";
+import BottomsectionPD from "./bottomsectionPD";
 export default function ProductDetails(props) {
   const { navigation} = props;
   const { title ,price,images,rating,colors} = props.route.params;
   return (
 
     <View style={[styles.container, { marginTop: StatusBar.currentHeight }]}>
-      <Text>{title}wdfsdsf</Text>
-      <TopsectionPD
-            title={title}
-            price={price}
-            images={images}
-            rating={rating}
-            colors={colors}
-            navigation={navigation}
-            />
-      <BottomsectionPD
-            title={title}
-            price={price}
-            images={images}
-            rating={rating}
-            colors={colors}
-            navigation={navigation}
-            />
+      <TopsectionPD title={title} images={images} rating={rating} price={price} colors={colors} style={styles.topsection}/>
+      <BottomsectionPD title={title} images={images} rating={rating} price={price} colors={colors} style={styles.bottomsection}/>
     </View>
   );
   
