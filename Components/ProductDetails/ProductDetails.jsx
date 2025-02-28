@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Text, View, StyleSheet, Image, FlatList, TouchableOpacity, StatusBar, Dimensions } from "react-native";
 import Icon from "@expo/vector-icons/AntDesign"; 
+import { AddToWishList } from "../AddToWishList";
+import { AddToCart } from "../AddToCart";
 const { width, height } = Dimensions.get('window');
 
 export default function ProductDetails(props) {
@@ -76,6 +78,15 @@ export default function ProductDetails(props) {
             </TouchableOpacity>
           )}
         />
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.buyNowButton}  onPress={AddToCart}>
+            <Text style={styles.buttonText}>Buy Now</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.wishlistButton} onPress={AddToWishList}>
+            <Text style={styles.buttonText}>Add to Wishlist</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -178,12 +189,29 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: "#000",
   },
-  colorText: {
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 20,
+  },
+  buyNowButton: {
+    flex: 1,
+    backgroundColor: "#5A31F4",
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginRight: 10,
+  },
+  wishlistButton: {
+    flex: 1,
+    backgroundColor: "#FFD700",
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-    color: "#333",
-  },
-  selectedColorText: {
-    color: "#fff", 
   },
 });
