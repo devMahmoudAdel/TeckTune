@@ -1,7 +1,7 @@
 import React from "react";
 import { Text, View ,StyleSheet,Image,Pressable,StatusBar} from "react-native";
-import TopsectionPD from "./topsectionPD";
-import BottomsectionPD from "./bottomsectionPD";
+import TopsectionPD from "./TopsectionPD";
+import BottomsectionPD from "./BottomsectionPD";
 export default function ProductDetails(props) {
   const { navigation} = props;
   const { title ,price,images,rating,colors,description} = props.route.params;
