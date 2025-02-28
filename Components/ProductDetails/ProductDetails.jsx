@@ -1,6 +1,5 @@
 import React from "react";
 import { Text, View ,StyleSheet,Image,Pressable,StatusBar} from "react-native";
-im
 export default function ProductDetails(props) {
   const { navigation} = props;
   const { title ,price,images,rating,colors} = props.route.params;
