@@ -28,8 +28,7 @@ const Product = ({ title, images, rating, price, navigation }) => {
         name="favorite-border"
         size={25}
         color={"#6055D8"}
-        st
-yle={styles.vProduct}
+        style={styles.favProduct}
       />
     </View>
 
