@@ -4,12 +4,11 @@ import TopsectionPD from "./topsectionPD";
 import BottomsectionPD from "./bottomsectionPD";
 export default function ProductDetails(props) {
   const { navigation} = props;
-  const { title ,price,images,rating,colors} = props.route.params;
+  const { title ,price,images,rating,colors,description} = props.route.params;
   return (
-
     <View style={[styles.container, { marginTop: StatusBar.currentHeight }]}>
-      <TopsectionPD title={title} images={images} rating={rating} price={price} colors={colors} style={styles.topsection}/>
-      <BottomsectionPD title={title} images={images} rating={rating} price={price} colors={colors} style={styles.bottomsection}/>
+      <TopsectionPD title={title} images={images} rating={rating} price={price} colors={colors} description={description} style={styles.topsection}/>
+      <BottomsectionPD title={title} images={images} rating={rating} price={price} colors={colors} description={description} style={styles.bottomsection}/>
     </View>
   );
   
@@ -17,20 +16,16 @@ export default function ProductDetails(props) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "white",
     alignItems: "center",
     justifyContent: "center",
   },
   topsection: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "blue",
   },
   bottomsection: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "red",
   },
 });
