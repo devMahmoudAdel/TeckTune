@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Text, View, StyleSheet, Image, FlatList, TouchableOpacity, StatusBar, Dimensions } from "react-native";
-import Icon from "@expo/vector-icons/AntDesign"; // Ensure you have the correct import for the Icon component
-
+import Icon from "@expo/vector-icons/AntDesign"; 
 const { width, height } = Dimensions.get('window');
 
 export default function ProductDetails(props) {
@@ -69,18 +68,11 @@ export default function ProductDetails(props) {
             <TouchableOpacity
               style={[
                 styles.colorBox,
+                { backgroundColor: item },
                 selectedColor === item && styles.selectedColorBox,
               ]}
               onPress={() => setSelectedColor(item)}
             >
-              <Text
-                style={[
-                  styles.colorText,
-                  selectedColor === item && styles.selectedColorText,
-                ]}
-              >
-                {item}
-              </Text>
             </TouchableOpacity>
           )}
         />
@@ -95,7 +87,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   topsection: {
-    flex: 2,
+    flex: 1,
     backgroundColor: "#fff",
     width: '100%',
     position: 'relative',
@@ -176,15 +168,15 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   colorBox: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 10,
-    backgroundColor: "#eee",
+    borderRadius: 20,
     marginRight: 10,
     marginTop: 10,
+    height: 40,
+    width: 40,
   },
   selectedColorBox: {
-    backgroundColor: "#000", 
+    borderWidth: 2,
+    borderColor: "#000",
   },
   colorText: {
     fontSize: 16,
