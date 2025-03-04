@@ -1,13 +1,13 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StyleSheet, View } from "react-native";
-import React, { useEffect, useState } from "react";
+// import React, { useEffect, useState } from "react";
 // import components & Screens
 import Cart from "../Components/Cart";
 import Checkout from "../Components/Checkout";
 import Search from "../Components/Wishlist";
 import Wishlist from "../Components/Wishlist";
 import { use } from "react";
-import Splash from "../Components/Splash";
+// import Splash from "../Components/Splash";
 
 // import Icons
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -47,21 +47,22 @@ const screenOptions = {
 };
 
 export default function MainAppNavigator() {
-  const [isLoading, setIsLoading] = useState(true);
-  useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 3000);
-  }, []);
+  // const [isLoading, setIsLoading] = useState(true);
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setIsLoading(false);
+  //   }, 3000);
+  // }, []);
   return (
     <Tab.Navigator screenOptions={screenOptions} initialRouteName="Home">
       <Tab.Screen
         name="Home"
-        component={isLoading ? Splash : ProductStack}
+        // component={isLoading ? Splash : ProductStack}
+        component={ProductStack}
         options={{
-          tabBarStyle: {
-            display: isLoading ? "none" : "flex",
-          },
+          // tabBarStyle: {
+          //   display: isLoading ? "none" : "flex",
+          // },
 
           tabBarIcon: ({ focused }) => (
             <View style={{ alignItems: "center", justifyContent: "center" }}>
