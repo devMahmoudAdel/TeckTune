@@ -1,12 +1,38 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet,TextInput,Pressable, ScrollView, StatusBar} from 'react-native';
+import React from "react";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TextInput,
+  Pressable,
+  ScrollView,
+  StatusBar,
+  Platform,
+} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 const MyProfile = ({ navigation }) => {
+  const scrollViewProps =
+    Platform.OS === "web"
+      ? { style: { maxHeight: "100vh", overflowY: "auto" } }
+      : {};
   return (
-    <ScrollView style={{ flex: 1 }}>
+    <ScrollView
+      style={{ flex: 1 }}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      {...scrollViewProps}
+    >
       <View style={styles.container}>
-        <View style={[styles.header, { marginTop: StatusBar.currentHeight+20 }]}>
-          <Ionicons name="chevron-back-outline" size={30} color="black" onPress={()=>navigation.goBack()}/>
+        <View
+          style={[styles.header, { marginTop: StatusBar.currentHeight + 20 }]}
+        >
+          <Ionicons
+            name="chevron-back-outline"
+            size={30}
+            color="black"
+            onPress={() => navigation.goBack()}
+          />
           <Text style={styles.textHeader}> Edit Profile</Text>
         </View>
         <Image
@@ -52,7 +78,7 @@ const MyProfile = ({ navigation }) => {
       </View>
     </ScrollView>
   );
-}
+};
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -69,7 +95,6 @@ const styles = StyleSheet.create({
   textHeader: {
     fontWeight: "bold",
     fontSize: 24,
-
   },
   imageProfile: {
     width: 140,

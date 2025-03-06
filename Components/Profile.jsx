@@ -1,44 +1,54 @@
-import { Text, View, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View, Image, StyleSheet, TouchableOpacity, ScrollView, Platform } from "react-native";
 import ProfileTags from "./ProfileTags";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import LogoutButton from "./Auth/LogoutButton";
 
 export default function Profile({ navigation }) {
+  const scrollViewProps =
+    Platform.OS === "web"
+      ? { style: { maxHeight: "100vh", overflowY: "auto" } }
+      : {};
   return (
-    <View style={styles.container}>
-      {/* <Indexes navigation={navigation} /> */}
-      <View style={{ alignItems: "center", marginVertical: 20 }}>
-        {/* <Image
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 40 }}
+      {...scrollViewProps} // also for web scrolling problem
+    >
+      <View style={styles.container}>
+        {/* <Indexes navigation={navigation} /> */}
+        <View style={{ alignItems: "center", marginVertical: 20 }}>
+          {/* <Image
           source={require("../assets/icon.png")}
           style={styles.imageProfile}
         /> */}
-        <Ionicons
-          name="person"
-          size={100}
-          color="black"
-          style={styles.imageProfile}
-        />
-        <Text style={styles.userText}>User Name</Text>
-        <Text style={styles.emailText}>user-email@email.com</Text>
+          <Ionicons
+            name="person"
+            size={100}
+            color="black"
+            style={styles.imageProfile}
+          />
+          <Text style={styles.userText}>User Name</Text>
+          <Text style={styles.emailText}>user-email@email.com</Text>
+        </View>
+        <TouchableOpacity onPress={() => navigation.navigate("MyProfile")}>
+          <ProfileTags name="Profile" image={"person"} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
+          <ProfileTags name="Settings" image={"settings-sharp"} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("About")}>
+          <ProfileTags name="About" image={"information-circle-sharp"} />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <ProfileTags name="Share App" image={"share-social-sharp"} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Help")}>
+          <ProfileTags name="Help" image={"help-circle-sharp"} />
+        </TouchableOpacity>
+        <LogoutButton />
       </View>
-      <TouchableOpacity onPress={() => navigation.navigate("MyProfile")}>
-        <ProfileTags name="Profile" image={"person"} />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
-        <ProfileTags name="Settings" image={"settings-sharp"} />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("About")}>
-        <ProfileTags name="About" image={"information-circle-sharp"} />
-      </TouchableOpacity>
-      <TouchableOpacity>
-        <ProfileTags name="Share App" image={"share-social-sharp"} />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("Help")}>
-        <ProfileTags name="Help" image={"help-circle-sharp"} />
-      </TouchableOpacity>
-      <LogoutButton/>
-    </View>
+    </ScrollView>
   );
 }
 const styles = StyleSheet.create({
