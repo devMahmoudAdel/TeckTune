@@ -52,10 +52,10 @@ const styles = StyleSheet.create({
     
   },
   discoverText1:{
-    fontSize: 50,
+    fontSize: 40,
     color: "#2f2baa",
     textAlign:"center",
-    fontFamily: "bold"
+    fontWeight: "bold"
     
   },
 
@@ -63,9 +63,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     color: "text",
-    marginTop: 15,
-    fontFamily: "regular",
-    letterSpacing: 2, 
+    marginTop: 12,
+    fontWeight: "regular",
+    // letterSpacing: 2, 
   },
 
   containerBouttons:{
@@ -85,8 +85,8 @@ const styles = StyleSheet.create({
     
   },
   textButtonLogin:{
-    fontFamily: "bold",
-    fontSize: 30,
+    fontWeight: "bold",
+    fontSize: 24,
     color: "white",
     paddingVertical:12,
     textAlign: "center"
@@ -99,9 +99,9 @@ const styles = StyleSheet.create({
     
   },
   textButtonRegister:{
-    fontFamily: "regular",
+    fontWeight: "regular",
     paddingVertical:12,
-    fontSize: 30,
+    fontSize: 24,
     color: "text",
     textAlign: "center"
   }
