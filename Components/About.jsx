@@ -87,6 +87,35 @@ const members = [
     email: "email@domain",
     phone: "1234567890",
   },
+  {
+    name: "Member 7",
+    nickName: "Role 7",
+    image: require("../assets/icon.png"),
+    description: "Description 1",
+    socialMedia: {
+      facebook: "https://www.facebook.com",
+      github: "https://www.github.com",
+      linkedin: "https://www.linkedin.com",
+      whatsapp: "https://www.whatsapp.com",
+    },
+    email: "email@domain",
+    phone: "1234567890",
+  },
+  {
+    name: "Member 8",
+    nickName: "Role 8",
+    image: require("../assets/icon.png"),
+    description: "Description 1",
+    socialMedia: {
+      facebook: "https://www.facebook.com",
+      github: "https://www.github.com",
+      linkedin: "https://www.linkedin.com",
+      whatsapp: "https://www.whatsapp.com",
+    },
+    email: "email@domain",
+    phone: "1234567890",
+  },
+  
 ];
 export default function About({ navigation }) {
   return (

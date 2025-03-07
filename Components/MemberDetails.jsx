@@ -17,38 +17,57 @@ const MemberDetails = ({route}) => {
     route.params;
   return (
     <View style={styles.container}>
-      <Image source={image} style={styles.image} />
+      <Image
+        source={image}
+        defaultSource={require("../assets/icon.png")}
+        style={styles.image}
+      />
       <Text style={styles.memberName}>
-        {name} (<Text style={styles.memberRole}>{nickName}</Text>)
+        {name && name} (
+        {nickName && <Text style={styles.memberRole}>{nickName}</Text>})
       </Text>
-      <Text numberOfLines={3} style={styles.memberDescription}>
-        {description}
-      </Text>
-      <Pressable
-        style={styles.memberEmailPhone}
-        onPress={() => openLink(`mailto:${email}`)}
-      >
-        <Text style={styles.textContact}>Contact Via Email</Text>
-      </Pressable>
-      <Pressable
-        style={styles.memberEmailPhone}
-        onPress={() => openLink(`tel:${phone}`)}
-      >
-        <Text style={styles.textContact}>Contact Via Phone</Text>
-      </Pressable>
+      {description && (
+        <Text numberOfLines={3} style={styles.memberDescription}>
+          {description}
+        </Text>
+      )}
+      {email && (
+        <Pressable
+          style={styles.memberEmailPhone}
+          onPress={() => openLink(`mailto:${email}`)}
+        >
+          <Text style={styles.textContact}>Contact Via Email</Text>
+        </Pressable>
+      )}
+      {phone && (
+        <Pressable
+          style={styles.memberEmailPhone}
+          onPress={() => openLink(`tel:${phone}`)}
+        >
+          <Text style={styles.textContact}>Contact Via Phone</Text>
+        </Pressable>
+      )}
       <View style={styles.socialMediaContainer}>
-        <Pressable onPress={() => openLink(socialMedia.facebook)}>
-          <FontAwesome name="facebook-square" size={24} color="black" />
-        </Pressable>
-        <Pressable onPress={() => openLink(socialMedia.whatsapp)}>
-          <FontAwesome name="whatsapp" size={24} color="black" />
-        </Pressable>
-        <Pressable onPress={() => openLink(socialMedia.github)}>
-          <FontAwesome name="github-square" size={24} color="black" />
-        </Pressable>
-        <Pressable onPress={() => openLink(socialMedia.linkedin)}>
-          <FontAwesome name="linkedin-square" size={24} color="black" />
-        </Pressable>
+        {socialMedia && socialMedia.facebook && (
+          <Pressable onPress={() => openLink(socialMedia.facebook)}>
+            <FontAwesome name="facebook-square" size={24} color="black" />
+          </Pressable>
+        )}
+        {socialMedia && socialMedia.whatsapp && (
+          <Pressable onPress={() => openLink(socialMedia.whatsapp)}>
+            <FontAwesome name="whatsapp" size={24} color="black" />
+          </Pressable>
+        )}
+        {socialMedia && socialMedia.github && (
+          <Pressable onPress={() => openLink(socialMedia.github)}>
+            <FontAwesome name="github-square" size={24} color="black" />
+          </Pressable>
+        )}
+        {socialMedia && socialMedia.linkedin && (
+          <Pressable onPress={() => openLink(socialMedia.linkedin)}>
+            <FontAwesome name="linkedin-square" size={24} color="black" />
+          </Pressable>
+        )}
       </View>
     </View>
   );

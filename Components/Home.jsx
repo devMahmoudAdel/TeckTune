@@ -1,33 +1,14 @@
-import { Button,ScrollView, Text, View, Image, TextInput, StyleSheet } from "react-native";
+import { Button,ScrollView, Text, View, Image, TextInput, StyleSheet,Pressable ,FlatList,RefreshControl} from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Product from "./Product";
 import ProductList from "./ProductList";
+import Search from "./Search";
+import products from "./data";
 export default function Home({ navigation }) {
+  const topProducts = JSON.parse(JSON.stringify(products));
+  topProducts.sort((a, b) => b.rating - a.rating);
   return (
-    // <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-    //   <Text>Home</Text>
-    //   <Button title="About" onPress={() => navigation.navigate("About")} />
-    //   <Button title="Cart" onPress={() => navigation.navigate("Cart")} />
-    //   <Button
-    //     title="Checkout"
-    //     onPress={() => navigation.navigate("Checkout")}
-    //   />
-    //   <Button
-    //     title="ProductList"
-    //     onPress={() => navigation.navigate("ProductList")}
-    //   />
-    //   <Button
-    //     title="ProductDetails"
-    //     onPress={() => navigation.navigate("ProductDetails")}
-    //   />
-    //   <Button title="Profile" onPress={() => navigation.navigate("Profile")} />
-    //   <Button
-    //     title="Settings"
-    //     onPress={() => navigation.navigate("Settings")}
-    //   />
-    // </View>
-
     <>
       {/* Header */}
       <View style={styles.header}>
@@ -52,13 +33,59 @@ export default function Home({ navigation }) {
         />
       </View>
       {/* // Search */}
-      <View style={styles.searchContainer}>
-        <MaterialIcons name="search" size={24} color="grey" />
-        <TextInput placeholder="Search" style={styles.inputSearch} />
+      <Search/>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingHorizontal: 15,
+          marginVertical: 10,
+        }}
+      >
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>Top Rated</Text>
+        <Pressable
+          onPress={() => navigation.navigate("ProductList")}
+          style={{
+            backgroundColor: "#2f2baa",
+            padding: 10,
+            borderRadius: 20,
+            height: 40,
+            justifyContent: "center",
+            width: 80,
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: "white", fontWeight: "bold" }}>View All</Text>
+        </Pressable>
       </View>
-
-      <View style={{ flex: 1 }}>
-        <ProductList navigation={navigation} />
+      <View style={{ flex: 1, marginTop: 10, marginBottom: 55 }}>
+          <FlatList
+            keyExtractor={(item) => item.title}
+            refreshControl={<RefreshControl refreshing={false} />}
+            contentContainerStyle={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            scrollEnabled={true}
+            data={topProducts}
+            renderItem={({ item }) => (
+              <Pressable
+                onPress={() => navigation.navigate("ProductDetails", item)}
+              >
+                <Product
+                  title={item.title}
+                  price={item.price}
+                  images={item.images}
+                  rating={item.rating}
+                  colors={item.colors}
+                  navigation={navigation}
+                />
+              </Pressable>
+            )}
+          />
       </View>
     </>
   );
@@ -100,18 +127,5 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginHorizontal: 10,
   },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#e5e5e5",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginHorizontal: 20,
-    marginVertical: 10,
-    borderRadius: 10,
-  },
-  inputSearch: {
-    fontSize: 16,
-    marginLeft: 10,
-  },
+  
 });

@@ -1,4 +1,4 @@
-import { Text, View, Image, StyleSheet, TouchableOpacity, ScrollView, Platform } from "react-native";
+import { Text, View, Image, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar } from "react-native";
 import ProfileTags from "./ProfileTags";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingTop: StatusBar.currentHeight + 10,
   },
   imageProfile: {
     width: 100,

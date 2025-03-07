@@ -41,7 +41,7 @@ export default function ProductDetails(props) {
               key={index}
               style={[
                 styles.paginationDot,
-                index === activeIndex && styles.paginationDotActive
+                index === activeIndex && styles.paginationDotActive,
               ]}
             />
           ))}
@@ -50,7 +50,7 @@ export default function ProductDetails(props) {
       <View style={styles.bottomsection}>
         <View style={styles.header}>
           <Text style={styles.title}>{title}</Text>
-          <Text style={styles.price}>{price}</Text>
+          <Text style={styles.price}>${price}</Text>
         </View>
 
         <View style={styles.ratingContainer}>
@@ -74,16 +74,18 @@ export default function ProductDetails(props) {
                 selectedColor === item && styles.selectedColorBox,
               ]}
               onPress={() => setSelectedColor(item)}
-            >
-            </TouchableOpacity>
+            ></TouchableOpacity>
           )}
         />
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.buyNowButton}  onPress={AddToCart}>
+          <TouchableOpacity style={styles.buyNowButton} onPress={AddToCart}>
             <Text style={styles.buttonText}>Buy Now</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.wishlistButton} onPress={AddToWishList}>
+          <TouchableOpacity
+            style={styles.wishlistButton}
+            onPress={AddToWishList}
+          >
             <Text style={styles.buttonText}>Add to Wishlist</Text>
           </TouchableOpacity>
         </View>
@@ -96,6 +98,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+    marginBottom: 55,
   },
   topsection: {
     flex: 1,
@@ -148,7 +151,7 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#5A31F4",
+    color: "#2f2baa",
   },
   ratingContainer: {
     flexDirection: "row",
