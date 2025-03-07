@@ -110,15 +110,6 @@ const styles = StyleSheet.create({
     color: "#555",
     marginBottom: 8,
   },
-  input: {
-    height: 52,
-    borderWidth: 1,
-    borderColor: "#DEDEDE",
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    backgroundColor: "#f9f9f9",
-  },
   textForgot:{
     fontWeight: "bold",
     fontSize: 15,

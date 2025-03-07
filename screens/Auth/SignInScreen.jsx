@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     height: height/2.5,
   },
   discoverContainer:{
-    paddingTop: 40 
+    paddingTop: 30 
     
   },
   discoverText1:{
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: "center",
     color: "text",
-    marginTop: 12,
+    marginTop: 30,
     fontWeight: "regular",
     // letterSpacing: 2, 
   },
