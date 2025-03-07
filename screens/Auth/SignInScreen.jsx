@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
 
   bouttonLogin:{
     backgroundColor: "#2f2baa",
-    marginTop:70,
+    marginTop:75,
     width: "45%",
     borderRadius: 10,
     shadowColor: "#9d9aff",
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
 
   bouttonRegister:{
-    marginTop:80,
+    marginTop:75,
     width: "45%",
     borderRadius: 10
     
