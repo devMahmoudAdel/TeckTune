@@ -1,7 +1,14 @@
-import { StyleSheet, View, Text, Pressable, Dimensions, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Pressable,
+  Dimensions,
+  TouchableOpacity,
+} from "react-native";
 import react from "react";
-import { ImageBackground, SafeAreaView } from "react-native-web";
-const {height} = Dimensions.get("window");
+import { ImageBackground, SafeAreaView } from "react-native";
+const { height } = Dimensions.get("window");
 
 export default function SignIn({ navigation }) {
   return (
@@ -17,26 +24,32 @@ export default function SignIn({ navigation }) {
 
     <SafeAreaView>
       <View>
-        <ImageBackground 
-        style={styles.image}
-        resizeMode="contain"
-        source = {require("../../assets/discover.png")}
+        <ImageBackground
+          style={styles.image}
+          resizeMode="contain"
+          source={require("../../assets/discover.png")}
         />
       </View>
       <View style={styles.discoverContainer}>
-        <Text style={styles.discoverText1}>Discover top deals{'\n'}and trending products!</Text>
-        <Text style={styles.discoverText2}>Find the best offersand latest trends,{'\n'}all in one place!</Text>
+        <Text style={styles.discoverText1}>
+          Discover top deals{"\n"}and trending products!
+        </Text>
+        <Text style={styles.discoverText2}>
+          Find the best offersand latest trends,{"\n"}all in one place!
+        </Text>
       </View>
       <View style={styles.containerBouttons}>
-        <TouchableOpacity style={styles.bouttonLogin} onPress={() => navigation.navigate("ForgotPassword")}>
-          <Text style={styles.textButtonLogin}>
-            Login
-          </Text>
+        <TouchableOpacity
+          style={styles.bouttonLogin}
+          onPress={() => navigation.navigate("Login")}
+        >
+          <Text style={styles.textButtonLogin}>Login</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.bouttonRegister} onPress={() => navigation.navigate("Sign Up")}>
-          <Text style={styles.textButtonRegister}>
-            Register
-          </Text>
+        <TouchableOpacity
+          style={styles.bouttonRegister}
+          onPress={() => navigation.navigate("Sign Up")}
+        >
+          <Text style={styles.textButtonRegister}>Register</Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -44,19 +57,17 @@ export default function SignIn({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  image:{
-    height: height/2.5,
+  image: {
+    height: height / 2.5,
   },
-  discoverContainer:{
-    paddingTop: 30 
-    
+  discoverContainer: {
+    paddingTop: 30,
   },
-  discoverText1:{
+  discoverText1: {
     fontSize: 40,
     color: "#2f2baa",
-    textAlign:"center",
-    fontWeight: "bold"
-    
+    textAlign: "center",
+    fontWeight: "bold",
   },
 
   discoverText2: {
@@ -65,45 +76,42 @@ const styles = StyleSheet.create({
     color: "text",
     marginTop: 30,
     fontWeight: "regular",
-    // letterSpacing: 2, 
+    // letterSpacing: 2,
   },
 
-  containerBouttons:{
+  containerBouttons: {
     paddingHorizontal: 30,
-    paddingVertical:15,
-    flexDirection: "row"
+    paddingVertical: 15,
+    flexDirection: "row",
   },
 
-  bouttonLogin:{
+  bouttonLogin: {
     backgroundColor: "#2f2baa",
-    marginTop:75,
+    marginTop: 75,
     width: "45%",
     borderRadius: 10,
     shadowColor: "#9d9aff",
-    shadowOffset:{width:0, height:8},
-    shadowRadius: 10
-    
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 10,
   },
-  textButtonLogin:{
+  textButtonLogin: {
     fontWeight: "bold",
     fontSize: 24,
     color: "white",
-    paddingVertical:12,
-    textAlign: "center"
+    paddingVertical: 12,
+    textAlign: "center",
   },
 
-  bouttonRegister:{
-    marginTop:75,
+  bouttonRegister: {
+    marginTop: 75,
     width: "45%",
-    borderRadius: 10
-    
+    borderRadius: 10,
   },
-  textButtonRegister:{
+  textButtonRegister: {
     fontWeight: "regular",
-    paddingVertical:12,
+    paddingVertical: 12,
     fontSize: 24,
     color: "text",
-    textAlign: "center"
-  }
-
+    textAlign: "center",
+  },
 });

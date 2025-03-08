@@ -1,13 +1,22 @@
 import { Ionicons } from "@expo/vector-icons";
-import { StyleSheet, View, Text, Pressable, TouchableOpacity } from "react-native";
-import { SafeAreaView, TextInput } from "react-native-web";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Pressable,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
+import { SafeAreaView, TextInput } from "react-native";
 
 export default function ForgotPassword({ navigation }) {
   return (
-    <SafeAreaView>
-      <View style={{padding: 80}}>
+    <ScrollView>
+      <View style={{ padding: 80 }}>
         <Text style={styles.textTitle}>Login Now</Text>
-        <Text style={styles.textsubTitle}>Welcome back you've been missed!</Text>
+        <Text style={styles.textsubTitle}>
+          Welcome back you've been missed!
+        </Text>
       </View>
       {/* <View>
         <Text>Email</Text>
@@ -21,74 +30,63 @@ export default function ForgotPassword({ navigation }) {
       {/* </View> */}
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={
-            styles.input
-          }
-          placeholder="Enter your Email"
-        />
+        <TextInput style={styles.input} placeholder="Enter your Email" />
       </View>
       <View style={styles.inputGroup}>
         <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={
-            styles.input
-          }
-          placeholder="Enter your Password"
-        />
+        <TextInput style={styles.input} placeholder="Enter your Password" />
       </View>
-      <TouchableOpacity style={{paddingHorizontal: 20}}>
-          <Text style={styles.textForgot}>
-            Forgot your password?
-          </Text>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("ForgotPassword")}
+        style={{ paddingHorizontal: 20 }}
+      >
+        <Text style={styles.textForgot}>Forgot your password?</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.buttonSingin}>
-        <Text style={styles.textButtonSingin}>
-          Sigin in
-        </Text>
+        <Text style={styles.textButtonSingin}>Sigin in</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={{padding: 20}} onPress={() => navigation.navigate("Sign Up")}>
-        <Text style={styles.textButtonSingup}>
-          Create new account
-        </Text>
+      <TouchableOpacity
+        style={{ padding: 20 }}
+        onPress={() => navigation.navigate("Sign Up")}
+      >
+        <Text style={styles.textButtonSingup}>Create new account</Text>
       </TouchableOpacity>
 
-      <View style={{marginVertical: 20}}>
-        <Text style={{color: "#2f2baa", fontSize:17, textAlign: "center"}}>
+      <View style={{ marginVertical: 20 }}>
+        <Text style={{ color: "#2f2baa", fontSize: 17, textAlign: "center" }}>
           Or continue with
         </Text>
       </View>
 
       <View style={styles.containerIconSignin}>
         <TouchableOpacity style={styles.iconSignin}>
-          <Ionicons name="logo-google" color="text" size={20}/>
+          <Ionicons name="logo-google" color="text" size={20} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconSignin}>
-          <Ionicons name="logo-apple" color="text" size={20}/>
+          <Ionicons name="logo-apple" color="text" size={20} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.iconSignin}>
-          <Ionicons name="logo-facebook" color="text" size={20}/>
+          <Ionicons name="logo-facebook" color="text" size={20} />
         </TouchableOpacity>
       </View>
-
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  textTitle:{
-    fontSize:40,
+  textTitle: {
+    fontSize: 40,
     fontWeight: "bold",
     color: "#2f2baa",
-    textAlign: "center"
+    textAlign: "center",
   },
-  textsubTitle:{
-    fontSize:20,
+  textsubTitle: {
+    fontSize: 20,
     marginTop: 13,
     fontWeight: "regular",
     color: "text",
-    textAlign: "center", 
+    textAlign: "center",
     // maxWidth: "35%"
   },
   input: {
@@ -102,7 +100,7 @@ const styles = StyleSheet.create({
   },
   inputGroup: {
     marginBottom: 15,
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
   },
   label: {
     fontSize: 14,
@@ -110,13 +108,13 @@ const styles = StyleSheet.create({
     color: "#555",
     marginBottom: 8,
   },
-  textForgot:{
+  textForgot: {
     fontWeight: "bold",
     fontSize: 15,
     color: "#2f2baa",
-    alignSelf: "flex-end"
+    alignSelf: "flex-end",
   },
-  buttonSingin:{
+  buttonSingin: {
     // paddi: 20,
     padding: 20,
     marginVertical: 30,
@@ -124,23 +122,20 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginHorizontal: 20,
     shadowColor: "#9d9aff",
-    shadowOffset:{width:0, height:8},
-    shadowRadius: 10
-    
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 10,
   },
   textButtonSingin: {
     color: "white",
     fontWeight: "bold",
     fontSize: 20,
-    textAlign: "center"
-
+    textAlign: "center",
   },
   textButtonSingup: {
     color: "text",
     fontWeight: "regular",
     fontSize: 20,
-    textAlign: "center"
-
+    textAlign: "center",
   },
   containerIconSignin: {
     flexDirection: "row",
@@ -150,7 +145,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: "#d9d9d9",
     marginHorizontal: 10,
-    padding: 10
-  }
-
+    padding: 10,
+  },
 });

@@ -1,8 +1,18 @@
-import { Text, View, Image, StyleSheet, TouchableOpacity, ScrollView, Platform, StatusBar } from "react-native";
+import {
+  Text,
+  View,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Platform,
+  StatusBar,
+} from "react-native";
 import ProfileTags from "./ProfileTags";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import LogoutButton from "./Auth/LogoutButton";
+import DashboardStack from "../navigation/DashboardStack";
 
 export default function Profile({ navigation }) {
   const scrollViewProps =
@@ -33,6 +43,9 @@ export default function Profile({ navigation }) {
         </View>
         <TouchableOpacity onPress={() => navigation.navigate("MyProfile")}>
           <ProfileTags name="Profile" image={"person"} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Dashboard")}>
+          <ProfileTags name="Dashboard" image={"person"} />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
           <ProfileTags name="Settings" image={"settings-sharp"} />

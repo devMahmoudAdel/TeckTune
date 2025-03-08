@@ -5,6 +5,7 @@ import Settings from "../Components/Settings";
 import Help from "../Components/Help";
 
 import { createStackNavigator } from "@react-navigation/stack";
+import DashboardStack from "./DashboardStack";
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,11 @@ export default function ProfileStack() {
       <Stack.Screen
         name="Help"
         component={Help}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Dashboard"
+        component={DashboardStack}
         options={{ headerShown: false }}
       />
       <Stack.Screen

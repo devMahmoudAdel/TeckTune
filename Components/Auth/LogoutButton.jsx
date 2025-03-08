@@ -9,7 +9,7 @@ const LogoutButton = () => {
 
   return (
     <TouchableOpacity onPress={logout}>
-      <ProfileTags name="Log Out" image={"Log-out-sharp"} />
+      <ProfileTags name="Log Out" />
     </TouchableOpacity>
   );
 };
