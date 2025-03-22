@@ -13,6 +13,7 @@ import AdminOrders from "../Components/Dashboard/AdminOrders";
 import AdminCategories from "../Components/Dashboard/AdminCategories";
 import AdminBrands from "../Components/Dashboard/AdminBrands";
 import Notificationn from "../Components/Dashboard/Notificationn";
+import ProductForm from "../Components/Dashboard/ProductForm";
 
 export default function DashboardStack() {
   return (
@@ -50,6 +51,11 @@ export default function DashboardStack() {
       <Stack.Screen
         name="Notificationn"
         component={Notificationn}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="ProductForm"
+        component={ProductForm}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>

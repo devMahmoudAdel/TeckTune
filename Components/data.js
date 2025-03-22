@@ -1,5 +1,6 @@
 const products = [
   {
+    id: 1,
     title: "Product 1",
     price: 100,
     images: [
@@ -15,6 +16,7 @@ const products = [
     colors: ["red", "blue", "green"],
   },
   {
+    id: 2,
     title: "Product 2",
     price: 200,
     images: [
@@ -30,6 +32,7 @@ const products = [
     colors: ["yellow", "purple", "orange"],
   },
   {
+    id: 3,
     title: "Product 3",
     price: 300,
     images: [
@@ -45,6 +48,7 @@ const products = [
     colors: ["pink", "brown", "black"],
   },
   {
+    id: 4,
     title: "Product 4",
     price: 400,
     images: [
@@ -60,6 +64,7 @@ const products = [
     colors: ["white", "gray", "cyan"],
   },
   {
+    id: 5,
     title: "Product 5",
     price: 500,
     images: [
@@ -75,6 +80,7 @@ const products = [
     colors: ["magenta", "lime", "teal"],
   },
   {
+    id: 6,
     title: "Product 6",
     price: 600,
     images: [
@@ -90,6 +96,7 @@ const products = [
     colors: ["navy", "olive", "maroon"],
   },
   {
+    id: 7,
     title: "Product 7",
     price: 700,
     images: [
@@ -105,6 +112,7 @@ const products = [
     colors: ["gold", "silver", "bronze"],
   },
   {
+    id: 8,
     title: "Product 8",
     price: 800,
     images: [
@@ -120,6 +128,7 @@ const products = [
     colors: ["coral", "salmon", "khaki"],
   },
   {
+    id: 9,
     title: "Product 9",
     price: 900,
     images: [
@@ -135,6 +144,7 @@ const products = [
     colors: ["plum", "orchid", "lavender"],
   },
   {
+    id: 10,
     title: "Product 10",
     price: 1000,
     images: [
@@ -150,6 +160,7 @@ const products = [
     colors: ["beige", "ivory", "mint"],
   },
   {
+    id: 11,
     title: "Product 11",
     price: 1100,
     images: [
@@ -165,6 +176,7 @@ const products = [
     colors: ["peach", "apricot", "honeydew"],
   },
   {
+    id: 12,
     title: "Product 12",
     price: 1200,
     images: [
