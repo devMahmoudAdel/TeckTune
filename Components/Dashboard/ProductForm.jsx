@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -23,6 +23,14 @@ export default function ProductForm({ route }) {
 
   const isExisting = !!existingProduct;
 
+  const validateFields = () => {
+    if (!title || !price || !description || !images || !rating || !colors) {
+      Alert.alert("Validation Error", "Please fill all the fields.");
+      return false;
+    }
+    return true;
+  };
+
   const handleSave = () => {
     if (validateFields()) {
       Alert.alert("Confirm", "Are you sure you want to save this new product?", [
@@ -46,14 +54,6 @@ export default function ProductForm({ route }) {
       { text: "Cancel" },
       { text: "Delete", onPress: () => console.log("Product deleted") },
     ]);
-  };
-
-  const validateFields = () => {
-    if (!title || !price || !description || !images || !rating || !colors) {
-      Alert.alert("Validation Error", "Please fill all the fields.");
-      return false;
-    }
-    return true;
   };
 
   return (
@@ -125,23 +125,32 @@ export default function ProductForm({ route }) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flexGrow: 1,
+    flex: 1,
+    paddingHorizontal: "5%",
+    paddingVertical: "10%",
+    backgroundColor: "#fff",
   },
   label: {
     marginTop: 10,
     fontWeight: "bold",
+    fontSize: 16,
   },
   input: {
+    width: "100%",
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
     padding: 10,
     marginTop: 5,
+    fontSize: 16,
   },
   buttonContainer: {
     marginTop: 20,
+    width: "100%",
   },
   space: {
     height: 10,
   },
 });
+
