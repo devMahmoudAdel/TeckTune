@@ -25,12 +25,12 @@ export default function Home({ navigation }) {
             <Text style={styles.userNameText}>User Name</Text>
           </View>
         </View>
-        <MaterialIcons
-          name="notifications-none"
-          size={24}
-          color="black"
+        <Pressable
+          onPress={() => navigation.navigate("Notificationn", { isAdmin: false })}
           style={styles.notificationIcon}
-        />
+        >
+          <MaterialIcons name="notifications-none" size={24} color="black" />
+        </Pressable>
       </View>
       {/* // Search */}
       <Search/>
