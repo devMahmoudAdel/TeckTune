@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, FlatList, StyleSheet, Image, Pressable, Alert } from "react-native";
 import usersData from "../Users";
-//  طبعا اي تغير مش بيتنفذ علشان بناخد نسخه من الداتا مش الداتا نفسها
+//  طبعا اي تغير مش بيتنفذ ناقص التربيط بالباك اند
 export default function UsersList() {
   const [users, setUsers] = useState(usersData); 
   const [roleFilter, setRoleFilter] = useState(null);
