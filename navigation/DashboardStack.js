@@ -7,7 +7,7 @@ import React from "react";
 
 import Dashboard from "../Components/Dashboard/Dashboard";
 import AdminProducts from "../Components/Dashboard/AdminProducts";
-import AdminUsers from "../Components/Dashboard/AdminUsers";
+import UsersList from "../Components/Dashboard/UsersList";
 
 import AdminOrders from "../Components/Dashboard/AdminOrders";
 import AdminCategories from "../Components/Dashboard/AdminCategories";
@@ -29,8 +29,8 @@ export default function DashboardStack() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="AdminUsers"
-        component={AdminUsers}
+        name="UsersList"
+        component={UsersList}
         options={{ headerShown: false }}
       />
       <Stack.Screen

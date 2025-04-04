@@ -7,7 +7,7 @@ const Dashboard = ({ navigation }) => {
     { name: "AdminCategories", title: "Admin Categories" },
     { name: "AdminOrders", title: "Admin Orders" },
     { name: "AdminProducts", title: "Admin Products" },
-    { name: "AdminUsers", title: "Admin Users" },
+    { name: "UsersList", title: "Users List" },
     { name: "Notificationn", title: "Notifications" },
     { name: "ProductForm", title: "Product Form testing", params: { id: 1 } },
   ];
