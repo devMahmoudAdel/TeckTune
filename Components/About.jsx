@@ -38,8 +38,8 @@ const members = [
     email: "hazemhussein392@gmail.com",
     phone: "01558277796 ",
     socialMedial: {
-      facebook: " ",
-      whatsapp: " ",
+      facebook: "https://www.facebook.com/hazem.hussein.1004 ",
+      whatsapp: "https:wa.me/201558277796 ",
       linkedin: " ",
       github: " ",
     },

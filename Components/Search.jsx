@@ -1,11 +1,15 @@
-import React from 'react';
+import React , {useState} from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-const Search = () => {
+const Search = ({setFilter}) => {
+
+  
   return (
     <View style={styles.searchContainer}>
       <MaterialIcons name="search" size={24} color="grey" />
-      <TextInput placeholder="Search" style={styles.inputSearch} />
+      <TextInput placeholder="Search"
+       style={styles.inputSearch}
+       onChangeText={(value) => setFilter(value)} />
     </View>
   );
 }

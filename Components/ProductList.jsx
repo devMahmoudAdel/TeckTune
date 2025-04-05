@@ -2,9 +2,18 @@ import { Text, View, FlatList, Pressable, RefreshControl, Platform, StatusBar } 
 import Product from "./Product";
 import products from "./data";
 import Search from "./Search";
-export default function ProductList({ navigation }) {
-  
+import { useEffect ,useState  } from "react";
+export default function ProductList({ navigation , filterSearch }) {
+  const [filteredProducts , setFilteredProducts] = useState([])
 
+  useEffect(() => {
+    if(filterSearch.trim()){
+      setFilteredProducts(products.filter((e) => e.title.toLowerCase().includes(filterSearch.toLowerCase())))
+    }
+    else {
+      setFilteredProducts(products);
+    }
+  },[filterSearch])
   // specific platform :-
   // used to handle the scroll in the web bundler
   // ---> as i get no scrolling without it,
@@ -16,7 +25,6 @@ export default function ProductList({ navigation }) {
   
   return (
     <View style = {[containerStyle, {paddingTop: StatusBar.currentHeight+10,flex: 1,paddingBottom: 55}]}> 
-    <Search/>
     <FlatList
       keyExtractor={(item) => item.title}
       showsVerticalScrollIndicator={false}
@@ -28,7 +36,7 @@ export default function ProductList({ navigation }) {
         alignItems: "center",
       }}
       scrollEnabled={true}
-      data={products}
+      data={filteredProducts}
       renderItem={({ item }) => (
         <Pressable onPress={() => navigation.navigate("ProductDetails", item)}>
           <Product
