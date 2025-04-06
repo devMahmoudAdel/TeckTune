@@ -1,16 +1,20 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet, Image, FlatList, TouchableOpacity, StatusBar, Dimensions } from "react-native";
+import { Text, View, StyleSheet, Image, FlatList, TouchableOpacity, StatusBar, Dimensions,Pressable } from "react-native";
 import Icon from "@expo/vector-icons/AntDesign"; 
-import { AddToWishList } from "../AddToWishList";
-import { AddToCart } from "../AddToCart";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { AddToWishList } from "../Components/AddToWishList";
+import { AddToCart } from "../Components/AddToCart";
+import { useRouter, useLocalSearchParams } from "expo-router";
 const { width, height } = Dimensions.get('window');
 
-export default function ProductDetails(props) {
+export default function ProductDetails() {
+  const router = useRouter();
   const [selectedColor, setSelectedColor] = useState(null);
-  const { navigation } = props;
-  const { title, price, images, rating, colors, description } = props.route.params;
+  const { title, price, imagess, rating, colorss, description, reviews } = useLocalSearchParams();
+  const images = JSON.parse(imagess);
+  const colors = JSON.parse(colorss);
   const [activeIndex, setActiveIndex] = useState(0);
-
   const handleScroll = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     setActiveIndex(slideIndex);
@@ -46,17 +50,26 @@ export default function ProductDetails(props) {
             />
           ))}
         </View>
+        <Pressable style={styles.wishlistButton} onPress={AddToWishList}>
+          <AntDesign name="hearto" size={24} color="black" />
+        </Pressable>
+        <Pressable
+          style={[styles.wishlistButton, { left: 15 }]}
+          onPress={() => router.back()}
+        >
+          <Ionicons name="arrow-back-outline" size={24} color="black" />
+        </Pressable>
       </View>
       <View style={styles.bottomsection}>
         <View style={styles.header}>
           <Text style={styles.title}>{title}</Text>
-          <Text style={styles.price}>${price}</Text>
+          <Text style={styles.price}>${Number(price).toFixed(2)}</Text>
         </View>
 
         <View style={styles.ratingContainer}>
           <Icon name="star" size={18} color="#FFD700" />
           <Text style={styles.rating}>{rating} </Text>
-          <Text style={styles.reviews}>({props.reviews} Reviews)</Text>
+          <Text style={styles.reviews}>({reviews} Reviews)</Text>
         </View>
 
         <Text style={styles.description}>{description}</Text>
@@ -82,12 +95,6 @@ export default function ProductDetails(props) {
           <TouchableOpacity style={styles.buyNowButton} onPress={AddToCart}>
             <Text style={styles.buttonText}>Buy Now</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.wishlistButton}
-            onPress={AddToWishList}
-          >
-            <Text style={styles.buttonText}>Add to Wishlist</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -98,7 +105,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-    marginBottom: 55,
+    marginTop: StatusBar.currentHeight
   },
   topsection: {
     flex: 1,
@@ -206,11 +213,16 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   wishlistButton: {
-    flex: 1,
-    backgroundColor: "#FFD700",
-    paddingVertical: 15,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#fff",
+    position: "absolute",
+    right: 15,
+    top: 15,
+    justifyContent: "center",
     alignItems: "center",
+    padding: 10,
   },
   buttonText: {
     color: "#fff",

@@ -11,7 +11,9 @@ import {
   Platform,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-const MyProfile = ({ navigation }) => {
+import { useRouter } from "expo-router";
+const MyProfile = () => {
+  const router = useRouter();
   const scrollViewProps =
     Platform.OS === "web"
       ? { style: { maxHeight: "100vh", overflowY: "auto" } }
@@ -31,12 +33,12 @@ const MyProfile = ({ navigation }) => {
             name="chevron-back-outline"
             size={30}
             color="black"
-            onPress={() => navigation.goBack()}
+            onPress={() => router.back()}
           />
           <Text style={styles.textHeader}> Edit Profile</Text>
         </View>
         <Image
-          source={require("../assets/icon.png")}
+          source={require("../../../assets/icon.png")}
           style={styles.imageProfile}
         />
         <View style={{ width: "100%", alignItems: "center" }}>

@@ -2,14 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet, Image ,Pressable} from 'react-native';
 
 const Member = ({
-  navigation,
   image,
   name,
-  nickName,
-  socialMedia,
-  email,
-  phone,
-  description,
+  nickName
 }) => {
   return (
     <View style={styles.container}>

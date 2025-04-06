@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, Text, Image,StyleSheet,Pressable } from 'react-native';
-import ProductDetails from './ProductDetails/ProductDetails';
+import ProductDetails from '../app/[...ProductDetails]';
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Stars from './Stars';
-const Product = ({ title, images, rating, price, navigation }) => {
+const Product = ({ title, images, rating, price}) => {
   return (
 
     <View style={styles.container}>

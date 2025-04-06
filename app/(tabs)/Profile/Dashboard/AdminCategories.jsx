@@ -3,7 +3,7 @@ import React from "react";
 
 export default function AdminCategories() {
   return (
-    <View>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <Text>AdminCategories</Text>
     </View>
   );

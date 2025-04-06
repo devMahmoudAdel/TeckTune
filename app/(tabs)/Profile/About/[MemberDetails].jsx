@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Pressable, Linking, ToastAndroid } from 'react-native';
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-
+import { useLocalSearchParams } from 'expo-router';
 const openLink = async (url) => {
   const supported = await Linking.canOpenURL(url);
 
@@ -12,14 +12,14 @@ const openLink = async (url) => {
   }
 };
 
-const MemberDetails = ({route}) => {
-  const { name, nickName, image, description, socialMedia, email, phone } =
-    route.params;
+const MemberDetails = () => {
+  const { name, nickName, image, description, socialMediaa, email, phone } = useLocalSearchParams();
+  const socialMedia = JSON.parse( socialMediaa);
   return (
     <View style={styles.container}>
       <Image
         source={image}
-        defaultSource={require("../assets/icon.png")}
+        defaultSource={require("../../../../assets/icon.png")}
         style={styles.image}
       />
       <Text style={styles.memberName}>

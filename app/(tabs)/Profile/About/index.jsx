@@ -1,11 +1,11 @@
 import { Text, View,StyleSheet, ScrollView, Pressable } from "react-native";
-import Member from "./Member";
-
+import Member from "../../../../Components/Member";
+import { useRouter, Link } from "expo-router";
 const members = [
   {
     name: "Mahmoud Adel",
     nickName: "Dolsika",
-    image: require("../assets/icon.png"),
+    image: require("../../../../assets/icon.png"),
     description: "lorem ipsum",
     socialMedia: {
       facebook: "https://www.facebook.com",
@@ -16,10 +16,10 @@ const members = [
     email: "karim3del04@gmail.com",
     phone: "01033612081",
   },
-    {
+  {
     name: "youssef.ah",
     nickName: "Ebn_ahmed",
-    image: require("../assets/icon.png"),
+    image: require("../../../../assets/icon.png"),
     description: "description not needed",
     socialMedia: {
       facebook: "https://www.facebook.com",
@@ -33,7 +33,7 @@ const members = [
   {
     name: "hazem",
     nickName: " نقاش",
-    image: require("../assets/icon.png"),
+    image: require("../../../../assets/icon.png"),
     description: "دمي خفيف ",
     email: "hazemhussein392@gmail.com",
     phone: "01558277796 ",
@@ -47,7 +47,7 @@ const members = [
   {
     name: "Ahmed Hassan",
     nickName: "Capa",
-    image: require("../assets/icon.png"),
+    image: require("../../../../assets/icon.png"),
     description: "",
     email: "elbana795@gmail.com",
     phone: "01002467068",
@@ -62,7 +62,7 @@ const members = [
   {
     name: "Member 5",
     nickName: "Role 5",
-    image: require("../assets/icon.png"),
+    image: require("../../../../assets/icon.png"),
     description: "Description 1",
     socialMedia: {
       facebook: "https://www.facebook.com",
@@ -76,7 +76,7 @@ const members = [
   {
     name: "Member 6",
     nickName: "Role 6",
-    image: require("../assets/icon.png"),
+    image: require("../../../../assets/icon.png"),
     description: "Description 1",
     socialMedia: {
       facebook: "https://www.facebook.com",
@@ -90,7 +90,7 @@ const members = [
   {
     name: "Member 7",
     nickName: "Role 7",
-    image: require("../assets/icon.png"),
+    image: require("../../../../assets/icon.png"),
     description: "Description 1",
     socialMedia: {
       facebook: "https://www.facebook.com",
@@ -104,7 +104,7 @@ const members = [
   {
     name: "Member 8",
     nickName: "Role 8",
-    image: require("../assets/icon.png"),
+    image: require("../../../../assets/icon.png"),
     description: "Description 1",
     socialMedia: {
       facebook: "https://www.facebook.com",
@@ -115,9 +115,9 @@ const members = [
     email: "email@domain",
     phone: "1234567890",
   },
-  
 ];
-export default function About({ navigation }) {
+export default function About() {
+  const router = useRouter();
   return (
     <ScrollView>
       <View style={styles.container}>
@@ -130,9 +130,17 @@ export default function About({ navigation }) {
         <Text style={[styles.title, { marginTop: 20 }]}>Team Members</Text>
         <View style={styles.members}>
           {members.map((member, index) => (
-            <Pressable key={index} onPress={() => navigation.navigate("MemberDetails", member)}>
+            <Link
+              key={index}
+              href={{
+                pathname: `/(tabs)/Profile/About/${index}`,
+                params: {name: member.name,nickName: member.nickName,image: member.image,description: member.description,socialMediaa: JSON.stringify(member.socialMedia),email: member.email,phone: member.phone},
+              }}
+            >
+              {/* <Link href={`/Profile/About/MemberDetails/${index}`}> */}
+              {/* <Pressable onPress={() => router.push(`/Profile/About/MemberDetails/${index}`)}> */}
               <Member key={index} {...member} />
-            </Pressable>
+            </Link>
           ))}
         </View>
       </View>

@@ -8,12 +8,11 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-import data from "../data";
-
-export default function ProductForm({ route }) {
-  const { id } = route.params;
-  const existingProduct = data.find((product) => product.id === id);
-
+import data from "../../../../../Components/data";
+import { useLocalSearchParams } from "expo-router";
+export default function ProductForm() {
+  const { id } = useLocalSearchParams();
+  const existingProduct = data.find((product) => product.id === Number(id));
   const [title, setTitle] = useState(existingProduct?.title || "");
   const [price, setPrice] = useState(existingProduct?.price.toString() || "");
   const [description, setDescription] = useState(existingProduct?.description || "");

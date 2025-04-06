@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-
-const Dashboard = ({ navigation }) => {
+import { useRouter, Link } from "expo-router";
+const Dashboard = () => {
+  const router = useRouter();
   const files = [
     { name: "AdminBrands", title: "Admin Brands" },
     { name: "AdminCategories", title: "Admin Categories" },
@@ -12,8 +13,9 @@ const Dashboard = ({ navigation }) => {
     { name: "ProductForm", title: "Product Form testing", params: { id: 1 } },
   ];
 
-  const handleButtonPress = (fileName, params = {}) => {
-    navigation.navigate(fileName, params);
+  const handleButtonPress = (fileName, params) => {
+    router.navigate(`/(tabs)/Profile/Dashboard/${fileName}`)
+    
   };
 
   return (
@@ -21,13 +23,16 @@ const Dashboard = ({ navigation }) => {
       <Text style={styles.title}>Dashboard</Text>
       <View style={styles.buttonContainer}>
         {files.map((file) => (
-          <TouchableOpacity
+          <Link
             key={file.name}
             style={styles.button}
-            onPress={() => handleButtonPress(file.name, file.params)}
+            href={file.params ? {
+              pathname: `/(tabs)/Profile/Dashboard/ProductForm/1`,
+              params: {id: file.params.id},
+            } : `/(tabs)/Profile/Dashboard/${file.name}`}
           >
             <Text style={styles.buttonText}>{file.title}</Text>
-          </TouchableOpacity>
+          </Link>
         ))}
       </View>
     </View>

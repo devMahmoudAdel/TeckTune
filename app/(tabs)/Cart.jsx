@@ -1,8 +1,10 @@
 import { Text, View, StyleSheet, Pressable, ScrollView, Image,StatusBar } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
-import CartItems from "./CartItems";
-export default function Cart({ navigation }) {
+import CartItems from "../../Components/CartItems";
+import { useRouter } from "expo-router";
+export default function Cart() {
+  const router = useRouter();
   return (
     <View style={styles.container}>
       <View
@@ -12,7 +14,7 @@ export default function Cart({ navigation }) {
           name="chevron-back-outline"
           size={30}
           color="black"
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
         />
         <Text style={styles.textHeader}>Cart</Text>
         <Entypo name="dots-three-vertical" size={24} color="black" />
