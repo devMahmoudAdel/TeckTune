@@ -1,5 +1,5 @@
 import {db} from './firebase.js';
-import {collection, doc, setDoc, deleteDoc, getDocs} from 'firebase/firestore';
+import {collection, doc, setDoc, deleteDoc, getDocs, getDoc} from 'firebase/firestore';
 import {auth} from './firebase.js';
 
 const addToWishlist = async (product) => {
@@ -35,4 +35,14 @@ const removeFromWishlist = async (productId) => {
   }
 }
 
-export {addToWishlist, getWishlist, removeFromWishlist};
+const inWishlist = async (productId) => {
+  try {
+    const user = auth.currentUser;
+    const wishlistDocRef = doc(collection(db, 'users', user.uid, 'wishlist'), productId);
+    const wishlistDoc = await getDoc(wishlistDocRef);
+    return wishlistDoc.exists();
+  } catch (error) {
+    throw error;
+  }
+}
+export {addToWishlist, getWishlist, removeFromWishlist, inWishlist};
