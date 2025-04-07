@@ -1,95 +1,87 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
-import AntDesign from "@expo/vector-icons/AntDesign";
-const CartItem = () => {
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, Pressable, Dimensions } from 'react-native';
+import { AntDesign } from "@expo/vector-icons"; 
+const screen = Dimensions.get('window');
+const CartItem = (prodcutInof) => {
+  const [counter, setCounter] = useState(1);
+
+  const incCounter = () => setCounter(counter + 1);
+  const decCounter = () => {
+    if (counter > 1) setCounter(counter - 1);
+    else console.log("here handle to del. product");
+  };
+
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={require("../assets/icon.png")} />
-      <View style={styles.secContainer}>
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <Text style={styles.title}>Product Name</Text>
-        </View>
-        <View style={{ textAlign: "left", alignSelf: "flex-start" }}>
-          <Text style={styles.price}>120</Text>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignSelf: "flex-end",
-            padding: 10,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              alignSelf: "flex-end",
-            }}
-          >
-            <Pressable>
-              <AntDesign name="minuscircle" size={24} color="#2f2baa" />
-            </Pressable>
-            <Text style={styles.count}>02</Text>
-            <Pressable>
-              <AntDesign name="pluscircle" size={24} color="#2f2baa" />
-            </Pressable>
-          </View>
-        </View>
+      <Image style={styles.image} source={prodcutInof.image} />
+
+      <View style={styles.detailsContainer}>
+        <Text style={styles.title}>{prodcutInof.title}</Text>
+        <Text style={styles.price}>${prodcutInof.price}</Text>
       </View>
-      <AntDesign name="delete" size={20} color="#e2e2e2" style={styles.deleteIcon} />
+
+      <View style={styles.counterContainer}>
+        <Pressable onPress={incCounter} style={styles.button}>
+          <AntDesign name="pluscircle" size={21} color="#2e2a9d" />
+        </Pressable>
+
+        <Text style={styles.count}>{counter}</Text>
+
+        <Pressable onPress={decCounter} style={styles.button}>
+          <AntDesign name="minuscircle" size={21} color="#7e7cb4" />
+        </Pressable>
+      </View>
     </View>
   );
-}
+};
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    justifyContent: "flex-start",
     alignItems: "center",
-    padding: 10,
-    height: 150,
     backgroundColor: "#f2f2f2",
-    marginHorizontal: "auto",
     borderRadius: 5,
-    width: 325,
-  },
-  secContainer: {
-    
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 10,
+    padding: 0,
+    width: screen.width - 20,
+    alignSelf: "center",
   },
   image: {
-    width: 140,
+    width: 90,
     height: "100%",
-    borderRadius: 8,
+    borderRadius: 5,
+  },
+  detailsContainer: {
+    flex: 1,
+    paddingHorizontal: 15,
+    justifyContent: "center",
   },
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "black",
-    textAlign: "left",
-    marginVertical: 10,
+    // fontWeight: "bold",
+    color: "#4e5774",
+    fontSize: 14,
+    marginBottom: 15,
   },
   price: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "bold",
-    color: "#2f2baa",
+    color: "#1f388d",
+  },
+  counterContainer: {
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingRight: 12,
   },
   count: {
     fontSize: 16,
-    color: "#grey",
-    marginHorizontal: 8,
-    
+    fontWeight: "bold",
+    marginVertical: 3,
+    color: "#333",
   },
-  deleteIcon: {
-    position: "absolute",
-    right: 5,
-    top: 5,
-    backgroundColor: "#212121",
-    padding: 8,
-    borderRadius: 25,
+  button: {
+    paddingVertical: 5,
+
   },
 });
+
 export default CartItem;

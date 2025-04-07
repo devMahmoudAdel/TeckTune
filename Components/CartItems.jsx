@@ -1,82 +1,83 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable,RefreshControl } from 'react-native';
+import { Dimensions, Text, FlatList, StyleSheet, Pressable,RefreshControl, TouchableOpacity } from 'react-native';
 import CartItem from './CartItem';
-
+const screen = Dimensions.get('window');
 const CartItems = ({navigation}) => {
-    const products = [
-      {
-        title: "Product 1",
-        price: 100,
-        image: require("../assets/icon.png"),
-        rating: 3,
-      },
-      {
-        title: "Product 2",
-        price: 200,
-        image: require("../assets/icon.png"),
-        rating: 4,
-      },
-      {
-        title: "Product 3",
-        price: 300,
-        image: require("../assets/icon.png"),
-        rating: 5,
-      },
-      {
-        title: "Product 4",
-        price: 400,
-        image: require("../assets/icon.png"),
-        rating: 3,
-      },
-      {
-        title: "Product 5",
-        price: 500,
-        image: require("../assets/icon.png"),
-        rating: 4,
-      },
-      {
-        title: "Product 6",
-        price: 600,
-        image: require("../assets/icon.png"),
-        rating: 5,
-      },
-      {
-        title: "Product 7",
-        price: 700,
-        image: require("../assets/icon.png"),
-        rating: 3,
-      },
-      {
-        title: "Product 8",
-        price: 800,
-        image: require("../assets/icon.png"),
-        rating: 4,
-      },
-      {
-        title: "Product 9",
-        price: 900,
-        image: require("../assets/icon.png"),
-        rating: 5,
-      },
-      {
-        title: "Product 10",
-        price: 1000,
-        image: require("../assets/icon.png"),
-        rating: 3,
-      },
-      {
-        title: "Product 11",
-        price: 1100,
-        image: require("../assets/icon.png"),
-        rating: 4,
-      },
-      {
-        title: "Product 12",
-        price: 1200,
-        image: require("../assets/icon.png"),
-        rating: 5,
-      },
-    ];
+  const products = [
+    {
+      title: "Apple iPhone 15 Pro ",
+      price: 45000,
+      image: require("../assets/icon.png"),
+      rating: 5,
+    },
+    {
+      title: "Samsung Galaxy S24 Ultra",
+      price: 42000,
+      image: require("../assets/icon.png"),
+      rating: 4,
+    },
+    {
+      title: "Xiaomi Redmi Note 13",
+      price: 9500,
+      image: require("../assets/icon.png"),
+      rating: 4,
+    },
+    {
+      title: "Lenovo IdeaPad 3 Laptop",
+      price: 21000,
+      image: require("../assets/icon.png"),
+      rating: 4,
+    },
+    {
+      title: "HP Victus Gaming Laptop",
+      price: 30000,
+      image: require("../assets/icon.png"),
+      rating: 5,
+    },
+    {
+      title: "Sony WH-1000XM5 Headphones",
+      price: 18000,
+      image: require("../assets/icon.png"),
+      rating: 5,
+    },
+    {
+      title: "Apple AirPods Pro 2",
+      price: 9000,
+      image: require("../assets/icon.png"),
+      rating: 4,
+    },
+    {
+      title: "Samsung Galaxy Watch 6",
+      price: 8500,
+      image: require("../assets/icon.png"),
+      rating: 4,
+    },
+    {
+      title: "Anker PowerCore 20000mAh",
+      price: 1500,
+      image: require("../assets/icon.png"),
+      rating: 4,
+    },
+    {
+      title: "JBL Flip 6 Bluetooth Speaker",
+      price: 4500,
+      image: require("../assets/icon.png"),
+      rating: 4,
+    },
+    {
+      title: "Canon EOS 200D II Camera",
+      price: 27000,
+      image: require("../assets/icon.png"),
+      rating: 5,
+    },
+    {
+      title: "Amazon Kindle Paperwhite",
+      price: 5500,
+      image: require("../assets/icon.png"),
+      rating: 4,
+    },
+  ];
+  
 
   return (
     <FlatList
@@ -85,13 +86,14 @@ const CartItems = ({navigation}) => {
         justifyContent: "center",
         alignItems: "center",
         gap: 10,
+        paddingBottom: 100, // عشان يكون في مساحة للزر تحت
       }}
       refreshControl={<RefreshControl refreshing={false} />}
       scrollEnabled={true}
       showsVerticalScrollIndicator={false}
       data={products}
       renderItem={({ item }) => (
-        <Pressable >
+        <Pressable>
           <CartItem
             title={item.title}
             price={item.price}
@@ -101,8 +103,38 @@ const CartItems = ({navigation}) => {
           />
         </Pressable>
       )}
+      ListFooterComponent={() => (
+        <TouchableOpacity
+          style={styles.checkoutButton}
+          onPress={() => navigation.navigate("Checkout")}
+        >
+          <Text style={styles.textButtonCheckout}>Checkout</Text>
+        </TouchableOpacity>
+      )}
     />
   );
+  
 }
 
+const styles = StyleSheet.create({
+checkoutButton: {
+  padding: 10,
+  backgroundColor: "#2e2a9d",
+  borderRadius: 10,
+  top:20,
+  width: screen.width - 40,
+  shadowColor: "#2e2a9d",
+  shadowOffset: { width: 0, height: 8 },
+  shadowOpacity: 0.3,
+  shadowRadius: 10,
+  elevation: 5,
+},
+textButtonCheckout: {
+  color: "white",
+  fontWeight: "bold",
+  fontSize: 20,
+  textAlign: "center",
+},
+
+});
 export default CartItems;
