@@ -1,6 +1,6 @@
 import { View, Text, FlatList, StyleSheet, Pressable, Modal, TextInput, Alert } from "react-native";
 import React, { useState } from "react";
-import notifications from "../../../../Components/notifictionsdata";
+import notifications from "../../../../../Components/notifictionsdata";
 
 export default function Notificationn({ isAdmin = true }) {
   const [modalVisible, setModalVisible] = useState(false);

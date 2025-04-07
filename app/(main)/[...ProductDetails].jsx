@@ -3,8 +3,8 @@ import { Text, View, StyleSheet, Image, FlatList, TouchableOpacity, StatusBar, D
 import Icon from "@expo/vector-icons/AntDesign"; 
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { AddToWishList } from "../Components/AddToWishList";
-import { AddToCart } from "../Components/AddToCart";
+import { AddToWishList } from "../../Components/AddToWishList";
+import { AddToCart } from "../../Components/AddToCart";
 import { useRouter, useLocalSearchParams } from "expo-router";
 const { width, height } = Dimensions.get('window');
 

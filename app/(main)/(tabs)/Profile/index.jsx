@@ -8,11 +8,11 @@ import {
   Platform,
   StatusBar,
 } from "react-native";
-import ProfileTags from "../../../Components/ProfileTags";
+import ProfileTags from "../../../../Components/ProfileTags";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import LogoutButton from "../../../Components/Auth/LogoutButton";
-import DashboardStack from "../../../navigation/DashboardStack";
+import LogoutButton from "../../../../Components/Auth/LogoutButton";
+import DashboardStack from "../../../../navigation/DashboardStack";
 
 export default function Profile() {
   const router = useRouter();

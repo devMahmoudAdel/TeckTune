@@ -38,7 +38,7 @@ const MyProfile = () => {
           <Text style={styles.textHeader}> Edit Profile</Text>
         </View>
         <Image
-          source={require("../../../assets/icon.png")}
+          source={require("../../../../assets/icon.png")}
           style={styles.imageProfile}
         />
         <View style={{ width: "100%", alignItems: "center" }}>

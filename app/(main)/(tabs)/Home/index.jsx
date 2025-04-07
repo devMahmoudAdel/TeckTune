@@ -2,7 +2,7 @@ import { Button,ScrollView, Text, View, Image, TextInput, StyleSheet } from "rea
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ProductList from "./ProductList";
-import Search from "../../../Components/Search";
+import Search from "../../../../Components/Search";
 import { useState } from "react";
 export default function Home() {
   const [filterSearch , setFilter] = useState('')

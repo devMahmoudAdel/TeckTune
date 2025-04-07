@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, FlatList, StyleSheet, Image, Pressable, Alert } from "react-native";
-import usersData from "../../../../Components/Users";
+import usersData from "../../../../../Components/Users";
 //  طبعا اي تغير مش بيتنفذ ناقص التربيط بالباك اند
 export default function UsersList() {
   const [users, setUsers] = useState(usersData); 

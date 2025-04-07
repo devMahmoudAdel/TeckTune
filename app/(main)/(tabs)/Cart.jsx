@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet, Pressable, ScrollView, Image,StatusBar } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
-import CartItems from "../../Components/CartItems";
+import CartItems from "../../../Components/CartItems";
 import { useRouter } from "expo-router";
 export default function Cart() {
   const router = useRouter();

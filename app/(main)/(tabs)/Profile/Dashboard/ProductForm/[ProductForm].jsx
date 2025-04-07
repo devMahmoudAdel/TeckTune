@@ -8,7 +8,7 @@ import {
   ScrollView,
   StyleSheet,
 } from "react-native";
-import data from "../../../../../Components/data";
+import data from "../../../../../../Components/data";
 import { useLocalSearchParams } from "expo-router";
 export default function ProductForm() {
   const { id } = useLocalSearchParams();

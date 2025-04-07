@@ -1,6 +1,6 @@
 import { Text, View, FlatList, Pressable, RefreshControl, Platform, StatusBar } from "react-native";
-import Product from "../../../Components/Product";
-import products from "../../../Components/data";
+import Product from "../../../../Components/Product";
+import products from "../../../../Components/data";
 import { useEffect ,useState  } from "react";
 import { useRouter, Link } from "expo-router";
 export default function ProductList({ filterSearch }) {
