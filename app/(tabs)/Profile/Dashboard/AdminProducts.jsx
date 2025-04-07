@@ -13,6 +13,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import { Ionicons, AntDesign } from "@expo/vector-icons";
 import products from "../../../../Components/data";
+import { addProduct, deleteProduct } from "../../../../firebase/Product";
 
 export default function AdminProducts() {
   const router = useRouter();
@@ -78,11 +79,13 @@ export default function AdminProducts() {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            // TODO: Call the Firebase function to delete the selected products.
-            // Example:
-            // selectedProducts.forEach((id) => firebase.deleteProduct(id).then(() => console.log(`Deleted product with ID: ${id}`)));
+            // Call the Firebase function to delete the selected products
+            selectedProducts.forEach((id) => {
+              deleteProduct(id)
+                .then(() => console.log(`Deleted product with ID: ${id}`))
+                .catch((error) => console.error("Error deleting product:", error));
+            });
 
-            console.log("Deleting products with IDs:", selectedProducts);
             Alert.alert("Success", "Products deleted successfully");
             setSelectedProducts([]);
             setDeleteMode(false);
@@ -114,11 +117,20 @@ export default function AdminProducts() {
 
   // Add new product
   const handleAddProduct = () => {
-    // TODO: Call the Firebase function to add a new product.
-    // Example:
-    // firebase.addProduct(newProductData).then(() => console.log("Product added successfully"));
+    // Example product data to add
+    const newProductData = {
+      title: "New Product",
+      description: "Description of the new product",
+      price: 100,
+      category: "Category Name",
+      createdAt: new Date(),
+    };
 
-    // Navigate to the ProductForm page for adding a new product.
+    // Call the Firebase function to add a new product
+    addProduct(newProductData)
+      .then((id) => console.log("Product added with ID:", id))
+      .catch((error) => console.error("Error adding product:", error));
+
     router.push("/Profile/Dashboard/ProductForm/[ProductForm]");
   };
 

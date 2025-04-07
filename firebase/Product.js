@@ -1,20 +1,28 @@
-import {doc, collection, setDoc, getDoc,deleteDoc, getDocs} from 'firebase/firestore';
-import { db } from './config';
+import { collection, addDoc, doc, deleteDoc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { db } from "./config";
 
-const addProduct = async (product) => {
-  const ref = doc(collection(db, 'products'));
-  await setDoc(ref, {
-    title: product.title,
-    description: product.description,
-    price: product.price,
-    category: product.category,
-    productPics: product.productPics,
-    createdAt: new Date(),
-    rating: product.rating,
-    colors: product.colors,
-    stock: product.stock,
-  }, { merge: true });
-  return ref.id;
+// Function to add a product to Firestore
+export async function addProduct(productData) {
+  try {
+    const docRef = await addDoc(collection(db, "products"), productData);
+    console.log("Product added with ID: ", docRef.id);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error adding product: ", error);
+    throw error;
+  }
+}
+
+// Function to delete a product from Firestore
+export async function deleteProduct(productId) {
+  try {
+    const productRef = doc(db, "products", productId);
+    await deleteDoc(productRef);
+    console.log("Product deleted with ID: ", productId);
+  } catch (error) {
+    console.error("Error deleting product: ", error);
+    throw error;
+  }
 }
 
 const getProduct = async (id) => {
@@ -62,13 +70,4 @@ const updateProduct = async (id, product) => {
   }
 }
 
-const deleteProduct = async (id) => {
-  try {
-    const productDocRef = doc(collection(db, 'products'), id);
-    await deleteDoc(productDocRef);
-    return true;
-  } catch (error) {
-    throw error;
-  }
-}
-export {addProduct, getProduct, getAllProducts, updateProduct, deleteProduct};
+export { getProduct, getAllProducts, updateProduct };
