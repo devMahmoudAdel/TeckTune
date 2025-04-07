@@ -2,14 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, Pressable, Dimensions } from 'react-native';
 import { AntDesign } from "@expo/vector-icons"; 
 const screen = Dimensions.get('window');
-const CartItem = (prodcutInof) => {
-  const [counter, setCounter] = useState(1);
-
-  const incCounter = () => setCounter(counter + 1);
-  const decCounter = () => {
-    if (counter > 1) setCounter(counter - 1);
-    else console.log("here handle to del. product");
-  };
+const Wishlistitem = (prodcutInof) => {
 
   return (
     <View style={styles.container}>
@@ -20,15 +13,9 @@ const CartItem = (prodcutInof) => {
         <Text style={styles.price}>${prodcutInof.price}</Text>
       </View>
 
-      <View style={styles.counterContainer}>
-        <Pressable onPress={incCounter} style={styles.button}>
-          <AntDesign name="pluscircle" size={21} color="#2e2a9d" />
-        </Pressable>
-
-        <Text style={styles.count}>{counter}</Text>
-
-        <Pressable onPress={decCounter} style={styles.button}>
-          <AntDesign name="minuscircle" size={21} color="#7e7cb4" />
+      <View style={styles.loveContainer}>
+        <Pressable onPress={console.log("handle here del. product from wishlist")} style={styles.button}>
+          <AntDesign name="heart" size={21} color="#2e2a9d" />
         </Pressable>
       </View>
     </View>
@@ -46,7 +33,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   image: {
-    width: 90,
+    width: 65,
     height: "100%",
     borderRadius: 5,
   },
@@ -54,6 +41,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 15,
     justifyContent: "center",
+    paddingTop: 10,
+    paddingBottom: 10
+
   },
   title: {
     // fontWeight: "bold",
@@ -66,23 +56,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#1f388d",
   },
-  counterContainer: {
+  loveContainer: {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     paddingRight: 12,
   },
-  count: {
-    fontSize: 16,
-    fontWeight: "bold",
-    marginVertical: 3,
-    color: "#333",
-  },
-  button: {
-    paddingVertical: 2,
-    // margin:-3
-
-  },
+  
 });
 
-export default CartItem;
+export default Wishlistitem;

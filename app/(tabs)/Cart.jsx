@@ -4,20 +4,23 @@ import Entypo from "@expo/vector-icons/Entypo";
 import CartItems from "../../Components/CartItems";
 import { useRouter } from "expo-router";
 export default function Cart() {
+
   const router = useRouter();
   return (
     <View style={styles.container}>
       <View
         style={[styles.header, { marginTop: StatusBar.currentHeight + 20 }]}
       >
-        <Ionicons
-          name="chevron-back-outline"
-          size={30}
+        <Entypo
+          name="chevron-left"
+          size={24}
           color="black"
           onPress={() => router.back()}
         />
         <Text style={styles.textHeader}>Cart</Text>
-        <Entypo name="dots-three-vertical" size={24} color="black" />
+
+        {/* for delete all product */}
+        <Entypo name="eraser" size={21} color="black" onPress={console.log("Here hundle del. all product")} />
       </View>
       <CartItems/>
     </View>
@@ -33,12 +36,12 @@ const styles = StyleSheet.create({
   header: {
     justifyContent: "space-between",
     flexDirection: "row",
-    width: "90%",
+    width: "92%",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 18,
   },
   textHeader: {
     fontWeight: "bold",
-    fontSize: 24,
+    fontSize: 22,
   },
 });
