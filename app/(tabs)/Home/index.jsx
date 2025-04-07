@@ -71,7 +71,9 @@ export default function Home() {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Notifications</Text>
             <FlatList
-              data={notifications}
+              data={notifications
+                .sort((a, b) => new Date(b.time) - new Date(a.time))
+                .slice(0, 5)}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
                 <View style={styles.notificationCard}>
