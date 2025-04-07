@@ -19,7 +19,6 @@ export default function AdminProducts() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredProducts, setFilteredProducts] = useState(products);
-  const [deleteMode, setDeleteMode] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
 
   // Filter products based on search query
@@ -36,20 +35,10 @@ export default function AdminProducts() {
 
   // Handle product selection for editing
   const handleProductPress = (product) => {
-    if (deleteMode) {
-      handleSelectProduct(product.id);
-    } else {
-      router.push({
-        pathname: "/Profile/Dashboard/ProductForm/[ProductForm]",
-        params: { id: product.id }
-      });
-    }
-  };
-
-  // Toggle delete mode
-  const toggleDeleteMode = () => {
-    setDeleteMode(!deleteMode);
-    setSelectedProducts([]);
+    router.push({
+      pathname: "/Profile/Dashboard/ProductForm/[ProductForm]",
+      params: { id: product.id }
+    });
   };
 
   // Handle product selection for deletion
@@ -88,7 +77,6 @@ export default function AdminProducts() {
 
             Alert.alert("Success", "Products deleted successfully");
             setSelectedProducts([]);
-            setDeleteMode(false);
           }
         }
       ]
@@ -169,11 +157,6 @@ export default function AdminProducts() {
           <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Products Management</Text>
-        {!deleteMode ? (
-          <TouchableOpacity onPress={toggleDeleteMode} style={styles.deleteButton}>
-            <Ionicons name="trash-outline" size={24} color="#FF3B30" />
-          </TouchableOpacity>
-        ) : null}
       </View>
 
       {/* Search Bar */}
@@ -202,29 +185,12 @@ export default function AdminProducts() {
       />
 
       {/* Action Buttons */}
-      {deleteMode ? (
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.cancelButton]}
-            onPress={toggleDeleteMode}
-          >
-            <Text style={styles.buttonText}>Cancel</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.actionButton, styles.confirmButton]}
-            onPress={handleDeleteProducts}
-          >
-            <Text style={styles.buttonText}>Delete ({selectedProducts.length})</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={handleAddProduct}
-        >
-          <AntDesign name="plus" size={24} color="#fff" />
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        style={styles.addButton}
+        onPress={handleAddProduct}
+      >
+        <AntDesign name="plus" size={24} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -251,9 +217,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     color: "#333",
-  },
-  deleteButton: {
-    padding: 8,
   },
   searchContainer: {
     flexDirection: "row",
