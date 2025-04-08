@@ -65,7 +65,7 @@ export default function Profile() {
         >
           <ProfileTags name="Help" image={"help-circle-sharp"} />
         </TouchableOpacity>
-        {/* <LogoutButton /> */}
+        <LogoutButton />
       </View>
     </ScrollView>
   );

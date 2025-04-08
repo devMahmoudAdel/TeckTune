@@ -2,13 +2,22 @@ import React, { useContext } from "react";
 import { TouchableOpacity, Pressable, Text, StyleSheet } from "react-native";
 import { AuthContext } from "../../context/AuthContext";
 
+import { useRouter } from "expo-router";
+
 import ProfileTags from "../ProfileTags";
 
 const LogoutButton = () => {
+  
   const { logout } = useContext(AuthContext);
-
+  const router = useRouter();
+  
+  const onPress = () => {
+    logout;
+    router.replace("../../../../(auth)/SignIn");
+  };
+  
   return (
-    <TouchableOpacity onPress={logout}>
+    <TouchableOpacity onPress={onPress}>
       <ProfileTags name="Log Out" />
     </TouchableOpacity>
   );
