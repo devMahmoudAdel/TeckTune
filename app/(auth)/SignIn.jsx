@@ -1,210 +1,183 @@
-// app/(auth)/SignIn.jsx
-import React, { useState } from "react";
-import { useRouter } from "expo-router";
-import { useAuth } from "../../context/useAuth";
+import { Ionicons } from "@expo/vector-icons";
 import {
+  StyleSheet,
   View,
   Text,
-  TextInput,
   TouchableOpacity,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
+  ScrollView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { TextInput } from "react-native";
+import { useState } from "react";
+import { useRouter } from "expo-router";
+import { useAuth } from "../../context/useAuth";
 
 export default function SignIn() {
+  // State management for form inputs and loading state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Get router and auth context
   const router = useRouter();
   const { login } = useAuth();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [errors, setErrors] = useState({});
-
-  const validateInputs = () => {
-    const newErrors = {};
-
-    if (!email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
-    if (!password) {
-      newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSignIn = async () => {
-    if (!validateInputs()) {
+  // Handle login submission
+  const handleLogin = async () => {
+    // Basic validation
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter both email and password");
       return;
     }
 
-    setIsProcessing(true);
-
     try {
-      // For testing purposes, we'll simulate a successful login
-      // In a real app, you would validate credentials against your backend
-      setTimeout(() => {
-        const userData = {
-          email,
-          name: "Test User",
-          profileImage: null,
-        };
+      setIsSubmitting(true);
 
-        login(userData);
-        // Navigation happens in the login function
-      }, 1500);
+      // Here you would normally call your API to authenticate
+      // For now we'll simulate an authentication
+      // Replace this with your actual API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // On successful authentication:
+      const userData = {
+        id: "user123",
+        email: email,
+        name: "User Name",
+        // Add any other user data you need
+      };
+
+      // Use the login function from auth context
+      await login(userData);
+
+      // Navigate to the main app
+      router.replace("/(main)");
     } catch (error) {
-      console.error("Sign in error:", error);
-      setErrors({ general: "Failed to sign in. Please try again." });
-      setIsProcessing(false);
+      console.error("Login error:", error);
+      Alert.alert(
+        "Login Failed",
+        "Please check your credentials and try again."
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <View style={styles.contentContainer}>
-        <View style={styles.logoContainer}>
-          <Text style={styles.logoText}>YourAppName</Text>
-        </View>
-
-        <Text style={styles.title}>Welcome Back</Text>
-        <Text style={styles.subtitle}>Sign in to continue</Text>
-
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={[styles.input, errors.email && styles.errorInput]}
-              placeholder="Enter your email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            {errors.email && (
-              <Text style={styles.errorText}>{errors.email}</Text>
-            )}
-          </View>
-
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Password</Text>
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={[
-                  styles.input,
-                  styles.passwordInput,
-                  errors.password && styles.errorInput,
-                ]}
-                placeholder="Enter your password"
-                secureTextEntry={!showPassword}
-                value={password}
-                onChangeText={setPassword}
-              />
-              <TouchableOpacity
-                style={styles.passwordToggle}
-                onPress={() => setShowPassword(!showPassword)}
-              >
-                <Ionicons
-                  name={showPassword ? "eye-off" : "eye"}
-                  size={24}
-                  color="#6055D8"
-                />
-              </TouchableOpacity>
-            </View>
-            {errors.password && (
-              <Text style={styles.errorText}>{errors.password}</Text>
-            )}
-          </View>
-
-          <TouchableOpacity
-            style={styles.forgotPassword}
-            onPress={() => router.push("./ForgotPassword")}
-          >
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
-
-          {errors.general && (
-            <Text style={[styles.errorText, styles.generalError]}>
-              {errors.general}
-            </Text>
-          )}
-
-          <TouchableOpacity
-            style={[styles.button, isProcessing && styles.processingButton]}
-            onPress={handleSignIn}
-            disabled={isProcessing}
-          >
-            <Text style={styles.buttonText}>
-              {isProcessing ? "Signing In..." : "Sign In"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.signUpContainer}>
-          <Text style={styles.signUpText}>Don't have an account?</Text>
-          <TouchableOpacity onPress={() => router.push("/(auth)/signUp/Step1")}>
-            <Text style={styles.signUpLink}>Sign Up</Text>
-          </TouchableOpacity>
-        </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.textTitle}>Login Now</Text>
+        <Text style={styles.textsubTitle}>
+          Welcome back you've been missed!
+        </Text>
       </View>
-    </KeyboardAvoidingView>
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
+      </View>
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+        />
+      </View>
+
+      <TouchableOpacity
+        onPress={() => router.push("/(auth)/ForgotPassword")}
+        style={{ paddingHorizontal: 20 }}
+      >
+        <Text style={styles.textForgot}>Forgot your password?</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.buttonSignin}
+        onPress={handleLogin}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <Text style={styles.textButtonSignin}>Sign in</Text>
+        )}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={{ padding: 20 }}
+        onPress={() => router.push("/(auth)/signUp/Step1")}
+      >
+        <Text style={styles.textButtonSignup}>Create new account</Text>
+      </TouchableOpacity>
+
+      <View style={{ marginVertical: 20 }}>
+        <Text style={{ color: "#2f2baa", fontSize: 17, textAlign: "center" }}>
+          Or continue with
+        </Text>
+      </View>
+
+      <View style={styles.containerIconSignin}>
+        <TouchableOpacity
+          style={styles.iconSignin}
+          onPress={() => handleSocialSignIn("google")}
+        >
+          <Ionicons name="logo-google" color="#555" size={20} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.iconSignin}
+          onPress={() => handleSocialSignIn("apple")}
+        >
+          <Ionicons name="logo-apple" color="#555" size={20} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.iconSignin}
+          onPress={() => handleSocialSignIn("facebook")}
+        >
+          <Ionicons name="logo-facebook" color="#555" size={20} />
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 }
 
+// Helper function for social sign-in (to be implemented)
+const handleSocialSignIn = (provider) => {
+  // Implement social sign-in logic here
+  console.log(`Sign in with ${provider}`);
+};
+
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#fff",
+    flexGrow: 1,
+    paddingBottom: 30,
   },
-  contentContainer: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 60,
-    justifyContent: "center",
+  headerContainer: {
+    padding: 40,
+    paddingTop: 80,
+    paddingBottom: 40,
   },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-  },
-  logoText: {
-    fontSize: 28,
+  textTitle: {
+    fontSize: 40,
     fontWeight: "bold",
-    color: "#6055D8",
+    color: "#2f2baa",
+    textAlign: "center",
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 32,
-  },
-  form: {
-    width: "100%",
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
+  textsubTitle: {
+    fontSize: 20,
+    marginTop: 13,
     color: "#555",
-    marginBottom: 8,
+    textAlign: "center",
   },
   input: {
     height: 52,
@@ -215,69 +188,53 @@ const styles = StyleSheet.create({
     fontSize: 16,
     backgroundColor: "#F9F9F9",
   },
-  passwordContainer: {
-    flexDirection: "row",
+  inputGroup: {
+    marginBottom: 15,
+    paddingHorizontal: 20,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#555",
+    marginBottom: 8,
+  },
+  textForgot: {
+    fontWeight: "bold",
+    fontSize: 15,
+    color: "#2f2baa",
+    alignSelf: "flex-end",
+  },
+  buttonSignin: {
+    padding: 20,
+    marginVertical: 30,
+    backgroundColor: "#2f2baa",
+    borderRadius: 10,
+    marginHorizontal: 20,
+    shadowColor: "#9d9aff",
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 10,
     alignItems: "center",
-    position: "relative",
-  },
-  passwordInput: {
-    flex: 1,
-    paddingRight: 50,
-  },
-  passwordToggle: {
-    position: "absolute",
-    right: 12,
-    height: "100%",
     justifyContent: "center",
   },
-  errorInput: {
-    borderColor: "#FF4D4D",
-  },
-  errorText: {
-    color: "#FF4D4D",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  generalError: {
-    marginBottom: 12,
+  textButtonSignin: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 20,
     textAlign: "center",
   },
-  forgotPassword: {
-    alignSelf: "flex-end",
-    marginTop: 4,
-    marginBottom: 24,
+  textButtonSignup: {
+    color: "#555",
+    fontSize: 20,
+    textAlign: "center",
   },
-  forgotPasswordText: {
-    color: "#6055D8",
-    fontSize: 14,
-  },
-  button: {
-    backgroundColor: "#6055D8",
-    paddingVertical: 16,
-    borderRadius: 10,
-    alignItems: "center",
-  },
-  processingButton: {
-    backgroundColor: "#9590E5",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  signUpContainer: {
+  containerIconSignin: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 24,
   },
-  signUpText: {
-    fontSize: 14,
-    color: "#666",
-  },
-  signUpLink: {
-    fontSize: 14,
-    color: "#6055D8",
-    fontWeight: "bold",
-    marginLeft: 5,
+  iconSignin: {
+    borderRadius: 10,
+    backgroundColor: "#d9d9d9",
+    marginHorizontal: 10,
+    padding: 10,
   },
 });
