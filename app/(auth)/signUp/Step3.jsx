@@ -11,6 +11,7 @@ import {
   Modal,
   FlatList,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -113,7 +114,7 @@ const Step3 = () => {
   const handleImageSelection = (imageUri) => {
     setIsUploading(true);
 
-    // Simulate upload process
+    // Simulate upload process - in a real app, you'd upload to Firebase Storage
     setTimeout(() => {
       setAvatar(imageUri);
       setSelectedDefaultAvatar(null);
@@ -131,13 +132,11 @@ const Step3 = () => {
     // Use the pre-generated random index from useRef
     selectDefaultAvatar(randomDefaultAvatarIndex.current);
   };
-
   const handleSignup = async () => {
     if (!avatar) {
       Alert.alert(
         "Profile Picture Required",
-        "Please select a profile picture or choose a default avatar.",
-        [{ text: "OK" }]
+        "Please select a profile picture or choose a default avatar."
       );
       return;
     }
@@ -145,31 +144,50 @@ const Step3 = () => {
     setIsProcessing(true);
 
     try {
-      // Create user data object
+      // Create user data object with all the required fields
       const userData = {
         username,
         email,
         password,
         firstName,
         lastName,
-        address,
-        phoneNumber,
-        avatar: typeof avatar === "string" ? avatar : "default_avatar",
-        createdAt: new Date().toISOString(),
+        address: address || "",
+        phoneNumber: phoneNumber || "",
+        avatarType: selectedDefaultAvatar !== null ? "default" : "custom",
+        avatarIndex: selectedDefaultAvatar,
+        avatarUri: typeof avatar === "string" ? avatar : null,
       };
 
-      // Call signup function from AuthContext which will store the user data, in both firbase + asyncStorage
+      console.log("Submitting user data:", {
+        ...userData,
+        password: "[HIDDEN]",
+      });
+
+      // Call signup function from AuthContext
       await signup(userData);
 
       // After successful signup, redirect to main application
       router.replace("../../(main)/(tabs)/Home");
     } catch (error) {
       console.error("Error during signup:", error);
-      Alert.alert(
-        "Signup Failed",
-        "There was an error creating your account. Please try again.",
-        [{ text: "OK" }]
-      );
+
+      // Display appropriate error message based on the error code
+      let errorMessage =
+        "There was an error creating your account. Please try again.";
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage =
+          "This email is already registered. Please use a different email or sign in.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "The email address is invalid.";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage =
+          "The password is too weak. Please use a stronger password.";
+      } else if (error.code === "auth/network-request-failed") {
+        errorMessage = "Network error. Please check your internet connection.";
+      }
+
+      Alert.alert("Signup Failed", errorMessage);
+    } finally {
       setIsProcessing(false);
     }
   };
@@ -350,14 +368,6 @@ const Step3 = () => {
     </View>
   );
 };
-
-// This component is defined here since it's not imported from react-native
-const ActivityIndicator = ({ size, color }) => (
-  <View style={{ padding: 10 }}>
-    <Text style={{ color }}>Loading...</Text>
-  </View>
-);
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

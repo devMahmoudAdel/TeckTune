@@ -34,33 +34,40 @@ export default function SignIn() {
     try {
       setIsSubmitting(true);
 
-      // Here you would normally call your API to authenticate
-      // For now we'll simulate an authentication
-      // Replace this with your actual API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // On successful authentication:
-      const userData = {
-        id: "user123",
-        email: email,
-        name: "User Name",
-        // Add any other user data you need
-      };
-
-      // Use the login function from auth context
-      await login(userData);
+      // Call the Firebase login function from auth context
+      await login(email, password);
 
       // Navigate to the main app
-      router.replace("/(main)");
+      router.replace("../(main)/(tabs)/Home");
     } catch (error) {
       console.error("Login error:", error);
-      Alert.alert(
-        "Login Failed",
-        "Please check your credentials and try again."
-      );
+
+      // Handle specific Firebase errors
+      let errorMessage = "Please check your credentials and try again.";
+      if (
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password"
+      ) {
+        errorMessage = "Invalid email or password.";
+      } else if (error.code === "auth/too-many-requests") {
+        errorMessage =
+          "Too many failed login attempts. Please try again later.";
+      } else if (error.code === "auth/network-request-failed") {
+        errorMessage = "Network error. Please check your internet connection.";
+      }
+
+      Alert.alert("Login Failed", errorMessage);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSocialSignIn = (provider) => {
+    // Implement social sign-in logic here
+    Alert.alert(
+      "Social Sign In",
+      `${provider} sign-in is not implemented yet.`
+    );
   };
 
   return (
@@ -130,19 +137,19 @@ export default function SignIn() {
       <View style={styles.containerIconSignin}>
         <TouchableOpacity
           style={styles.iconSignin}
-          onPress={() => handleSocialSignIn("google")}
+          onPress={() => handleSocialSignIn("Google")}
         >
           <Ionicons name="logo-google" color="#555" size={20} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconSignin}
-          onPress={() => handleSocialSignIn("apple")}
+          onPress={() => handleSocialSignIn("Apple")}
         >
           <Ionicons name="logo-apple" color="#555" size={20} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.iconSignin}
-          onPress={() => handleSocialSignIn("facebook")}
+          onPress={() => handleSocialSignIn("Facebook")}
         >
           <Ionicons name="logo-facebook" color="#555" size={20} />
         </TouchableOpacity>
@@ -150,12 +157,6 @@ export default function SignIn() {
     </ScrollView>
   );
 }
-
-// Helper function for social sign-in (to be implemented)
-const handleSocialSignIn = (provider) => {
-  // Implement social sign-in logic here
-  console.log(`Sign in with ${provider}`);
-};
 
 const styles = StyleSheet.create({
   container: {

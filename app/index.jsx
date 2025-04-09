@@ -6,6 +6,9 @@ export default function Index() {
   const { user, loading } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
 
+  /* -- note 
+  The useEffect hook has an empty dependency array ([]), meaning it runs once
+  */
   useEffect(() => {
     // Show splash screen for 2 seconds then check auth state
     const timer = setTimeout(() => {

@@ -1,87 +1,197 @@
 import React, { createContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "../firebase/config";
+import {
+  register,
+  login as firebaseLogin,
+  logout as firebaseLogout,
+} from "../firebase/Auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
-import { useRouter } from "expo-router";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // This code runs when your app first mounts the AuthProvider,
-  // checking AsyncStorage for a stored user.
-  //  The loading state stays true until this process completes.
-
+  // Listen for Firebase auth state changes
   useEffect(() => {
-    const checkAuthState = async () => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        // User is signed in
+        try {
+          // Get user profile data from Firestore
+          const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+          let userData;
+
+          if (userDoc.exists()) {
+            // Combine Firebase user with Firestore profile data
+            userData = {
+              id: firebaseUser.uid,
+              email: firebaseUser.email,
+              ...userDoc.data(),
+            };
+          } else {
+            // If no Firestore doc, use basic Firebase user data
+            userData = {
+              id: firebaseUser.uid,
+              email: firebaseUser.email,
+            };
+          }
+
+          // Store user in AsyncStorage for offline access
+          await AsyncStorage.setItem("user", JSON.stringify(userData));
+          setUser(userData);
+        } catch (error) {
+          console.error("Error getting user data:", error);
+        }
+      } else {
+        // User is signed out
+        await AsyncStorage.removeItem("user");
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    // Check for stored user on cold start
+    const checkStoredUser = async () => {
       try {
         const storedUser = await AsyncStorage.getItem("user");
-        if (storedUser) {
+        if (storedUser && !user) {
           setUser(JSON.parse(storedUser));
         }
       } catch (error) {
-        console.error("Error retrieving auth state:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error retrieving stored user:", error);
       }
     };
 
-    checkAuthState();
+    checkStoredUser();
+
+    // Cleanup subscription
+    return () => unsubscribe();
   }, []);
 
   const signup = async (userData) => {
     try {
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
-      setUser(userData);
+      // Register with Firebase
+      const firebaseUser = await register(userData.email, userData.password);
+
+      // Remove password from userData before storing
+      const { password, ...userDataToStore } = userData;
+
+      // Store additional user data in Firestore
+      await setDoc(doc(db, "users", firebaseUser.uid), {
+        ...userDataToStore,
+        createdAt: new Date().toISOString(),
+      });
+
+      // Fetch the complete profile to store locally
+      const fullUserData = {
+        id: firebaseUser.uid,
+        email: firebaseUser.email,
+        ...userDataToStore,
+      };
+
+      // Store in AsyncStorage
+      await AsyncStorage.setItem("user", JSON.stringify(fullUserData));
+      setUser(fullUserData);
+
+      return fullUserData;
     } catch (error) {
-      console.error("Error storing user data:", error);
+      console.error("Error during signup:", error);
+      throw error;
     }
   };
 
-  const login = async (userData) => {
+  const login = async (email, password) => {
     try {
+      // Firebase login
+      const firebaseUser = await firebaseLogin(email, password);
+
+      // Get user profile from Firestore
+      const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
+
+      let userData;
+      if (userDoc.exists()) {
+        userData = {
+          id: firebaseUser.uid,
+          email: firebaseUser.email,
+          ...userDoc.data(),
+        };
+      } else {
+        userData = {
+          id: firebaseUser.uid,
+          email: firebaseUser.email,
+        };
+      }
+
+      // Store user in AsyncStorage
       await AsyncStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
+
+      return userData;
     } catch (error) {
-      console.error("Error processing user data:", error);
+      console.error("Error during login:", error);
+      throw error;
     }
   };
 
   const logout = async () => {
     try {
+      // Firebase logout
+      await firebaseLogout();
+      // Clear AsyncStorage
       await AsyncStorage.removeItem("user");
       setUser(null);
     } catch (error) {
-      console.error("Error, colud not remove user data:", error);
+      console.error("Error during logout:", error);
+      throw error;
     }
   };
 
+  // Add this function to the AuthContext component
+  const updateUserProfile = async (userId, userData) => {
+    try {
+      // Remove sensitive fields before storing in Firestore
+      const { password, ...userDataToStore } = userData;
+
+      // Update user profile in Firestore
+      await setDoc(
+        doc(db, "users", userId),
+        {
+          ...userDataToStore,
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      ); // Use merge to update fields without overwriting the entire document
+
+      // Get updated user profile
+      const userDoc = await getDoc(doc(db, "users", userId));
+
+      if (userDoc.exists()) {
+        const updatedUserData = {
+          id: userId,
+          email: userData.email,
+          ...userDoc.data(),
+        };
+
+        // Update local storage
+        await AsyncStorage.setItem("user", JSON.stringify(updatedUserData));
+        setUser(updatedUserData);
+
+        return updatedUserData;
+      }
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      throw error;
+    }
+  };
   return (
-    <AuthContext.Provider value={{ user, signup, login, logout, loading }}>
+    <AuthContext.Provider
+      value={{ user, signup, login, logout, loading, updateUserProfile }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
-
-
-
-// remmeber that :- 
-   
-  // useEffect is executed once at the beginning.
-  // =>> so it will auto check and load from the storage to see 
-  // is or not there a pre-signed user ,,,, 
-  
-  /*   Thus, we can deduce that i only need to 
-    1- use that  pre-defined context 
-
-    >> shorthand use the designed Hook -> useAuth
-    
-    2- Destructure that context aka get the reqired useStates:-
-          load : the useState, if yes it still looking in its storage
-          user : if === user --> pre-signed user
-          
-          // used to handle : putting and removing data from storage
-          login
-          logout
-          singin 
-  */
