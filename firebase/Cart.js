@@ -1,5 +1,5 @@
 import { db } from "./config";
-import { collection, doc, setDoc, deleteDoc, getDocs } from "firebase/firestore";
+import { collection, doc, setDoc, deleteDoc, getDocs , getDoc} from "firebase/firestore";
 import { auth } from "./config";
 
 const addToCart = async (product) => {
@@ -36,4 +36,15 @@ const getCart = async () => {
   }
 };
 
-export { addToCart, removeFromCart, getCart };
+const inCart = async (productId) => {
+  try {
+    const user = auth.currentUser;
+    const cartDocRef = doc(collection(db, "users", user.uid, "cart"), productId);
+    const cartDoc = await getDoc(cartDocRef);
+    return cartDoc.exists();
+  } catch (error) {
+    throw error;
+  }
+}
+
+export { addToCart, removeFromCart, getCart , inCart };

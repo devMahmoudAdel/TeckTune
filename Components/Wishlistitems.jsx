@@ -1,8 +1,8 @@
 import React from 'react';
 import { Dimensions, Text, FlatList, StyleSheet, Pressable,RefreshControl, TouchableOpacity } from 'react-native';
-import CartItem from './CartItem';
+import CartItem from './Wishlistitem';
 const screen = Dimensions.get('window');
-const CartItems = ({navigation}) => {
+const Wishlistitems = ({navigation}) => {
   const products = [
     {
       title: "Apple iPhone 15 Pro ",
@@ -103,38 +103,12 @@ const CartItems = ({navigation}) => {
           />
         </Pressable>
       )}
-      ListFooterComponent={() => (
-        <TouchableOpacity
-          style={styles.checkoutButton}
-          onPress={() => navigation.navigate("Checkout")}
-        >
-          <Text style={styles.textButtonCheckout}>Checkout</Text>
-        </TouchableOpacity>
-      )}
     />
   );
   
 }
 
 const styles = StyleSheet.create({
-checkoutButton: {
-  padding: 10,
-  backgroundColor: "#2e2a9d",
-  borderRadius: 10,
-  top:20,
-  width: screen.width - 40,
-  shadowColor: "#2e2a9d",
-  shadowOffset: { width: 0, height: 8 },
-  shadowOpacity: 0.3,
-  shadowRadius: 10,
-  elevation: 5,
-},
-textButtonCheckout: {
-  color: "white",
-  fontWeight: "bold",
-  fontSize: 20,
-  textAlign: "center",
-},
 
 });
-export default CartItems;
+export default Wishlistitems;

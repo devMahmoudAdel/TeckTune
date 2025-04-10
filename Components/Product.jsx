@@ -6,7 +6,6 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Stars from './Stars';
 const Product = ({ title, images, rating, price}) => {
   return (
-
     <View style={styles.container}>
       <Image
         source={images[0]}
@@ -24,20 +23,16 @@ const Product = ({ title, images, rating, price}) => {
         <Text>({rating})</Text>
       </View>
       <Text style={styles.productPrice}>${Number(price).toFixed(2)}</Text>
-      <MaterialIcons
-        name="favorite-border"
-        size={25}
-        color={"#6055D8"}
-        style={styles.favProduct}
-      />
+      <View style={styles.favProduct}>
+        <MaterialIcons name="favorite-border" size={25} color={"#fff"} />
+      </View>
     </View>
-
   );
 };
 const styles = StyleSheet.create({
   container: {
     width: "160",
-    height: "230",
+    height: "240",
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: "#e5e5e5",
@@ -73,6 +68,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 10,
     right: 10,
+    backgroundColor: "#818181",
+    borderRadius: 20,
+    width: 35,
+    height: 35,
+    padding: 5,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 
