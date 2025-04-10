@@ -27,7 +27,6 @@ const Step1 = () => {
   const [focusedField, setFocusedField] = useState(null);
   const progressValue = new Animated.Value(0.33);
 
-  // useEffect Hook used once while the loading of the screen
   useEffect(() => {
     Animated.timing(progressValue, {
       toValue: 0.33,

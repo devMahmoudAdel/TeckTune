@@ -19,13 +19,16 @@ import { useAuth } from "../../../context/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
-const AVATAR_SIZE = width / 4 - 20;
+const AVATAR_SIZE = width / 3 - 20;
 
 const defaultAvatars = [
   require("../../../assets/avatars/avatar1.png"),
   require("../../../assets/avatars/avatar2.png"),
   require("../../../assets/avatars/avatar3.png"),
   require("../../../assets/avatars/avatar4.png"),
+  require("../../../assets/avatars/avatar5.png"),
+  require("../../../assets/avatars/avatar6.png"),
+  require("../../../assets/avatars/avatar7.png"),
 ];
 
 const Step3 = () => {
@@ -114,7 +117,6 @@ const Step3 = () => {
   const handleImageSelection = (imageUri) => {
     setIsUploading(true);
 
-    // Simulate upload process - in a real app, you'd upload to Firebase Storage
     setTimeout(() => {
       setAvatar(imageUri);
       setSelectedDefaultAvatar(null);

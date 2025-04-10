@@ -12,7 +12,7 @@ const LogoutButton = () => {
   const router = useRouter();
   
   const onPress = () => {
-    logout;
+    logout();
     router.replace("../../../../(auth)/SignIn");
   };
   
