@@ -1,12 +1,19 @@
 import React, { useState } from "react";
-import { Text, View, StyleSheet, Image, FlatList, TouchableOpacity, StatusBar, Dimensions,Pressable } from "react-native";
-import Icon from "@expo/vector-icons/AntDesign"; 
+import { Text, View, StyleSheet, Image, FlatList, TouchableOpacity, StatusBar, Dimensions, Pressable, ScrollView } from "react-native";
+import Icon from "@expo/vector-icons/AntDesign";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { AddToWishList } from "../../Components/AddToWishList";
 import { AddToCart } from "../../Components/AddToCart";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, Link } from "expo-router";
 const { width, height } = Dimensions.get('window');
+
+const reviewsData = [
+  { id: "1", user: "John Doe", comment: "Great product!", rating: 5 },
+  { id: "2", user: "Jane Smith", comment: "Good value for money.", rating: 4 },
+  { id: "3", user: "Alice Johnson", comment: "Not what I expected.", rating: 3 },
+  { id: "4", user: "Bob Brown", comment: "Amazing quality!", rating: 5 },
+];
 
 export default function ProductDetails() {
   const router = useRouter();
@@ -15,14 +22,16 @@ export default function ProductDetails() {
   const images = JSON.parse(imagess);
   const colors = JSON.parse(colorss);
   const [activeIndex, setActiveIndex] = useState(0);
+
   const handleScroll = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     setActiveIndex(slideIndex);
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" />
+
       <View style={styles.topsection}>
         <FlatList
           data={images}
@@ -50,6 +59,7 @@ export default function ProductDetails() {
             />
           ))}
         </View>
+
         <Pressable style={styles.wishlistButton} onPress={AddToWishList}>
           <AntDesign name="hearto" size={24} color="black" />
         </Pressable>
@@ -60,6 +70,8 @@ export default function ProductDetails() {
           <Ionicons name="arrow-back-outline" size={24} color="black" />
         </Pressable>
       </View>
+
+
       <View style={styles.bottomsection}>
         <View style={styles.header}>
           <Text style={styles.title}>{title}</Text>
@@ -74,6 +86,7 @@ export default function ProductDetails() {
 
         <Text style={styles.description}>{description}</Text>
 
+        {/* Color Section */}
         <Text style={styles.colorTitle}>Colors</Text>
         <FlatList
           data={colors}
@@ -89,15 +102,70 @@ export default function ProductDetails() {
               onPress={() => setSelectedColor(item)}
             ></TouchableOpacity>
           )}
+          showsHorizontalScrollIndicator={false}
         />
 
+        {/* Reviews Section */}
+        <Text style={styles.reviewsTitle}>Customer Reviews</Text>
+        <FlatList
+          data={reviewsData}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.reviewItem}>
+              <Text style={styles.reviewUser}>{item.user}</Text>
+              <Text style={styles.reviewComment}>{item.comment}</Text>
+              <View style={styles.reviewRating}>
+                {Array.from({ length: item.rating }).map((_, index) => (
+                  <Icon key={index} name="star" size={16} color="#FFD700" />
+                ))}
+              </View>
+            </View>
+          )}
+          ListFooterComponent={
+            <Link
+              href={{
+                pathname: `/(main)/(tabs)/Home/reviewList/[...reviewList]`,
+                params: {
+                  productId: title,
+                  reviews: JSON.stringify(reviewsData),
+                },
+              }}
+              asChild
+            >
+              <Pressable style={{ alignItems: "center", justifyContent: "center" , borderRadius : 50 , borderColor : "#5A31F4" , borderWidth : 2 , height :50}}>
+              <Text style={{ fontSize: 30 , color : "#5A31F4" }}>View All</Text>
+              </Pressable>
+            </Link>
+          }
+        />
+
+        {/* Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.buyNowButton} onPress={AddToCart}>
+          <Pressable
+            onPress={AddToCart}
+            style={[
+              styles.buyNowButton,
+              {
+                backgroundColor: "white",
+                borderColor: "#5A31F4",
+                borderRadius: 5,
+                borderWidth: 2,
+                flexDirection: "row",
+                gap: 5,
+              },
+            ]}
+          >
+            <AntDesign name="shoppingcart" size={24} color="#5A31F4" />
+            <Text style={[styles.buttonText, { color: "#5A31F4" }]}>
+              Add to cart
+            </Text>
+          </Pressable>
+          <TouchableOpacity style={styles.buyNowButton}>
             <Text style={styles.buttonText}>Buy Now</Text>
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
@@ -105,39 +173,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
-    marginTop: StatusBar.currentHeight
+    marginTop: StatusBar.currentHeight,
   },
   topsection: {
-    flex: 1,
-    backgroundColor: "#fff",
-    width: '100%',
-    position: 'relative',
+    width: "100%",
+    position: "relative",
+    marginBottom: 20,
   },
   imageContainer: {
     width: width,
-    height: height / 2,
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: height / 2.5,
+    justifyContent: "center",
+    alignItems: "center",
   },
   image: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   pagination: {
-    flexDirection: 'row',
-    position: 'absolute',
+    flexDirection: "row",
+    position: "absolute",
     bottom: 10,
-    alignSelf: 'center',
+    alignSelf: "center",
   },
   paginationDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
     marginHorizontal: 4,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
   },
   paginationDotActive: {
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
   },
   bottomsection: {
     flex: 1,
@@ -205,11 +272,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   buyNowButton: {
-    flex: 1,
+    width: 150,
     backgroundColor: "#5A31F4",
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: "center",
+    justifyContent: 'center',
     marginRight: 10,
   },
   wishlistButton: {
@@ -228,5 +296,32 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  reviewsTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  reviewItem: {
+    marginBottom: 15,
+    padding: 10,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 8,
+  },
+  reviewUser: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  reviewComment: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 5,
+  },
+  reviewRating: {
+    flexDirection: "row",
+    marginTop: 5,
   },
 });

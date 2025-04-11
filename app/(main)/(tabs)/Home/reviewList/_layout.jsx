@@ -5,17 +5,10 @@ export default function ProductStack() {
   return (
     <>
       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <Stack initialRouteName="index" >
+      <Stack>
+
         <Stack.Screen
-          name="index"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="ProductList"
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="reviewList"
+          name="[...reviewList]"
           options={{ headerShown: false }}
         />
         
