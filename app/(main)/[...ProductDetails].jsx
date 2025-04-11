@@ -20,8 +20,8 @@ export default function ProductDetails() {
   // const images = JSON.parse(imagess);
   // const colors = JSON.parse(colorss);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isWishList, setIsWishList] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [isWishList, setIsWishList] = useState(true);
+  const [loading, setLoading] = useState(false);
   const handleScroll = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     setActiveIndex(slideIndex);
@@ -77,6 +77,7 @@ export default function ProductDetails() {
     const checkWishListStatus = async () => {
       try {
         const inList = await inWishlist(id);
+        console.log("In wishlist:", inList);
         setIsWishList(inList);
       } catch (error) {
         console.error("Error checking wishlist:", error);

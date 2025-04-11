@@ -5,7 +5,7 @@ import {auth} from './config.js';
 const addToWishlist = async (productId) => {
   try {
     const user = auth.currentUser;
-    const wishlistDocRef = doc(collection(db, 'users', user.uid, 'wishlist'));
+    const wishlistDocRef = doc(db, 'users', user.uid, 'wishlist', productId);
     await setDoc(wishlistDocRef, {productId}, {merge: true});
     return true;
   } catch (error) {

@@ -174,7 +174,7 @@ export default function Home() {
           renderItem={({ item }) => (
             <Link
               href={{
-                pathname: `/${item.id}`,
+                pathname: `/app/(main)/${item.id}`,
                 params: {
                   title: item.title,
                   price: item.price,
