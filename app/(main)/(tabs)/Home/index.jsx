@@ -3,33 +3,76 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ProductList from "./ProductList";
 import Search from "../../../../Components/Search";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import notifications from "../../../../Components/notifictionsdata";
 import { useAuth } from "../../../../context/useAuth";
 import products from "../../../../Components/data";
 import { Link, useRouter } from "expo-router";
 import Product from "../../../../Components/Product";
+import { getAllProducts } from "../../../../firebase/Product";
+
 
 export default function Home() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [allProducts, setAllProducts] = useState([]);
+  const { user } = useAuth();
+  
   const topProductss = JSON.parse(JSON.stringify(products));
   topProductss.sort((a, b) => b.rating - a.rating);
-  const topProducts = topProductss.slice(0, 10);
   const router = useRouter();
-  // Filter products based on search query
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      const filtered = topProducts.filter((product) =>
-        product.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts(topProducts);
-    }
-  }, [searchQuery]);
 
+  const topProducts = useMemo(() => {
+    return [...allProducts].sort((a, b) => b.rating - a.rating).slice(0, 10);
+  }, [allProducts]);
+
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) return topProducts;
+    return allProducts.filter(product =>
+      product.title.toLowerCase().includes(searchQuery.toLowerCase())
+  )}, [searchQuery, allProducts, topProducts]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const productsData = await getAllProducts();
+        const validatedProducts = productsData.map((product) => ({
+          id: product.id || Math.random().toString(36).substring(7),
+          title: product.title || "Untitled Product",
+          price: product.price || 0,
+          images: product.images || [],
+          rating: product.rating || 0,
+          colors: product.colors || [],
+          description: product.description || "",
+          reviews: product.reviews || [],
+          stock: product.stock || 0,
+          category: product.category || "Uncategorized",
+          createdAt: product.createdAt || new Date(),
+          updatedAt: product.updatedAt || new Date(),
+          productPics: product.productPics || [],
+        }));
+        setAllProducts(validatedProducts);
+      } catch (err) {
+        setError("Failed to load products. Please try again.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+  
+  
+  if(loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text style={{ fontSize: 18, fontWeight: "bold" }}>Loading...</Text>
+      </View>
+    );
+  }
   return (
     <>
       {/* Header */}
@@ -135,7 +178,7 @@ export default function Home() {
           renderItem={({ item }) => (
             <Link
               href={{
-                pathname: `/${item.id}`,
+                pathname: `/app/(main)/${item.id}`,
                 params: {
                   title: item.title,
                   price: item.price,
@@ -149,6 +192,7 @@ export default function Home() {
               }}
             >
               <Product
+                id={item.id}
                 title={item.title}
                 price={item.price}
                 images={item.images}

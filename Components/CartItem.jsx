@@ -1,14 +1,37 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, Pressable, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable, Dimensions, Alert } from 'react-native';
 import { AntDesign } from "@expo/vector-icons"; 
+import CartFireBase from '../firebase/Cart';
 const screen = Dimensions.get('window');
+
 const CartItem = (prodcutInof) => {
   const [counter, setCounter] = useState(1);
 
-  const incCounter = () => setCounter(counter + 1);
-  const decCounter = () => {
-    if (counter > 1) setCounter(counter - 1);
-    else console.log("here handle to del. product");
+  const incCounter = async () =>{
+    try{
+      const cleanItem = {
+        id: prodcutInof.id,
+        title: prodcutInof.title,
+        price: prodcutInof.price,
+        image: prodcutInof.image,
+        rating: prodcutInof.rating,
+      };
+      await CartFireBase.addToCart(cleanItem);
+      setCounter(counter + 1);
+    }catch (e){
+      console.error("Faild add product", e);
+      Alert.alert("Faild add product" + e);
+    }
+  };
+  const decCounter = async () => {
+    try{
+        if (counter > 1){
+          await CartFireBase.removeFromCart(prodcutInof.id)
+          setCounter(counter - 1);
+        } 
+    }catch{
+      Alert.alert("Faild del product")
+    }
   };
 
   return (
@@ -21,13 +44,13 @@ const CartItem = (prodcutInof) => {
       </View>
 
       <View style={styles.counterContainer}>
-        <Pressable onPress={incCounter} style={styles.button}>
+        <Pressable onPress={() => incCounter()} style={styles.button}>
           <AntDesign name="pluscircle" size={21} color="#2e2a9d" />
         </Pressable>
 
         <Text style={styles.count}>{counter}</Text>
 
-        <Pressable onPress={decCounter} style={styles.button}>
+        <Pressable onPress={() => decCounter()} style={styles.button}>
           <AntDesign name="minuscircle" size={21} color="#7e7cb4" />
         </Pressable>
       </View>

@@ -9,26 +9,40 @@ import {
   StatusBar,
   Dimensions,
   Pressable,
-  SafeAreaView
+  SafeAreaView,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import Icon from "@expo/vector-icons/AntDesign";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { AddToWishList } from "../../Components/AddToWishList";
 import { AddToCart } from "../../Components/AddToCart";
 import { useRouter, useLocalSearchParams, Link } from "expo-router";
 import { getReviews } from "../../firebase/reviews";
+import {
+  addToWishlist,
+  getWishlist,
+  removeFromWishlist,
+  inWishlist,
+} from "../../firebase/Wishlist";
 
-const { width, height } = Dimensions.get('window');
+const { width, height } = Dimensions.get("window");
 
 export default function ProductDetails() {
   const router = useRouter();
   const [selectedColor, setSelectedColor] = useState(null);
   const [dynamicReviews, setDynamicReviews] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const { id, title, price, imagess, rating, colorss, description, reviews } = useLocalSearchParams();
-  const images = JSON.parse(imagess);
-  const colors = JSON.parse(colorss);
+  const [isWishList, setIsWishList] = useState(true);
+  const [loading, setLoading] = useState(false);
+
+  const { id, title, price, imagess, rating, colorss, description, reviews } =
+    useLocalSearchParams();
+
+  const images = imagess ? JSON.parse(imagess) : [];
+  const colors = colorss ? JSON.parse(colorss) : [];
 
   const handleScroll = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -38,14 +52,42 @@ export default function ProductDetails() {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
+        setLoading(true);
         const reviews = await getReviews(id);
         setDynamicReviews(reviews.sort((a, b) => b.rating - a.rating).slice(0, 5));
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchReviews();
   }, [id]);
+
+  const handleAddToWishList = async () => {
+    try {
+      if (isWishList) {
+        await removeFromWishlist(id);
+        setIsWishList(false);
+        Alert.alert("Success", "Product removed from wishlist");
+      } else {
+        await addToWishlist(id);
+        setIsWishList(true);
+        Alert.alert("Success", "Product added to wishlist");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to update wishlist");
+      console.error(error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#5A31F4" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -68,8 +110,12 @@ export default function ProductDetails() {
                 scrollEventThrottle={200}
                 keyExtractor={(_, index) => index.toString()}
               />
-              <Pressable style={styles.wishlistButton} onPress={AddToWishList}>
-                <AntDesign name="hearto" size={24} color="black" />
+              <Pressable style={styles.wishlistButton} onPress={handleAddToWishList}>
+                <MaterialIcons
+                  name={isWishList ? "favorite" : "favorite-border"}
+                  size={24}
+                  color="black"
+                />
               </Pressable>
               <Pressable
                 style={[styles.wishlistButton, { left: 15 }]}
@@ -109,7 +155,6 @@ export default function ProductDetails() {
                   />
                 )}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{paddingBottom : 5}}
               />
 
               <Text style={styles.sectionTitle}>Customer Reviews</Text>
@@ -118,11 +163,13 @@ export default function ProductDetails() {
                 <FlatList
                   data={dynamicReviews}
                   scrollEnabled={false}
-                  keyExtractor={(item, index) => item.id ? item.id.toString() : `review-${index}`}
+                  keyExtractor={(item, index) =>
+                    item.id ? item.id.toString() : `review-${index}`
+                  }
                   renderItem={({ item }) => (
                     <View style={styles.reviewItem}>
                       <View style={styles.reviewHeader}>
-                        <View style={{flexDirection : "row"}}>
+                        <View style={{ flexDirection: "row" }}>
                           {Array.from({ length: 5 }).map((_, index) => (
                             <Icon
                               key={index}
@@ -142,7 +189,10 @@ export default function ProductDetails() {
                         pathname: `/(main)/(tabs)/Home/reviewList/[...reviewList]`,
                         params: {
                           productId: id,
-                          productImage: typeof images[0] === "string" ? images[0] : images[0]?.uri,
+                          productImage:
+                            typeof images[0] === "string"
+                              ? images[0]
+                              : images[0]?.uri || "",
                           totalReviews: reviews,
                           productName: title,
                           productPrice: price,
@@ -161,14 +211,19 @@ export default function ProductDetails() {
                 <View>
                   <View style={styles.noReviewsContainer}>
                     <Text style={styles.noReviewsText}>No reviews yet</Text>
-                    <Text style={styles.noReviewsSubtext}>Be the first to review this product!</Text>
+                    <Text style={styles.noReviewsSubtext}>
+                      Be the first to review this product!
+                    </Text>
                   </View>
                   <Link
                     href={{
                       pathname: `/(main)/(tabs)/Home/reviewList/[...reviewList]`,
                       params: {
                         productId: id,
-                        productImage: typeof images[0] === "string" ? images[0] : images[0]?.uri,
+                        productImage:
+                          typeof images[0] === "string"
+                            ? images[0]
+                            : images[0]?.uri || "",
                         totalReviews: reviews,
                         productName: title,
                         productPrice: price,
@@ -189,7 +244,7 @@ export default function ProductDetails() {
                   style={({ pressed }) => [
                     styles.actionButton,
                     styles.cartButton,
-                    pressed && {opacity : 0.8}
+                    pressed && { opacity: 0.8 },
                   ]}
                 >
                   <AntDesign name="shoppingcart" size={20} color="#5A31F4" />
@@ -199,8 +254,8 @@ export default function ProductDetails() {
                 <Pressable
                   style={({ pressed }) => [
                     styles.actionButton,
-                    {backgroundColor: "#5A31F4",},
-                    pressed && {opacity : 0.8}
+                    { backgroundColor: "#5A31F4" },
+                    pressed && { opacity: 0.8 },
                   ]}
                 >
                   <Text style={styles.buyButtonText}>Buy Now</Text>
@@ -216,6 +271,12 @@ export default function ProductDetails() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
   container: {
     flex: 1,
     backgroundColor: "white",
@@ -401,4 +462,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
-  });
+});
