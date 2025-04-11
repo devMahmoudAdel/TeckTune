@@ -161,7 +161,7 @@ export default function Home() {
       <View style={{ flex: 1 }}>
         {/* <ProductList filterSearch={filterSearch} /> */}
         <FlatList
-          keyExtractor={(item) => item.title}
+          keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={false} />}
           numColumns={2}

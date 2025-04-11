@@ -110,7 +110,7 @@ export default function ProductList() {
 
       <Search setFilter={setSearchQuery} />
       <FlatList
-        keyExtractor={(item) => item.title}
+        keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={false} />}
         numColumns={2}
@@ -142,7 +142,9 @@ export default function ProductList() {
               images={item.images}
               rating={item.rating}
               colors={item.colors}
-              navigation={navigation}
+              description={item.description}
+              id ={item.id}
+
             />
           </Link>
         )}
