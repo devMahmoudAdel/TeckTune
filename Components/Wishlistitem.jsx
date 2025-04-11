@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, Pressable, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable, Dimensions, Alert } from 'react-native';
 import { AntDesign } from "@expo/vector-icons"; 
 const screen = Dimensions.get('window');
 const Wishlistitem = (prodcutInof) => {
@@ -14,7 +14,7 @@ const Wishlistitem = (prodcutInof) => {
       </View>
 
       <View style={styles.loveContainer}>
-        <Pressable onPress={console.log("handle here del. product from wishlist")} style={styles.button}>
+        <Pressable onPress={() => Alert.alert("handle here del. product from wishlist")} style={styles.button}>
           <AntDesign name="heart" size={21} color="#2e2a9d" />
         </Pressable>
       </View>
