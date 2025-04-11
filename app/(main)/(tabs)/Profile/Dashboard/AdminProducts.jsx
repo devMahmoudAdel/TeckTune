@@ -67,7 +67,7 @@ export default function AdminProducts() {
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchProducts();
+     fetchProducts();
   };
 
   const filteredProducts = products.filter(product =>
