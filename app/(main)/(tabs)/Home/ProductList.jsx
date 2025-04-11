@@ -1,19 +1,27 @@
-import { Text, View, FlatList, Pressable, RefreshControl, Platform, StatusBar } from "react-native";
+import { Text, View, FlatList, Pressable, RefreshControl, Platform, StatusBar, StyleSheet } from "react-native";
 import Product from "../../../../Components/Product";
+import Entypo from "@expo/vector-icons/Entypo";
 import products from "../../../../Components/data";
 import { useEffect ,useState  } from "react";
 import { useRouter, Link } from "expo-router";
+import Search from "../../../../Components/Search";
 export default function ProductList({ filterSearch }) {
-  const [filteredProducts , setFilteredProducts] = useState([])
 const navigation = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const router = useRouter();
+  // Filter products based on search query
   useEffect(() => {
-    if(filterSearch.trim()){
-      setFilteredProducts(products.filter((e) => e.title.toLowerCase().includes(filterSearch.toLowerCase())))
-    }
-    else {
+    if (searchQuery.trim()) {
+      const filtered = products.filter((product) =>
+        product.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    } else {
       setFilteredProducts(products);
     }
-  },[filterSearch])
+  }, [searchQuery]);
   const containerStyle = Platform.OS === 'web' 
   ? { height: '100vh', overflowY: 'auto' } 
   : {}; 
@@ -24,12 +32,25 @@ const navigation = useRouter();
       style={[
         containerStyle,
         {
-          paddingTop: StatusBar.currentHeight + 10,
+          paddingTop: StatusBar.currentHeight+20,
           flex: 1,
           paddingBottom: 55,
         },
       ]}
     >
+      <View
+        style={styles.header}
+      >
+        <Entypo
+          name="chevron-left"
+          size={30}
+          color="black"
+          onPress={() => router.back()}
+        />
+        <Text style={styles.textHeader}>All Products</Text>
+      </View>
+
+      <Search setFilter={setSearchQuery} />
       <FlatList
         keyExtractor={(item) => item.title}
         showsVerticalScrollIndicator={false}
@@ -71,3 +92,18 @@ const navigation = useRouter();
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  header: {
+    justifyContent: "space-between",
+    flexDirection: "row",
+    width: "92%",
+    alignItems: "center",
+    marginBottom: 18,
+    paddingHorizontal: 15,
+  },
+  textHeader: {
+    fontWeight: "bold",
+    fontSize: 22,
+  },
+});

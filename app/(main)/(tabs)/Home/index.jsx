@@ -1,39 +1,36 @@
-import { Button,ScrollView, Text, View, Image, TextInput, StyleSheet, Modal, FlatList, TouchableOpacity } from "react-native";
+import { Button,ScrollView, Text, View, Image, TextInput, StyleSheet, Modal, FlatList, TouchableOpacity, Pressable, RefreshControl } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ProductList from "./ProductList";
 import Search from "../../../../Components/Search";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import notifications from "../../../../Components/notifictionsdata";
 import { useAuth } from "../../../../context/useAuth";
+import products from "../../../../Components/data";
+import { Link, useRouter } from "expo-router";
+import Product from "../../../../Components/Product";
 export default function Home() {
-  const [filterSearch, setFilter] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  const [selectedProducts, setSelectedProducts] = useState([]);
+  const topProductss = JSON.parse(JSON.stringify(products));
+  topProductss.sort((a, b) => b.rating - a.rating);
+  const topProducts = topProductss.slice(0, 10);
+  const router = useRouter();
+  // Filter products based on search query
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const filtered = topProducts.filter((product) =>
+        product.title.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(topProducts);
+    }
+  }, [searchQuery]);
 
   return (
-    // <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-    //   <Text>Home</Text>
-    //   <Button title="About" onPress={() => navigation.navigate("About")} />
-    //   <Button title="Cart" onPress={() => navigation.navigate("Cart")} />
-    //   <Button
-    //     title="Checkout"
-    //     onPress={() => navigation.navigate("Checkout")}
-    //   />
-    //   <Button
-    //     title="ProductList"
-    //     onPress={() => navigation.navigate("ProductList")}
-    //   />
-    //   <Button
-    //     title="ProductDetails"
-    //     onPress={() => navigation.navigate("ProductDetails")}
-    //   />
-    //   <Button title="Profile" onPress={() => navigation.navigate("Profile")} />
-    //   <Button
-    //     title="Settings"
-    //     onPress={() => navigation.navigate("Settings")}
-    //   />
-    // </View>
-
     <>
       {/* Header */}
       <View style={styles.header}>
@@ -78,7 +75,9 @@ export default function Home() {
               renderItem={({ item }) => (
                 <View style={styles.notificationCard}>
                   <Text style={styles.notificationTitle}>{item.title}</Text>
-                  <Text style={styles.notificationDescription}>{item.description}</Text>
+                  <Text style={styles.notificationDescription}>
+                    {item.description}
+                  </Text>
                 </View>
               )}
             />
@@ -93,10 +92,72 @@ export default function Home() {
       </Modal>
 
       {/* Search */}
-      <Search setFilter={setFilter} />
-
+      <Search setFilter={setSearchQuery} />
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingHorizontal: 15,
+          marginVertical: 10,
+        }}
+      >
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>Top Rated</Text>
+        <Pressable
+          onPress={() => router.push("/(main)/(tabs)/Home/ProductList")}
+          style={{
+            backgroundColor: "#2f2baa",
+            padding: 10,
+            borderRadius: 20,
+            height: 40,
+            justifyContent: "center",
+            width: 80,
+            alignItems: "center",
+          }}
+        >
+          <Text style={{ color: "white", fontWeight: "bold" }}>View All</Text>
+        </Pressable>
+      </View>
+      {/* Top 10 Products */}
       <View style={{ flex: 1 }}>
-        <ProductList filterSearch={filterSearch} />
+        {/* <ProductList filterSearch={filterSearch} /> */}
+        <FlatList
+          keyExtractor={(item) => item.title}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={false} />}
+          numColumns={2}
+          contentContainerStyle={{
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          scrollEnabled={true}
+          data={filteredProducts}
+          renderItem={({ item }) => (
+            <Link
+              href={{
+                pathname: `/${item.id}`,
+                params: {
+                  title: item.title,
+                  price: item.price,
+                  imagess: JSON.stringify(item.images),
+                  rating: item.rating,
+                  colorss: JSON.stringify(item.colors),
+                  description: item.description,
+                  reviews: item.reviews,
+                  id: item.id,
+                },
+              }}
+            >
+              <Product
+                title={item.title}
+                price={item.price}
+                images={item.images}
+                rating={item.rating}
+                colors={item.colors}
+              />
+            </Link>
+          )}
+        />
       </View>
     </>
   );
