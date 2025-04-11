@@ -24,14 +24,25 @@ export async function addProduct(productData) {
 export async function deleteProduct(productId) {
   try {
     if (!productId) {
+      console.error("[Delete Error] Product ID is missing");
       throw new Error("Product ID is required for deletion");
     }
-    const productRef = doc(db, "products", productId);
-    await deleteDoc(productRef);
-    console.log("Product deleted with ID: ", productId);
-    return true;
+    
+    console.log("[Delete] Attempting to delete product with ID:", productId);
+    
+    const productDocRef = doc(db, "products", productId);
+    await deleteDoc(productDocRef);
+    
+    // Verify deletion
+    const verifyDoc = await getDoc(productDocRef);
+    if (!verifyDoc.exists()) {
+      console.log("[Delete Success] Product deleted with ID:", productId);
+      return true;
+    } else {
+      throw new Error("Product deletion failed - document still exists");
+    }
   } catch (error) {
-    console.error("Error deleting product: ", error);
+    console.error(`[Delete Error] Failed to delete product ${productId}:`, error);
     throw error;
   }
 }
