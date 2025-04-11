@@ -27,8 +27,10 @@ import {
   removeFromWishlist,
   inWishlist,
 } from "../../firebase/Wishlist";
+import fallbackImage from "../../assets/icon.png";
 
 const { width, height } = Dimensions.get("window");
+
 
 export default function ProductDetails() {
   const router = useRouter();
@@ -36,33 +38,79 @@ export default function ProductDetails() {
   const [dynamicReviews, setDynamicReviews] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isWishList, setIsWishList] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); 
+  const [images, setImages] = useState([]);
+  const [colors, setColors] = useState([]);
 
-  const { id, title, price, imagess, rating, colorss, description, reviews } =
-    useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const title = params.title || "Product Title";
+  const price = params.price || "0";
+  const rating = params.rating || "0";
+  const description = params.description || "No description available";
+  const reviews = params.reviews || "0";
+  const id = params.id || "";
 
-  const images = imagess ? JSON.parse(imagess) : [];
-  const colors = colorss ? JSON.parse(colorss) : [];
+  useEffect(() => {
+    try {
+      const parsedImages = params.imagess ? JSON.parse(params.imagess) : [];
+      const validatedImages = parsedImages.map((img) =>
+        typeof img === "string" && img.trim() !== "" ? { uri: img } : fallbackImage
+      );
+      setImages(validatedImages);
+      setColors(params.colorss ? JSON.parse(params.colorss) : []);
+    } catch (error) {
+      console.error("Error parsing data:", error);
+      setImages([fallbackImage]); 
+      setColors([]);
+    }
+  }, [params.imagess, params.colorss]);
+
+  useEffect(() => {
+    const checkWishListStatus = async () => {
+      try {
+        const inList = await inWishlist(id);
+        setIsWishList(inList);
+      } catch (error) {
+        console.error("Error checking wishlist:", error);
+      }
+    };
+
+    if (id) {
+      checkWishListStatus();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const reviews = await getReviews(id);
+        if (Array.isArray(reviews)) {
+          setDynamicReviews(reviews.sort((a, b) => b.rating - a.rating).slice(0, 5));
+        } else {
+          setDynamicReviews([]);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false); 
+      }
+    };
+
+    fetchReviews();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#5A31F4" />
+      </View>
+    );
+  }
 
   const handleScroll = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     setActiveIndex(slideIndex);
   };
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        setLoading(true);
-        const reviews = await getReviews(id);
-        setDynamicReviews(reviews.sort((a, b) => b.rating - a.rating).slice(0, 5));
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchReviews();
-  }, [id]);
 
   const handleAddToWishList = async () => {
     try {
@@ -80,14 +128,6 @@ export default function ProductDetails() {
       console.error(error);
     }
   };
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#5A31F4" />
-      </View>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -109,6 +149,11 @@ export default function ProductDetails() {
                 onScroll={handleScroll}
                 scrollEventThrottle={200}
                 keyExtractor={(_, index) => index.toString()}
+                ListEmptyComponent={
+                  <View style={styles.imageContainer}>
+                    <Image source={fallbackImage} style={styles.image} resizeMode="cover" />
+                  </View>
+                }
               />
               <Pressable style={styles.wishlistButton} onPress={handleAddToWishList}>
                 <MaterialIcons
@@ -155,6 +200,9 @@ export default function ProductDetails() {
                   />
                 )}
                 showsHorizontalScrollIndicator={false}
+                ListEmptyComponent={
+                  <Text style={{ color: "#999", fontSize: 14 }}>No colors available</Text>
+                }
               />
 
               <Text style={styles.sectionTitle}>Customer Reviews</Text>
@@ -252,6 +300,7 @@ export default function ProductDetails() {
                 </Pressable>
 
                 <Pressable
+                  onPress={() => Alert.alert("Buy Now", "Proceeding to checkout...")}
                   style={({ pressed }) => [
                     styles.actionButton,
                     { backgroundColor: "#5A31F4" },
@@ -294,8 +343,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   image: {
-    width: "100%",
-    height: "100%",
+    width: "300",
+    height: "300",
   },
   wishlistButton: {
     width: 44,
