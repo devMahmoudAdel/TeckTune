@@ -47,4 +47,18 @@ const inCart = async (productId) => {
   }
 }
 
-export default { addToCart, removeFromCart, getCart , inCart };
+const deleteAll = async () => {
+  try {
+    const user = auth.currentUser;
+    const cartCollectionRef = collection(db, "users", user.uid, "cart");
+    const cartSnapshot = await getDocs(cartCollectionRef);
+    cartSnapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+    });
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default { addToCart, removeFromCart, getCart , inCart, deleteAll };

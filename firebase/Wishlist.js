@@ -45,4 +45,18 @@ const inWishlist = async (productId) => {
     throw error;
   }
 }
-export {addToWishlist, getWishlist, removeFromWishlist, inWishlist};
+
+const deleteAll = async () => {
+  try {
+    const user = auth.currentUser;
+    const wishlistCollectionRef = collection(db, 'users', user.uid, 'wishlist');
+    const wishlistSnapshot = await getDocs(wishlistCollectionRef);
+    wishlistSnapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+    });
+    return true;
+  } catch (error) {
+    throw error;
+  }
+}
+export {addToWishlist, getWishlist, removeFromWishlist, inWishlist, deleteAll};
