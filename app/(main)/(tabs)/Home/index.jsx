@@ -6,16 +6,16 @@ import Search from "../../../../Components/Search";
 import { useState, useEffect, useMemo } from "react";
 import notifications from "../../../../Components/notifictionsdata";
 import { useAuth } from "../../../../context/useAuth";
-// import products from "../../../../Components/data";
+import products from "../../../../Components/data";
 import { Link, useRouter } from "expo-router";
 import Product from "../../../../Components/Product";
 import { getAllProducts } from "../../../../firebase/Product";
+
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [allProducts, setAllProducts] = useState([]);
   const router = useRouter();

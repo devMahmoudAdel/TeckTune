@@ -8,7 +8,7 @@ const Product = ({ title, images, rating, price}) => {
   return (
     <View style={styles.container}>
       <Image
-        source={images[0]}
+        source={typeof images[0] === "string" ? { uri: images[0] } : images[0]}
         style={styles.image}
         resizeMode="cover"
         defaultSource={require("../assets/icon.png")}

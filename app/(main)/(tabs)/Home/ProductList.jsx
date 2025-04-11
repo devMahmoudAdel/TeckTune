@@ -125,6 +125,7 @@ export default function ProductList() {
             href={{
               pathname: `/${item.id}`,
               params: {
+                id : item.id ,
                 title: item.title,
                 price: item.price,
                 imagess: JSON.stringify(item.images),
