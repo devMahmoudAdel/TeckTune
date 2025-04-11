@@ -1,10 +1,47 @@
 import React from 'react';
-import { View, Text, Image,StyleSheet,Pressable } from 'react-native';
+import { View, Text, Image,StyleSheet,Pressable, Alert } from 'react-native';
 import ProductDetails from '../app/(main)/[...ProductDetails]';
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useState, useEffect } from 'react';
+import { addToWishlist,removeFromWishlist,inWishlist} from '../firebase/Wishlist';
 import Stars from './Stars';
-const Product = ({ title, images, rating, price}) => {
+const Product = ({id, title, images, rating, price}) => {
+  const [isWishList, setIsWishList] = useState(true);
+    const [loading, setLoading] = useState(false);
+  const handleAddToWishList = async () => {
+      try {
+        if (isWishList) {
+          await removeFromWishlist(id);
+          setIsWishList(false);
+          Alert.alert("Success", "Product removed from wishlist");
+        } else {
+          await addToWishlist(id);
+          setIsWishList(true);
+          Alert.alert("Success", "Product added to wishlist");
+        }
+      } catch (error) {
+        Alert.alert("Error", "Failed to update wishlist");
+        console.error(error);
+      }
+    };
+  
+  
+     useEffect(() => {
+      const checkWishListStatus = async () => {
+        try {
+          const inList = await inWishlist(id);
+          console.log("In wishlist:", inList);
+          setIsWishList(inList);
+        } catch (error) {
+          console.error("Error checking wishlist:", error);
+        }
+      };
+      
+      if (id) {
+        checkWishListStatus();
+      }
+    }, []);
   return (
     <View style={styles.container}>
       <Image
@@ -23,9 +60,13 @@ const Product = ({ title, images, rating, price}) => {
         <Text>({rating})</Text>
       </View>
       <Text style={styles.productPrice}>${Number(price).toFixed(2)}</Text>
-      <View style={styles.favProduct}>
-        <MaterialIcons name="favorite-border" size={25} color={"#fff"} />
-      </View>
+      <Pressable onPress={() => handleAddToWishList()} style={styles.favProduct}>
+        <MaterialIcons
+          name={isWishList ? "favorite" : "favorite-border"}
+          size={25}
+          color={"#fff"}
+        />
+      </Pressable>
     </View>
   );
 };
