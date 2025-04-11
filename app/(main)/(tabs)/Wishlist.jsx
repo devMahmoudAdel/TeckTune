@@ -1,6 +1,6 @@
 import React from 'react';
 import Entypo from "@expo/vector-icons/Entypo";
-import { Text, View, StyleSheet, Pressable, ScrollView, Image,StatusBar } from "react-native";
+import { Text, View, StyleSheet, StatusBar, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import Wishlistitems from "../../../Components/Wishlistitems";
 const Wishlist = () => {
@@ -19,7 +19,7 @@ const Wishlist = () => {
         <Text style={styles.textHeader}>Wishlist</Text>
 
         {/* for delete all product */}
-        <Entypo name="eraser" size={21} color="black" onPress={console.log("Here hundle del. all product")} />
+        <Entypo name="eraser" size={21} color="black" onPress={() => (Alert.alert("Here hundle del. all product"))} />
       </View>
       <Wishlistitems/>
     </View>
