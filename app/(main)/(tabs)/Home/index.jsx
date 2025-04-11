@@ -3,7 +3,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ProductList from "./ProductList";
 import Search from "../../../../Components/Search";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import notifications from "../../../../Components/notifictionsdata";
 import { useAuth } from "../../../../context/useAuth";
 // import products from "../../../../Components/data";
@@ -12,16 +12,24 @@ import Product from "../../../../Components/Product";
 import { getAllProducts } from "../../../../firebase/Product";
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState(products);
   const [allProducts, setAllProducts] = useState([]);
-  
   const router = useRouter();
-  // Filter products based on search query
+
+  const topProducts = useMemo(() => {
+    return [...allProducts].sort((a, b) => b.rating - a.rating).slice(0, 10);
+  }, [allProducts]);
+
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) return topProducts;
+    return allProducts.filter(product =>
+      product.title.toLowerCase().includes(searchQuery.toLowerCase())
+  )}, [searchQuery, allProducts, topProducts]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -42,9 +50,6 @@ export default function Home() {
           productPics: product.productPics || [],
         }));
         setAllProducts(validatedProducts);
-        console.log("Products:", productsData);
-        console.log("All Products:", allProducts);
-        console.log("Filtered Products:", filteredProducts);
       } catch (err) {
         setError("Failed to load products. Please try again.");
         console.error(err);
@@ -55,21 +60,8 @@ export default function Home() {
 
     fetchProducts();
   }, []);
-  useEffect(() => {
   
-    if (searchQuery.trim()) {
-
-      const filtered = topProducts.filter((product) =>
-        product.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts(topProducts);
-    }
-  }, [searchQuery, topProducts]);
-  const topProductss = JSON.parse(JSON.stringify(allProducts));
-  topProductss.sort((a, b) => b.rating - a.rating);
-  const topProducts = topProductss.slice(0, 10);
+  
   if(loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>

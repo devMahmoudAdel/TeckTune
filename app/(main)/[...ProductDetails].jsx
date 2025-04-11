@@ -1,25 +1,100 @@
-import React, { useState } from "react";
-import { Text, View, StyleSheet, Image, FlatList, TouchableOpacity, StatusBar, Dimensions,Pressable } from "react-native";
+import React, { useState,useEffect } from "react";
+import { Text, View, StyleSheet, Image, FlatList, TouchableOpacity, StatusBar, Dimensions,Pressable, Alert, ActivityIndicator } from "react-native";
 import Icon from "@expo/vector-icons/AntDesign"; 
-import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { AddToWishList } from "../../Components/AddToWishList";
-import { AddToCart } from "../../Components/AddToCart";
 import { useRouter, useLocalSearchParams } from "expo-router";
+import {
+  addToWishlist,
+  getWishlist,
+  removeFromWishlist,
+  inWishlist,
+} from "../../firebase/Wishlist";
 const { width, height } = Dimensions.get('window');
+
 
 export default function ProductDetails() {
   const router = useRouter();
   const [selectedColor, setSelectedColor] = useState(null);
-  const { title, price, imagess, rating, colorss, description, reviews } = useLocalSearchParams();
-  const images = JSON.parse(imagess);
-  const colors = JSON.parse(colorss);
+  // const { title, price, imagess, rating, colorss, description, reviews, stock, category, id } = useLocalSearchParams();
+  // const images = JSON.parse(imagess);
+  // const colors = JSON.parse(colorss);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [isWishList, setIsWishList] = useState(false);
+  const [loading, setLoading] = useState(true);
   const handleScroll = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     setActiveIndex(slideIndex);
   };
 
+
+ const params = useLocalSearchParams();
+ const title = params.title || "Product Title";
+ const price = params.price || "0";
+ const rating = params.rating || "0";
+ const description = params.description || "No description available";
+ const reviews = params.reviews || "0";
+ const id = params.id || "";
+
+ // Safely parse JSON data
+ const [images, setImages] = useState([]);
+ const [colors, setColors] = useState([]);
+
+ useEffect(() => {
+   try {
+     setImages(params.imagess ? JSON.parse(params.imagess) : []);
+     setColors(params.colorss ? JSON.parse(params.colorss) : []);
+   } catch (error) {
+     console.error("Error parsing data:", error);
+     setImages([]);
+     setColors([]);
+   } finally {
+     setLoading(false);
+   }
+ }, []);
+
+
+
+  const handleAddToWishList = async () => {
+    try {
+      if (isWishList) {
+        await removeFromWishlist(id);
+        setIsWishList(false);
+        Alert.alert("Success", "Product removed from wishlist");
+      } else {
+        await addToWishlist(id);
+        setIsWishList(true);
+        Alert.alert("Success", "Product added to wishlist");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to update wishlist");
+      console.error(error);
+    }
+  };
+
+
+   useEffect(() => {
+    const checkWishListStatus = async () => {
+      try {
+        const inList = await inWishlist(id);
+        setIsWishList(inList);
+      } catch (error) {
+        console.error("Error checking wishlist:", error);
+      }
+    };
+    
+    if (id) {
+      checkWishListStatus();
+    }
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#5A31F4" />
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <StatusBar translucent backgroundColor="transparent" />
@@ -50,8 +125,8 @@ export default function ProductDetails() {
             />
           ))}
         </View>
-        <Pressable style={styles.wishlistButton} onPress={AddToWishList}>
-          <AntDesign name="hearto" size={24} color="black" />
+        <Pressable style={styles.wishlistButton} onPress={handleAddToWishList}>
+          <MaterialIcons name={isWishList ? "favorite" : "favorite-border"} size={24} color="black" />
         </Pressable>
         <Pressable
           style={[styles.wishlistButton, { left: 15 }]}
@@ -92,7 +167,10 @@ export default function ProductDetails() {
         />
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.buyNowButton} onPress={AddToCart}>
+          <TouchableOpacity
+            style={styles.buyNowButton}
+            onPress={() => Alert.alert("Buy Now")}
+          >
             <Text style={styles.buttonText}>Buy Now</Text>
           </TouchableOpacity>
         </View>
@@ -102,6 +180,12 @@ export default function ProductDetails() {
 }
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
   container: {
     flex: 1,
     backgroundColor: "white",

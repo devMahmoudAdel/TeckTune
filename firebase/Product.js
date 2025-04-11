@@ -1,10 +1,11 @@
-import { collection, addDoc, doc, deleteDoc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import { collection, addDoc, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./config";
 
 // Function to add a product to Firestore
 export async function addProduct(productData) {
   try {
     const docRef = await addDoc(collection(db, "products"), productData);
+    await updateDoc(docRef, { id: docRef.id });
     console.log("Product added with ID: ", docRef.id);
     return docRef.id;
   } catch (error) {
