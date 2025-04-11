@@ -1,196 +1,290 @@
-import {
-  View,
-  Text,
-  FlatList,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Pressable,
-  Alert,
-  StatusBar
-} from "react-native";
-import React, { useState, useEffect } from "react";
-import { useRouter } from "expo-router";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
-import products from "../../../../../Components/data";
-import { addProduct, deleteProduct } from "../../../../../firebase/Product";
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, StyleSheet, Pressable, Alert, TextInput, StatusBar, ActivityIndicator, ToastAndroid, Platform } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { getAllProducts, deleteProduct } from '@firebase/Product';
+import Toast from 'react-native-toast-message';
 
 export default function AdminProducts() {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState(new Set());
+  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState(products);
-  const [selectedProducts, setSelectedProducts] = useState([]);
 
-  // Filter products based on search query
   useEffect(() => {
-    if (searchQuery.trim()) {
-      const filtered = products.filter((product) =>
-        product.title.toLowerCase().includes(searchQuery.toLowerCase())
+    fetchProducts();
+  }, []);
+
+  // Function to show visual feedback based on platform
+  const showFeedback = (type, message, details = '') => {
+    // Use Toast for consistent UI across platforms
+    Toast.show({
+      type: type, // 'success', 'error', 'info'
+      text1: message,
+      text2: details,
+      position: 'bottom',
+      visibilityTime: 3000,
+    });
+    
+    // Additional feedback for Android
+    if (Platform.OS === 'android') {
+      ToastAndroid.showWithGravity(
+        message,
+        ToastAndroid.LONG,
+        ToastAndroid.CENTER
       );
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts(products);
     }
-  }, [searchQuery]);
-
-  // Handle product selection for editing
-  const handleProductPress = (product) => {
-    router.push({
-      pathname: "/Profile/Dashboard/ProductForm/[ProductForm]",
-      params: { id: product.id }
-    });
+    
+    console.log(`[${type.toUpperCase()}]: ${message} - ${details}`);
   };
 
-  // Handle product selection for deletion
-  const handleSelectProduct = (productId) => {
-    setSelectedProducts(prev => {
-      if (prev.includes(productId)) {
-        return prev.filter(id => id !== productId);
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const productsData = await getAllProducts();
+      
+      if (!productsData || productsData.length === 0) {
+        console.log('No products found or empty array returned');
       } else {
-        return [...prev, productId];
+        console.log(`Fetched ${productsData.length} products`);
       }
-    });
+      
+      setProducts(productsData || []);
+      showFeedback('success', 'Products loaded successfully');
+    } catch (err) {
+      console.error('Failed to load products:', err);
+      setError('Failed to load products');
+      showFeedback('error', 'Failed to load products', err.message);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   };
 
-  // Delete selected products
-  const handleDeleteProducts = () => {
-    if (selectedProducts.length === 0) {
-      Alert.alert("No Selection", "Please select products to delete.");
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProducts();
+  };
+
+  const filteredProducts = products.filter(product =>
+    product.title?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const toggleProductSelection = (productId) => {
+    const newSelected = new Set(selectedProducts);
+    if (newSelected.has(productId)) {
+      newSelected.delete(productId);
+    } else {
+      newSelected.add(productId);
+    }
+    setSelectedProducts(newSelected);
+  };
+
+  const handleDeleteSelected = async () => {
+    const selectedCount = selectedProducts.size;
+    const selectedIds = Array.from(selectedProducts);
+    
+    if (selectedCount === 0) {
+      showFeedback('info', 'No products selected', 'Please select products to delete');
       return;
     }
-
+    
     Alert.alert(
-      "Confirm Deletion",
-      `Are you sure you want to delete ${selectedProducts.length} product(s)?`,
+      'Confirm Delete',
+      `Are you sure you want to delete ${selectedCount} products?`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            // Call the Firebase function to delete the selected products
-            selectedProducts.forEach((id) => {
-              deleteProduct(id)
-                .then(() => console.log(`Deleted product with ID: ${id}`))
-                .catch((error) => console.error("Error deleting product:", error));
-            });
-
-            Alert.alert("Success", "Products deleted successfully");
-            setSelectedProducts([]);
-          }
-        }
-      ]
-    );
-  };
-
-  // Handle individual product deletion
-  const handleDeleteProduct = (productId) => {
-    Alert.alert(
-      "Confirm Deletion",
-      "Are you sure you want to delete this product?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            // Implement actual deletion logic here
-            console.log("Deleting product with ID:", productId);
-            Alert.alert("Success", "Product deleted successfully");
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              
+              // Show initial feedback
+              showFeedback('info', 'Deleting products...', 'Please wait');
+              
+              // Track success and failures
+              let successCount = 0;
+              let failureCount = 0;
+              
+              // Delete products one by one to handle individual failures
+              for (const id of selectedIds) {
+                try {
+                  await deleteProduct(id);
+                  successCount++;
+                } catch (err) {
+                  console.error(`Failed to delete product ${id}:`, err);
+                  failureCount++;
+                }
+              }
+              
+              // Clear selection regardless of outcome
+              setSelectedProducts(new Set());
+              setIsDeleteMode(false);
+              
+              // Show appropriate feedback based on results
+              if (failureCount === 0) {
+                showFeedback(
+                  'success', 
+                  'Products deleted successfully', 
+                  `${successCount} products removed`
+                );
+              } else if (successCount > 0) {
+                showFeedback(
+                  'info', 
+                  'Some products deleted', 
+                  `${successCount} deleted, ${failureCount} failed`
+                );
+              } else {
+                showFeedback(
+                  'error', 
+                  'Failed to delete products', 
+                  'Please try again later'
+                );
+              }
+              
+              // Refresh product list
+              await fetchProducts();
+            } catch (error) {
+              console.error('Delete operation error:', error);
+              showFeedback(
+                'error', 
+                'Delete operation failed', 
+                error.message || 'Unknown error occurred'
+              );
+            } finally {
+              setLoading(false);
+            }
           },
         },
       ]
     );
   };
 
-  // Add new product
-  const handleAddProduct = () => {
-    // Example product data to add
-    const newProductData = {
-      title: "New Product",
-      description: "Description of the new product",
-      price: 100,
-      category: "Category Name",
-      createdAt: new Date(),
-    };
-
-    // Call the Firebase function to add a new product
-    addProduct(newProductData)
-      .then((id) => console.log("Product added with ID:", id))
-      .catch((error) => console.error("Error adding product:", error));
-
-    router.push("/Profile/Dashboard/ProductForm/[ProductForm]");
-  };
-
-  // Render product item
-  const renderItem = ({ item }) => (
-    <View style={styles.productItem}>
-      <View style={styles.productInfo}>
-        <Text style={styles.productTitle}>{item.title}</Text>
-        <Text style={styles.productPrice}>${item.price.toFixed(2)}</Text>
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2f2baa" />
+        <Text style={styles.loadingText}>Loading products...</Text>
       </View>
-      <View style={styles.actionIcons}>
-        <TouchableOpacity
-          onPress={() =>
-            router.push({
-              pathname: "/Profile/Dashboard/ProductForm/[ProductForm]",
-              params: { id: item.id },
-            })
-          }
-        >
-          <Ionicons name="create-outline" size={24} color="#4CAF50" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => handleDeleteProduct(item.id)}>
-          <Ionicons name="trash-outline" size={24} color="#F44336" />
-        </TouchableOpacity>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={styles.errorText}>{error}</Text>
       </View>
-    </View>
-  );
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <StatusBar backgroundColor="#fff" barStyle="dark-content" />
-
-      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Products Management</Text>
+        <Pressable onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="black" />
+        </Pressable>
+        <Text style={styles.title}>Products Management</Text>
+        <Pressable onPress={() => setIsDeleteMode(!isDeleteMode)}>
+          <Ionicons name={isDeleteMode ? "close" : "trash"} size={24} color={isDeleteMode ? "red" : "black"} />
+        </Pressable>
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search products..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        {searchQuery ? (
-          <TouchableOpacity onPress={() => setSearchQuery("")}>
-            <Ionicons name="close-circle" size={20} color="#666" />
-          </TouchableOpacity>
-        ) : null}
-      </View>
-
-      {/* Products List */}
-      <FlatList
-        data={filteredProducts}
-        renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
+      <TextInput
+        style={styles.searchInput}
+        placeholder="Search products..."
+        value={searchQuery}
+        onChangeText={setSearchQuery}
       />
 
-      {/* Action Buttons */}
-      <TouchableOpacity
-        style={styles.addButton}
-        onPress={handleAddProduct}
-      >
-        <AntDesign name="plus" size={24} color="#fff" />
-      </TouchableOpacity>
+      <View style={styles.actionButtons}>
+        <Pressable
+          style={[styles.button, styles.addButton]}
+          onPress={() => router.push('/Profile/Dashboard/ProductForm')}
+        >
+          <Text style={styles.buttonText}>Add New Product</Text>
+        </Pressable>
+        
+        {isDeleteMode && (
+          <View style={styles.deleteActions}>
+            <Text style={styles.selectedCount}>
+              Selected: {selectedProducts.size}
+            </Text>
+            <Pressable
+              style={[styles.button, styles.deleteButton]}
+              onPress={handleDeleteSelected}
+              disabled={selectedProducts.size === 0}
+            >
+              <Text style={styles.buttonText}>Delete Selected</Text>
+            </Pressable>
+          </View>
+        )}
+      </View>
+
+      <FlatList
+        data={filteredProducts}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContainer}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No products found</Text>
+          </View>
+        )}
+        renderItem={({ item }) => (
+          <Pressable
+            style={[
+              styles.productItem,
+              selectedProducts.has(item.id) && styles.selectedItem,
+            ]}
+            onPress={() => {
+              if (isDeleteMode) {
+                toggleProductSelection(item.id);
+              } else {
+                router.push({
+                  pathname: "/Profile/Dashboard/ProductForm/[ProductForm]",
+                  params: { id: item.id }
+                });
+              }
+            }}
+            onLongPress={() => {
+              setIsDeleteMode(true);
+              toggleProductSelection(item.id);
+              Toast.show({
+                type: 'info',
+                text1: 'Delete mode activated',
+                text2: 'Select items to delete',
+                position: 'bottom'
+              });
+            }}
+          >
+            <View style={styles.productContent}>
+              <View style={styles.productInfo}>
+                <Text style={styles.productTitle}>{item.title}</Text>
+                <Text style={styles.productPrice}>${item.price?.toFixed(2)}</Text>
+                <Text style={styles.productStock}>Stock: {item.stock || 0}</Text>
+                {item.category && (
+                  <Text style={styles.productCategory}>{item.category}</Text>
+                )}
+              </View>
+              {selectedProducts.has(item.id) ? (
+                <MaterialIcons name="check-circle" size={24} color="#2f2baa" />
+              ) : (
+                <MaterialIcons name="chevron-right" size={24} color="#666" />
+              )}
+            </View>
+            {item.description && (
+              <Text numberOfLines={2} style={styles.productDescription}>
+                {item.description}
+              </Text>
+            )}
+          </Pressable>
+        )}
+      />
     </View>
   );
 }
@@ -198,134 +292,153 @@ export default function AdminProducts() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    paddingTop: 10,
+    backgroundColor: '#fff',
+    paddingTop: StatusBar.currentHeight + 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: '#eee',
+    backgroundColor: '#fff',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#f5f5f5",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    marginHorizontal: 16,
-    marginTop: 12,
-    marginBottom: 8,
-    height: 44,
-  },
-  searchIcon: {
-    marginRight: 8,
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
   },
   searchInput: {
-    flex: 1,
+    margin: 15,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#f8f8f8',
     fontSize: 16,
-    color: "#333",
-    paddingVertical: 8,
+  },
+  actionButtons: {
+    padding: 15,
+    gap: 10,
+  },
+  button: {
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  addButton: {
+    backgroundColor: '#2f2baa',
+  },
+  deleteButton: {
+    backgroundColor: '#ff4444',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  deleteActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  selectedCount: {
+    fontSize: 16,
+    color: '#666',
   },
   listContainer: {
-    paddingHorizontal: 16,
-    paddingBottom: 90,
+    padding: 15,
   },
   productItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: 12,
-    backgroundColor: "#f9f9f9",
+    padding: 15,
+    backgroundColor: '#fff',
     borderRadius: 8,
-    marginVertical: 6,
-    borderWidth: 1,
-    borderColor: "#eee",
+    marginBottom: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   selectedItem: {
-    backgroundColor: "#e6f0ff",
-    borderColor: "#2f2baa",
+    backgroundColor: '#f0f8ff',
+    borderColor: '#2f2baa',
+    borderWidth: 1,
+  },
+  productContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   productInfo: {
     flex: 1,
   },
   productTitle: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 4,
+    fontWeight: 'bold',
+    color: '#333',
   },
   productPrice: {
+    fontSize: 15,
+    color: '#2f2baa',
+    fontWeight: 'bold',
+    marginTop: 4,
+  },
+  productStock: {
     fontSize: 14,
-    color: "#2f2baa",
-    fontWeight: "bold",
+    color: '#666',
+    marginTop: 4,
   },
-  checkboxContainer: {
-    marginLeft: 10,
+  productCategory: {
+    fontSize: 13,
+    color: '#888',
+    marginTop: 4,
+    fontStyle: 'italic',
   },
-  actionButtons: {
-    flexDirection: "row",
-    position: "absolute",
-    bottom: 20,
-    left: 16,
-    right: 16,
-    justifyContent: "space-between",
+  productDescription: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 8,
+    lineHeight: 20,
   },
-  actionButton: {
-    flex: 1,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
-    marginHorizontal: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  emptyContainer: {
+    padding: 20,
+    alignItems: 'center',
   },
-  cancelButton: {
-    backgroundColor: "#f2f2f2",
-  },
-  confirmButton: {
-    backgroundColor: "#FF3B30",
-  },
-  buttonText: {
+  emptyText: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#fff",
+    color: '#666',
+    textAlign: 'center',
   },
-  addButton: {
-    position: "absolute",
-    bottom: 60, // Adjusted to move
-    right: 30,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#2f2baa",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
   },
-  actionIcons: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    width: 80,
+  errorText: {
+    fontSize: 16,
+    color: '#ff4444',
+    textAlign: 'center',
   },
 });
