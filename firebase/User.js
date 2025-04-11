@@ -14,16 +14,6 @@ const getUser = async (userId) => {
     throw error;
   }
 };
-const getAllUsers = async () => {
-  try {
-    const usersCollectionRef = collection(db, 'users');
-    const usersSnapshot = await getDocs(usersCollectionRef);
-    const users = usersSnapshot.docs.map((doc) => doc.data());
-    return users;
-  } catch (error) {
-    throw error;
-  }
-}
 
 const createUser = async (userId, userData) => {
   try {
@@ -45,8 +35,6 @@ const createUser = async (userId, userData) => {
     throw error;
   }
 }
-
-
 const isUnique = async(userName)=>{
     const userNameQuery = doc(collection(db, 'users'), userName);
     const existingUserName = await getDoc(userNameQuery);
