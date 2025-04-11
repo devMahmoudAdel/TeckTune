@@ -1,12 +1,28 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, FlatList, StyleSheet, Image, Pressable, Alert } from "react-native";
-import usersData from "../../../../../Components/Users";
-//  طبعا اي تغير مش بيتنفذ ناقص التربيط بالباك اند
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, FlatList, StyleSheet, Image, Pressable, Alert, ActivityIndicator } from "react-native";
+import { getAllUsers } from "../../../../../firebase/User";
+
 export default function UsersList() {
-  const [users, setUsers] = useState(usersData); 
+  const [users, setUsers] = useState([]); // State to store users
+  const [loading, setLoading] = useState(true); // State to manage loading
   const [roleFilter, setRoleFilter] = useState(null);
-  const [statusFilter, setStatusFilter] = useState(null); 
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [statusFilter, setStatusFilter] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Fetch users on component mount
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const fetchedUsers = await getAllUsers(); // Fetch users using getAllUsers
+        setUsers(fetchedUsers); // Store fetched users in state
+      } catch (error) {
+        console.error("Error fetching users:", error); // Log any errors
+      } finally {
+        setLoading(false); // Stop loading indicator
+      }
+    };
+    fetchUsers();
+  }, []);
 
   // Filter and search
   const filteredUsers = users
@@ -71,6 +87,15 @@ export default function UsersList() {
       ]
     );
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2f2baa" />
+        <Text>Loading users...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -268,5 +293,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
     textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
