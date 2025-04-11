@@ -5,6 +5,7 @@ import products from "../../../../Components/data";
 import { useEffect ,useState  } from "react";
 import { useRouter, Link } from "expo-router";
 import Search from "../../../../Components/Search";
+
 export default function ProductList({ filterSearch }) {
 const navigation = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,6 +68,7 @@ const navigation = useRouter();
             href={{
               pathname: `/${item.id}`,
               params: {
+                id : item.id ,
                 title: item.title,
                 price: item.price,
                 imagess: JSON.stringify(item.images),

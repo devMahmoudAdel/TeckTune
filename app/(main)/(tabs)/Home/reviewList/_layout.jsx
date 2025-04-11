@@ -11,7 +11,6 @@ export default function ProductStack() {
           name="[...reviewList]"
           options={{ headerShown: false }}
         />
-        
       </Stack>
     </>
   );

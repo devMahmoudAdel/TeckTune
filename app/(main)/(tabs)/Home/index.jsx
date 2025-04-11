@@ -9,11 +9,11 @@ import { useAuth } from "../../../../context/useAuth";
 import products from "../../../../Components/data";
 import { Link, useRouter } from "expo-router";
 import Product from "../../../../Components/Product";
+
 export default function Home() {
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredProducts, setFilteredProducts] = useState(products);
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const topProductss = JSON.parse(JSON.stringify(products));
   topProductss.sort((a, b) => b.rating - a.rating);
   const topProducts = topProductss.slice(0, 10);
@@ -91,7 +91,7 @@ export default function Home() {
         </View>
       </Modal>
 
-      {/* Search */}
+      
       <Search setFilter={setSearchQuery} />
       <View
         style={{
@@ -118,17 +118,17 @@ export default function Home() {
           <Text style={{ color: "white", fontWeight: "bold" }}>View All</Text>
         </Pressable>
       </View>
-      {/* Top 10 Products */}
+
       <View style={{ flex: 1 }}>
-        {/* <ProductList filterSearch={filterSearch} /> */}
         <FlatList
-          keyExtractor={(item) => item.title}
+          keyExtractor={(item) => item.id.toString()}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={false} />}
           numColumns={2}
           contentContainerStyle={{
             justifyContent: "center",
             alignItems: "center",
+            paddingBottom: 50,
           }}
           scrollEnabled={true}
           data={filteredProducts}
