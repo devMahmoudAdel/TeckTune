@@ -6,7 +6,7 @@ const addToCart = async (product) => {
   try {
     const user = auth.currentUser;
     const cartDocRef = doc(collection(db, "users", user.uid, "cart"));
-    await setDoc(cartDocRef, ...product);
+    await setDoc(cartDocRef, product);
     return true;
   } catch (error) {
     throw error;
@@ -47,4 +47,4 @@ const inCart = async (productId) => {
   }
 }
 
-export { addToCart, removeFromCart, getCart , inCart };
+export default { addToCart, removeFromCart, getCart , inCart };
