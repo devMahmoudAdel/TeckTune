@@ -13,7 +13,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import LogoutButton from "../../../../Components/Auth/LogoutButton";
 import DashboardStack from "../../../../navigation/DashboardStack";
-
+import { useAuth } from "../../../../context/useAuth";
 export default function Profile() {
   const router = useRouter();
   const scrollViewProps =
@@ -28,14 +28,21 @@ export default function Profile() {
     >
       <View style={styles.container}>
         <View style={{ alignItems: "center", marginVertical: 20 }}>
-          <Ionicons
+          {/* <Ionicons
             name="person"
             size={100}
             color="black"
             style={styles.imageProfile}
+          /> */}
+          <Image
+            source={useAuth().user.avatarUri}
+            defaultSource={require("../../../../assets/avatars/avatar2.png")}
+            style={styles.imageProfile}
           />
-          <Text style={styles.userText}>User Name</Text>
-          <Text style={styles.emailText}>user-email@email.com</Text>
+          <Text style={styles.userText}>
+            {useAuth().user.firstName} {useAuth().user.lastName}
+          </Text>
+          <Text style={styles.emailText}>{useAuth().user.email}</Text>
         </View>
         <TouchableOpacity
           onPress={() => router.navigate("/(tabs)/Profile/MyProfile")}

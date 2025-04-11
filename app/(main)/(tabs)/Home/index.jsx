@@ -5,7 +5,7 @@ import ProductList from "./ProductList";
 import Search from "../../../../Components/Search";
 import { useState } from "react";
 import notifications from "../../../../Components/notifictionsdata";
-
+import { useAuth } from "../../../../context/useAuth";
 export default function Home() {
   const [filterSearch, setFilter] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -47,7 +47,7 @@ export default function Home() {
           />
           <View>
             <Text style={styles.helloText}>Hello!</Text>
-            <Text style={styles.userNameText}>User Name</Text>
+            <Text style={styles.userNameText}>{useAuth().user.firstName}!</Text>
           </View>
         </View>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
