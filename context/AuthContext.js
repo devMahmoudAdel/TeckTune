@@ -77,12 +77,17 @@ export const AuthProvider = ({ children }) => {
       // Register with Firebase
       const firebaseUser = await register(userData.email, userData.password);
 
+      // let's put the password in a separate varaiable
+      let pass = userData.password;
+
       // Remove password from userData before storing
       const { password, ...userDataToStore } = userData;
 
       // Store additional user data in Firestore
       await setDoc(doc(db, "users", firebaseUser.uid), {
         ...userDataToStore,
+        status: "active",
+        role: "user",
         createdAt: new Date().toISOString(),
       });
 
@@ -90,6 +95,7 @@ export const AuthProvider = ({ children }) => {
       const fullUserData = {
         id: firebaseUser.uid,
         email: firebaseUser.email,
+        password: pass,
         ...userDataToStore,
       };
 
@@ -109,6 +115,8 @@ export const AuthProvider = ({ children }) => {
       // Firebase login
       const firebaseUser = await firebaseLogin(email, password);
 
+      let pass = password;
+
       // Get user profile from Firestore
       const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
 
@@ -117,12 +125,15 @@ export const AuthProvider = ({ children }) => {
         userData = {
           id: firebaseUser.uid,
           email: firebaseUser.email,
+          pasword: pass,
           ...userDoc.data(),
         };
       } else {
+        // if there is no pre-stored data in the firestore
         userData = {
           id: firebaseUser.uid,
           email: firebaseUser.email,
+          password: pass,
         };
       }
 
@@ -150,9 +161,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Add this function to the AuthContext component
   const updateUserProfile = async (userId, userData) => {
     try {
+      // Store the password in a separate variable if it exists
+      let pass = userData.password;
+
       // Remove sensitive fields before storing in Firestore
       const { password, ...userDataToStore } = userData;
 
@@ -173,6 +186,7 @@ export const AuthProvider = ({ children }) => {
         const updatedUserData = {
           id: userId,
           email: userData.email,
+          password: pass,
           ...userDoc.data(),
         };
 
