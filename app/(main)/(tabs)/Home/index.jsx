@@ -13,6 +13,7 @@ import { getAllProducts } from "../../../../firebase/Product";
 
 
 export default function Home() {
+  const { user } = useAuth(); // Ensure useContext is called consistently
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -28,7 +29,8 @@ export default function Home() {
     if (!searchQuery.trim()) return topProducts;
     return allProducts.filter(product =>
       product.title.toLowerCase().includes(searchQuery.toLowerCase())
-  )}, [searchQuery, allProducts, topProducts]);
+    );
+  }, [searchQuery, allProducts, topProducts]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -83,7 +85,7 @@ export default function Home() {
           />
           <View>
             <Text style={styles.helloText}>Hello!</Text>
-            <Text style={styles.userNameText}>{useAuth().user.firstName}!</Text>
+            <Text style={styles.userNameText}>{user.firstName}!</Text>
           </View>
         </View>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
