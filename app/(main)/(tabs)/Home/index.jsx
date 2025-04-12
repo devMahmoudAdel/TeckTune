@@ -13,6 +13,7 @@ import { getAllProducts } from "../../../../firebase/Product";
 
 
 export default function Home() {
+  const { user } = useAuth(); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
