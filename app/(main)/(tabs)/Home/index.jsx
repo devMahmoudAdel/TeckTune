@@ -21,14 +21,6 @@ export default function Home() {
   const [allProducts, setAllProducts] = useState([]);
   const router = useRouter();
 
-  // Safely get user's name with fallback
-  const getUserName = () => {
-    if (user && user.firstName) {
-      return user.firstName;
-    }
-    return "Guest";
-  };
-
   const topProducts = useMemo(() => {
     return [...allProducts].sort((a, b) => b.rating - a.rating).slice(0, 10);
   }, [allProducts]);
@@ -92,7 +84,7 @@ export default function Home() {
           />
           <View>
             <Text style={styles.helloText}>Hello!</Text>
-            <Text style={styles.userNameText}>{getUserName()}!</Text>
+            <Text style={styles.userNameText}>{useAuth().user.firstName}!</Text>
           </View>
         </View>
         <TouchableOpacity onPress={() => setModalVisible(true)}>

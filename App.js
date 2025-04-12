@@ -3,9 +3,9 @@ import { NavigationContainer } from "@react-navigation/native";
 import { StyleSheet, View } from "react-native";
 import AuthFlow from "./navigation/AuthFlow";
 import { AuthProvider, AuthContext } from "./context/AuthContext";
-import Toast from 'react-native-toast-message';
 
-export default function App() {  return (
+export default function App() {
+  return (
     <>
       <AuthProvider>
         <StatusBar style="auto" />
@@ -13,7 +13,6 @@ export default function App() {  return (
           <AuthFlow />
         </NavigationContainer>
       </AuthProvider>
-      <Toast />
     </>
   );
 }
