@@ -1,155 +1,365 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  Alert,
-  ScrollView,
-  StyleSheet,
-} from "react-native";
-import data from "../../../../../../Components/data";
-import { useLocalSearchParams } from "expo-router";
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Alert, StatusBar, ActivityIndicator, ToastAndroid, Platform } from 'react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
+import { addProduct, getProduct, updateProduct } from '@firebase/Product';
+import Toast from 'react-native-toast-message';
+
 export default function ProductForm() {
-  const { id } = useLocalSearchParams();
-  const existingProduct = data.find((product) => product.id === Number(id));
-  const [title, setTitle] = useState(existingProduct?.title || "");
-  const [price, setPrice] = useState(existingProduct?.price.toString() || "");
-  const [description, setDescription] = useState(existingProduct?.description || "");
-  const [images, setImages] = useState(existingProduct?.images.join(", ") || "");
-  const [rating, setRating] = useState(existingProduct?.rating.toString() || "");
-  const [colors, setColors] = useState(existingProduct?.colors.join(", ") || "");
+  const router = useRouter();
+  const params = useLocalSearchParams();
+  const isEditing = !!params.id;
 
-  const isExisting = !!existingProduct;
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    price: '',
+    stock: '',
+    category: '',
+    colors: '',
+    rating: '0',
+  });
+  const [loading, setLoading] = useState(isEditing);
+  const [saving, setSaving] = useState(false);
 
-  const validateFields = () => {
-    if (!title || !price || !description || !images || !rating || !colors) {
-      Alert.alert("Validation Error", "Please fill all the fields.");
-      return false;
+  useEffect(() => {
+    if (isEditing) {
+      fetchProduct();
     }
-    return true;
+  }, [params.id]);
+
+  // Function to show visual feedback based on platform
+  const showFeedback = (type, message, details = '') => {
+    // Use Toast for consistent UI across platforms
+    Toast.show({
+      type: type, // 'success', 'error', 'info'
+      text1: message,
+      text2: details,
+      position: 'bottom',
+      visibilityTime: 3000,
+    });
+    
+    // Additional feedback for Android
+    if (Platform.OS === 'android') {
+      ToastAndroid.showWithGravity(
+        message,
+        ToastAndroid.LONG,
+        ToastAndroid.CENTER
+      );
+    }
+    
+    console.log(`[${type.toUpperCase()}]: ${message} - ${details}`);
   };
 
-  const handleSave = () => {
-    if (validateFields()) {
-      Alert.alert("Confirm", "Are you sure you want to save this new product?", [
-        { text: "Cancel" },
-        { text: "Save", onPress: () => console.log("Product saved") },
-      ]);
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
+      console.log('Fetching product with ID:', params.id);
+      const product = await getProduct(params.id);
+      
+      if (!product) {
+        throw new Error('Product not found');
+      }
+      
+      console.log('Fetched product:', product);
+      
+      setFormData({
+        title: product.title || '',
+        description: product.description || '',
+        price: product.price?.toString() || '',
+        stock: product.stock?.toString() || '',
+        category: product.category || '',
+        colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
+        rating: product.rating?.toString() || '0',
+      });
+      showFeedback('success', 'Product details loaded', product.title);
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      showFeedback('error', 'Failed to load product', error.message || 'Please try again');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleUpdate = () => {
-    if (validateFields()) {
-      Alert.alert("Confirm", "Are you sure you want to update this product?", [
-        { text: "Cancel" },
-        { text: "Update", onPress: () => console.log("Product updated") },
-      ]);
+  const validateForm = () => {
+    const errors = [];
+    
+    if (!formData.title.trim()) {
+      errors.push('Title is required');
+    }
+    
+    if (!formData.price.trim()) {
+      errors.push('Price is required');
+    } else if (isNaN(parseFloat(formData.price)) || parseFloat(formData.price) < 0) {
+      errors.push('Price must be a valid positive number');
+    }
+
+    if (formData.stock.trim() && (isNaN(parseInt(formData.stock)) || parseInt(formData.stock) < 0)) {
+      errors.push('Stock must be a valid positive number');
+    }
+
+    if (formData.rating.trim() && (isNaN(parseFloat(formData.rating)) || parseFloat(formData.rating) < 0 || parseFloat(formData.rating) > 5)) {
+      errors.push('Rating must be between 0 and 5');
+    }
+
+    return errors;
+  };
+  
+  const handleSubmit = async () => {
+    try {
+      // Validate form data
+      const errors = validateForm();
+      if (errors.length > 0) {
+        showFeedback('error', 'Validation Error', errors.join(', '));
+        return;
+      }
+
+      setSaving(true);
+      setLoading(true);
+      
+      // Prepare data
+      const productData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        stock: parseInt(formData.stock) || 0,
+        rating: parseFloat(formData.rating) || 0,
+        colors: formData.colors.split(',').map(color => color.trim()).filter(Boolean),
+        id: isEditing ? params.id : undefined, // Make sure ID is preserved for updates
+        updatedAt: new Date(),
+      };
+
+      // Show initial feedback
+      showFeedback('info', isEditing ? 'Updating product...' : 'Adding product...', 'Please wait');
+      
+      if (isEditing) {
+        console.log(`Updating product with ID: ${params.id}`, productData);
+        const success = await updateProduct(params.id, productData);
+        
+        if (success) {
+          showFeedback('success', 'Product Updated', 'Product has been updated successfully');
+          
+          // Allow toast to be visible before navigating back
+          setTimeout(() => {
+            router.back();
+          }, 2000);
+        } else {
+          throw new Error("Failed to update product");
+        }
+      } else {
+        const newProductId = await addProduct(productData);
+        
+        if (newProductId) {
+          showFeedback('success', 'Product Added', `Product "${productData.title}" has been added successfully`);
+          
+          // Allow toast to be visible before navigating back
+          setTimeout(() => {
+            router.back();
+          }, 2000);
+        } else {
+          throw new Error("Failed to add product");
+        }
+      }
+    } catch (error) {
+      console.error("Operation failed:", error);
+      showFeedback('error', 'Operation Failed', error.message || 'Failed to save product');
+    } finally {
+      setSaving(false);
+      setLoading(false);
     }
   };
 
-  const handleDelete = () => {
-    Alert.alert("Confirm", "Are you sure you want to delete this product?", [
-      { text: "Cancel" },
-      { text: "Delete", onPress: () => console.log("Product deleted") },
-    ]);
-  };
+  if (loading && !saving) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#2f2baa" />
+        <Text style={styles.loadingText}>
+          {isEditing ? 'Loading product...' : 'Creating product...'}
+        </Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.label}>Title</Text>
-      <TextInput
-        value={title}
-        onChangeText={setTitle}
-        placeholder="Product title"
-        style={styles.input}
-      />
-
-      <Text style={styles.label}>Price</Text>
-      <TextInput
-        value={price}
-        onChangeText={setPrice}
-        placeholder="Product price"
-        keyboardType="numeric"
-        style={styles.input}
-      />
-
-      <Text style={styles.label}>Description</Text>
-      <TextInput
-        value={description}
-        onChangeText={setDescription}
-        placeholder="Product description"
-        style={styles.input}
-      />
-
-      <Text style={styles.label}>Images (comma separated URLs)</Text>
-      <TextInput
-        value={images}
-        onChangeText={setImages}
-        placeholder="image1.jpg, image2.jpg"
-        style={styles.input}
-      />
-
-      <Text style={styles.label}>Rating</Text>
-      <TextInput
-        value={rating}
-        onChangeText={setRating}
-        placeholder="Product rating"
-        keyboardType="numeric"
-        style={styles.input}
-      />
-
-      <Text style={styles.label}>Colors</Text>
-      <TextInput
-        value={colors}
-        onChangeText={setColors}
-        placeholder="red, blue, green"
-        style={styles.input}
-      />
-
-      <View style={styles.buttonContainer}>
-        {isExisting ? (
-          <>
-            <Button title="Update" color="#4CAF50" onPress={handleUpdate} />
-            <View style={styles.space} />
-            <Button title="Delete" color="#F44336" onPress={handleDelete} />
-          </>
-        ) : (
-          <Button title="Save" color="#2196F3" onPress={handleSave} />
-        )}
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} disabled={saving}>
+          <Ionicons name="arrow-back" size={24} color={saving ? "#ccc" : "black"} />
+        </Pressable>
+        <Text style={styles.title}>{isEditing ? 'Edit Product' : 'Add Product'}</Text>
+        <View style={{ width: 24 }} />
       </View>
-    </ScrollView>
+
+      <ScrollView style={styles.form}>
+        <Text style={styles.label}>Title *</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.title}
+          onChangeText={(text) => setFormData({ ...formData, title: text })}
+          placeholder="Product title"
+          editable={!saving}
+        />
+
+        <Text style={styles.label}>Description</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={formData.description}
+          onChangeText={(text) => setFormData({ ...formData, description: text })}
+          placeholder="Product description"
+          multiline
+          numberOfLines={4}
+          editable={!saving}
+        />
+
+        <Text style={styles.label}>Price *</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.price}
+          onChangeText={(text) => setFormData({ ...formData, price: text })}
+          placeholder="Product price"
+          keyboardType="decimal-pad"
+          editable={!saving}
+        />
+
+        <Text style={styles.label}>Stock</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.stock}
+          onChangeText={(text) => setFormData({ ...formData, stock: text })}
+          placeholder="Product stock"
+          keyboardType="number-pad"
+          editable={!saving}
+        />
+
+        <Text style={styles.label}>Category</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.category}
+          onChangeText={(text) => setFormData({ ...formData, category: text })}
+          placeholder="Product category"
+          editable={!saving}
+        />
+
+        <Text style={styles.label}>Colors (comma-separated)</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.colors}
+          onChangeText={(text) => setFormData({ ...formData, colors: text })}
+          placeholder="red, blue, green"
+          editable={!saving}
+        />
+
+        <Text style={styles.label}>Rating (0-5)</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.rating}
+          onChangeText={(text) => setFormData({ ...formData, rating: text })}
+          placeholder="Product rating (0-5)"
+          keyboardType="decimal-pad"
+          editable={!saving}
+        />
+
+        <Pressable 
+          style={[styles.submitButton, saving && styles.disabledButton]} 
+          onPress={handleSubmit}
+          disabled={saving}
+        >
+          {saving ? (
+            <View style={styles.savingContainer}>
+              <ActivityIndicator size="small" color="#fff" />
+              <Text style={styles.submitButtonText}>
+                {isEditing ? 'Updating...' : 'Adding...'}
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.submitButtonText}>
+              {isEditing ? 'Update Product' : 'Add Product'}
+            </Text>
+          )}
+        </Pressable>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flexGrow: 1,
     flex: 1,
-    paddingHorizontal: "5%",
-    paddingVertical: "10%",
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
+    paddingTop: StatusBar.currentHeight + 10,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  form: {
+    padding: 15,
   },
   label: {
-    marginTop: 10,
-    fontWeight: "bold",
     fontSize: 16,
+    marginBottom: 5,
+    color: '#666',
   },
   input: {
-    width: "100%",
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
+    borderColor: '#ddd',
+    borderRadius: 8,
     padding: 10,
-    marginTop: 5,
+    marginBottom: 15,
     fontSize: 16,
   },
-  buttonContainer: {
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  submitButton: {
+    backgroundColor: '#2f2baa',
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
     marginTop: 20,
-    width: "100%",
+    marginBottom: 40,
   },
-  space: {
-    height: 10,
+  disabledButton: {
+    backgroundColor: '#9e9dc6',
   },
+  savingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#ff4444',
+    textAlign: 'center',
+  }
 });
-
