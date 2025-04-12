@@ -242,15 +242,16 @@ export default function AdminProducts() {
                 {item.description}
               </Text>
             )}
-            //mahmoud
+
+            {/* //mahmoud */}
             {/* Individual delete button for each product */}
-            <Pressable 
+            {/* <Pressable 
               style={styles.productDeleteButton}
               onPress={() => handleDeleteProduct(item.id, item.title)}
-            >
+            > */}
               <AntDesign name="delete" size={18} color="#fff" />
               {/* <Text style={styles.productDeleteText}>Delete</Text> */}
-            </Pressable>
+            {/* </Pressable> */}
           </View>
         )}
       />
