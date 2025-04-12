@@ -18,7 +18,8 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { AddToWishList } from "../../Components/AddToWishList";
-import { AddToCart } from "../../Components/AddToCart";
+// import { AddToCart } from "../../Components/AddToCart";
+import { addToCart, removeFromCart, getCart , inCart, deleteAll } from "../../firebase/Cart";
 import { useRouter, useLocalSearchParams, Link } from "expo-router";
 import { getReviews } from "../../firebase/reviews";
 import {
@@ -38,6 +39,7 @@ export default function ProductDetails() {
   const [dynamicReviews, setDynamicReviews] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isWishList, setIsWishList] = useState(true);
+  const [isCart, setIsCart] = useState(false);
   const [loading, setLoading] = useState(true); 
   const [images, setImages] = useState([]);
   const [colors, setColors] = useState([]);
@@ -79,6 +81,23 @@ export default function ProductDetails() {
       checkWishListStatus();
     }
   }, [id]);
+
+
+  useEffect(() => {
+    const checkCartStatus = async () => {
+      try {
+        const inList = await inCart(id);
+        setIsCart(inList);
+      } catch (error) {
+        console.error("Error checking cart:", error);
+      }
+    };
+
+    if (id) {
+      checkCartStatus();
+    }
+  }, [id]);
+
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -129,6 +148,22 @@ export default function ProductDetails() {
     }
   };
 
+  const handleAddToCart = async () => {
+    try {
+      if (isCart) {
+        await removeFromCart(id);
+        setIsCart(false);
+        Alert.alert("Success", "Product removed from cart");
+      } else {
+        await addToCart(id);
+        setIsCart(true);
+        Alert.alert("Success", "Product added to cart");
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to update cart");
+      console.error(error);
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -288,7 +323,7 @@ export default function ProductDetails() {
               )}
               <View style={styles.buttonContainer}>
                 <Pressable
-                  onPress={AddToCart}
+                  onPress={handleAddToCart}
                   style={({ pressed }) => [
                     styles.actionButton,
                     styles.cartButton,
@@ -296,7 +331,7 @@ export default function ProductDetails() {
                   ]}
                 >
                   <AntDesign name="shoppingcart" size={20} color="#5A31F4" />
-                  <Text style={styles.cartButtonText}>Add to cart</Text>
+                  <Text style={styles.cartButtonText}>{isCart ? "Remove from Cart" : "Add to Cart"}</Text>
                 </Pressable>
 
                 <Pressable

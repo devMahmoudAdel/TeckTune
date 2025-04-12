@@ -5,7 +5,7 @@ import { auth } from "./config";
 const addToCart = async (productId) => {
   try {
     const user = auth.currentUser;
-    const cartDocRef = doc(db, "users", user.uid, "cart");
+    const cartDocRef = doc(db, "users", user.uid, "cart", productId);
     await setDoc(cartDocRef, {productId}, { merge: true });
     return true;
   } catch (error) {
@@ -61,4 +61,4 @@ const deleteAll = async () => {
   }
 };
 
-export default { addToCart, removeFromCart, getCart , inCart, deleteAll };
+export { addToCart, removeFromCart, getCart , inCart, deleteAll };

@@ -1,5 +1,5 @@
 import { db } from './config';
-import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDoc, getDocs } from 'firebase/firestore';
 
 const getUser = async (userId) => {
   try {
@@ -46,5 +46,14 @@ const isUnique = async(userName)=>{
       throw new Error('Username is already taken');
     }
   };
+  const getAllUsers = async () => {
+    try {
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      const users = usersSnapshot.docs.map((doc) => doc.data());
+      return users;
+    } catch (error) {
+      throw error;
+    }
+  };
 
-export { getUser, createUser, isUnique };
+export { getUser, createUser, isUnique, getAllUsers };
