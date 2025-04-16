@@ -1,4 +1,17 @@
-import { Button,ScrollView, Text, View, Image, TextInput, StyleSheet, Modal, FlatList, TouchableOpacity, Pressable, RefreshControl } from "react-native";
+import {
+  Button,
+  ScrollView,
+  Text,
+  View,
+  Image,
+  TextInput,
+  StyleSheet,
+  Modal,
+  FlatList,
+  TouchableOpacity,
+  Pressable,
+  RefreshControl,
+} from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ProductList from "./ProductList";
@@ -26,9 +39,10 @@ export default function Home() {
 
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) return topProducts;
-    return allProducts.filter(product =>
+    return allProducts.filter((product) =>
       product.title.toLowerCase().includes(searchQuery.toLowerCase())
-  )}, [searchQuery, allProducts, topProducts]);
+    );
+  }, [searchQuery, allProducts, topProducts]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -60,9 +74,8 @@ export default function Home() {
 
     fetchProducts();
   }, []);
-  
-  
-  if(loading) {
+
+  if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ fontSize: 18, fontWeight: "bold" }}>Loading...</Text>
@@ -83,7 +96,11 @@ export default function Home() {
           />
           <View>
             <Text style={styles.helloText}>Hello!</Text>
-            <Text style={styles.userNameText}>{useAuth().user.firstName}!</Text>
+            <Text style={styles.userNameText}>
+              {useAuth().user.firstName
+                ? useAuth().user.firstName + "!"
+                : "Guest!"}
+            </Text>
           </View>
         </View>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -217,7 +234,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-
   },
   helloText: {
     fontSize: 16,

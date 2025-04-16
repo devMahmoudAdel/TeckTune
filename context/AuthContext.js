@@ -14,6 +14,7 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [guest, setGuest] = useState(null);
 
   // Listen for Firebase auth state changes
   useEffect(() => {
@@ -148,13 +149,44 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const enterGuestMode = async () => {
+    const guestData = {
+      id: "guest",
+      email: "guest@example.com",
+      password: "",
+      firstName: "Guest",
+      lastName: "User",
+      address: "###########",
+      phoneNumber: "00000000000",
+      status: "active",
+      role: "guest",
+      avatarType: "default",
+      avatarUri: require("../assets/avatars/avatar7.png"),
+      createdAt: new Date().toISOString(),
+    };
+
+    // store-locally, my state & data as - guest - :
+    await AsyncStorage.setItem("guest", JSON.stringify(guestData));
+    setUser(guestData);
+
+    setGuest(guestData);
+  };
+
   const logout = async () => {
     try {
-      // Firebase logout
-      await firebaseLogout();
-      // Clear AsyncStorage
-      await AsyncStorage.removeItem("user");
-      setUser(null);
+      if (!guest) {
+        // Firebase logout
+        await firebaseLogout();
+        // Clear AsyncStorage
+        await AsyncStorage.removeItem("user");
+        // set the local state to null
+        setUser(null);
+      } else {
+        // if (guest) :
+        setUser(null);
+        setGuest(null);
+        await AsyncStorage.removeItem("guest");
+      }
     } catch (error) {
       console.error("Error during logout:", error);
       throw error;
@@ -203,7 +235,16 @@ export const AuthProvider = ({ children }) => {
   };
   return (
     <AuthContext.Provider
-      value={{ user, signup, login, logout, loading, updateUserProfile }}
+      value={{
+        user,
+        loading,
+        guest,
+        signup,
+        login,
+        logout,
+        updateUserProfile,
+        enterGuestMode,
+      }}
     >
       {children}
     </AuthContext.Provider>
