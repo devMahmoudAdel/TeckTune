@@ -1,12 +1,12 @@
 import { db } from "./config";
-import { collection, doc, setDoc, deleteDoc, getDocs , getDoc} from "firebase/firestore";
+import { collection, doc, setDoc, deleteDoc, getDocs , getDoc, updateDoc, addDoc} from "firebase/firestore";
 import { auth } from "./config";
 
-const addToCart = async (product) => {
+const addToCart = async (productId) => {
   try {
     const user = auth.currentUser;
-    const cartDocRef = doc(collection(db, "users", user.uid, "cart"));
-    await setDoc(cartDocRef, product);
+    const cartDocRef = doc(db, "users", user.uid, "cart");
+    await setDoc(cartDocRef, {productId}, { merge: true });
     return true;
   } catch (error) {
     throw error;
@@ -47,4 +47,18 @@ const inCart = async (productId) => {
   }
 }
 
-export default { addToCart, removeFromCart, getCart , inCart };
+const deleteAll = async () => {
+  try {
+    const user = auth.currentUser;
+    const cartCollectionRef = collection(db, "users", user.uid, "cart");
+    const cartSnapshot = await getDocs(cartCollectionRef);
+    cartSnapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+    });
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export default { addToCart, removeFromCart, getCart , inCart, deleteAll };

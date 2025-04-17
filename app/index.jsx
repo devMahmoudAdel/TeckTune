@@ -3,7 +3,7 @@ import { Redirect } from "expo-router";
 import { useAuth } from "../context/useAuth";
 import Splash from "../Components/Splash";
 export default function Index() {
-  const { user, loading } = useAuth();
+  const { user, loading, guest } = useAuth();
   const [showSplash, setShowSplash] = useState(true);
 
   /* -- note 
@@ -24,7 +24,7 @@ export default function Index() {
   }
 
   // After splash screen and loading, redirect based on authentication state
-  if (user) {
+  if (user || guest) {
     // User is authenticated, redirect to main app
     return <Redirect href="./(main)/(tabs)/Home" />;
   } else {

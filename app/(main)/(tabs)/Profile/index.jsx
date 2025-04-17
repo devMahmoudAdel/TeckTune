@@ -16,6 +16,7 @@ import DashboardStack from "../../../../navigation/DashboardStack";
 import { useAuth } from "../../../../context/useAuth";
 export default function Profile() {
   const router = useRouter();
+  const { guest } = useAuth();
   const scrollViewProps =
     Platform.OS === "web"
       ? { style: { maxHeight: "100vh", overflowY: "auto" } }
@@ -35,8 +36,16 @@ export default function Profile() {
             style={styles.imageProfile}
           /> */}
           <Image
-            source={useAuth().user.avatarUri}
-            defaultSource={require("../../../../assets/avatars/avatar2.png")}
+            source={
+              useAuth().user.avatarUri
+                ? useAuth().user.avatarUri
+                : require("../../../../assets/avatars/avatar1.png")
+            }
+            defaultSource={
+              useAuth().user.avatarUri
+                ? useAuth().user.avatarUri
+                : require("../../../../assets/avatars/avatar1.png")
+            }
             style={styles.imageProfile}
           />
           <Text style={styles.userText}>
@@ -45,7 +54,11 @@ export default function Profile() {
           <Text style={styles.emailText}>{useAuth().user.email}</Text>
         </View>
         <TouchableOpacity
-          onPress={() => router.navigate("/(tabs)/Profile/MyProfile")}
+          onPress={() =>
+            guest
+              ? router.push("/restricted-modal")
+              : router.navigate("/(tabs)/Profile/MyProfile")
+          }
         >
           <ProfileTags name="Profile" image={"person"} />
         </TouchableOpacity>

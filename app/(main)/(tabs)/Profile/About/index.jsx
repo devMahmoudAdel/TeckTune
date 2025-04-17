@@ -31,18 +31,18 @@ const members = [
     phone: "1234567890",
   },
   {
-    name: "hazem",
-    nickName: " نقاش",
+   name: "hazem",
+    nickName: "zooma",
     image: require("../../../../../assets/icon.png"),
-    description: "دمي خفيف ",
-    email: "hazemhussein392@gmail.com",
-    phone: "01558277796 ",
-    socialMedial: {
-      facebook: "https://www.facebook.com/hazem.hussein.1004 ",
-      whatsapp: "https:wa.me/201558277796 ",
-      linkedin: " ",
-      github: " ",
+    description: "description not needed",
+    socialMedia: {
+      facebook: "https://www.facebook.com",
+      github: "https://github.com/YousseefAh",
+      linkedin: "https://www.linkedin.com/in/yousseefah/",
+      whatsapp: "https://www.whatsapp.com",
     },
+    email: "yousseef.ah@gmail.com",
+    phone: "1234567890",
   },
   {
     name: "Ahmed Hassan",

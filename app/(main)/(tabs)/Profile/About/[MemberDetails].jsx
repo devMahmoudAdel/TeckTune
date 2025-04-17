@@ -14,7 +14,7 @@ const openLink = async (url) => {
 
 const MemberDetails = () => {
   const { name, nickName, image, description, socialMediaa, email, phone } = useLocalSearchParams();
-  const socialMedia = JSON.parse( socialMediaa);
+  const socialMedia = JSON.parse(socialMediaa);
   return (
     <View style={styles.container}>
       <Image
