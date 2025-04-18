@@ -2,9 +2,9 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-} from "firebase/auth";
+} from "../node_modules/firebase/auth";
 import { auth, db } from "./config";
-import { doc, deletedoc } from "firebase/firestore";
+import { doc, deleteDoc } from "firebase/firestore";
 
 const register = async (email, password) => {
   try {
@@ -44,7 +44,7 @@ const deleteAccount = async (userId) => {
   try {
     // 1- delete user document from firestore
     const userDocRef = doc(db, "users", userId);
-    await deletedoc(userDocRef);
+    await deleteDoc(userDocRef);
 
     // 2- Delete the Firebase Authentication account
     await auth.currentUser.delete();
