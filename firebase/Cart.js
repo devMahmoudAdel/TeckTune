@@ -1,12 +1,16 @@
 import { db } from "./config";
 import { collection, doc, setDoc, deleteDoc, getDocs , getDoc, updateDoc, addDoc} from "firebase/firestore";
 import { auth } from "./config";
-
-const addToCart = async (productId) => {
+import { getProduct } from "./Product";
+const addToCart = async (productId, quantity=1) => {
   try {
     const user = auth.currentUser;
+    const product = await getProduct(productId);
+    if (!product) {
+      throw new Error("Product not found");
+    }
     const cartDocRef = doc(db, "users", user.uid, "cart", productId);
-    await setDoc(cartDocRef, {productId}, { merge: true });
+    await setDoc(cartDocRef, {  quantity, ...product }, { merge: true });
     return true;
   } catch (error) {
     throw error;

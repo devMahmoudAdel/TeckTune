@@ -1,12 +1,17 @@
 import {db} from './config.js';
 import {collection, doc, setDoc, deleteDoc, getDocs, getDoc} from 'firebase/firestore';
 import {auth} from './config.js';
+import { getProduct } from './Product.js';
 // import { useAuth } from '../context/useAuth.js';
 const addToWishlist = async (productId) => {
   try {
     const user = auth.currentUser;
+    const product = await getProduct(productId);
+    if (!product) {
+      throw new Error('Product not found');
+    }
     const wishlistDocRef = doc(db, 'users', user.uid, 'wishlist', productId);
-    await setDoc(wishlistDocRef, {productId}, {merge: true});
+    await setDoc(wishlistDocRef, {...product}, {merge: true});
     return true;
   } catch (error) {
     throw error;
