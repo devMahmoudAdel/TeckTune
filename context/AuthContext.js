@@ -6,6 +6,7 @@ import {
   register,
   login as firebaseLogin,
   logout as firebaseLogout,
+  deleteAccount as deleteAccountFromFirebase,
 } from "../firebase/Auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
@@ -172,6 +173,27 @@ export const AuthProvider = ({ children }) => {
     setGuest(guestData);
   };
 
+  const deleteAccount = async () => {
+    try {
+      if (!user && !guest) throw new Error("No user is logged in.");
+
+      if (guest) {
+        await AsyncStorage.removeItem("guest");
+        setUser(null);
+        setGuest(null);
+        return;
+      }
+      // Delete account from Firestore and Firebase Auth
+      await deleteAccountFromFirebase(user.id);
+
+      // Clear local storage and state
+      await AsyncStorage.removeItem("user");
+      setUser(null);
+    } catch (error) {
+      console.error("Error during account deletion:", error);
+      throw error;
+    }
+  };
   const logout = async () => {
     try {
       if (!guest) {
@@ -244,6 +266,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         updateUserProfile,
         enterGuestMode,
+        deleteAccount,
       }}
     >
       {children}
