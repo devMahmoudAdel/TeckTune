@@ -1,5 +1,5 @@
-import { AuthProvider } from '../context/AuthContext';
-import { Stack } from 'expo-router';
+import { AuthProvider } from "../context/AuthContext";
+import { Stack } from "expo-router";
 
 export default function RootLayout() {
   return (
@@ -7,6 +7,14 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(main)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="restricted-modal"
+          options={{
+            headerShown: false,
+            presentation: "transparentModal",
+            animation: "fade",
+          }}
+        />
       </Stack>
     </AuthProvider>
   );
