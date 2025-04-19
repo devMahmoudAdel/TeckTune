@@ -19,16 +19,17 @@ import Search from "../../../../Components/Search";
 import { useState, useEffect, useMemo } from "react";
 import notifications from "../../../../Components/notifictionsdata";
 import { useAuth } from "../../../../context/useAuth";
-// import products from "../../../../Components/data";
+import products from "../../../../Components/data";
 import { Link, useRouter } from "expo-router";
 import Product from "../../../../Components/Product";
 import { getAllProducts } from "../../../../firebase/Product";
 
+
 export default function Home() {
+  const { user } = useAuth(); // Ensure useContext is called consistently
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [allProducts, setAllProducts] = useState([]);
   const router = useRouter();
@@ -96,11 +97,13 @@ export default function Home() {
           />
           <View>
             <Text style={styles.helloText}>Hello!</Text>
+
             <Text style={styles.userNameText}>
               {useAuth().user.firstName
                 ? useAuth().user.firstName + "!"
                 : "Guest!"}
             </Text>
+
           </View>
         </View>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -178,7 +181,7 @@ export default function Home() {
       <View style={{ flex: 1 }}>
         {/* <ProductList filterSearch={filterSearch} /> */}
         <FlatList
-          keyExtractor={(item) => item.title}
+          keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={false} />}
           numColumns={2}
@@ -191,7 +194,7 @@ export default function Home() {
           renderItem={({ item }) => (
             <Link
               href={{
-                pathname: `/${item.id}`,
+                pathname: `/app/(main)/${item.id}`,
                 params: {
                   title: item.title,
                   price: item.price,

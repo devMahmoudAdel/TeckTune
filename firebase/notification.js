@@ -1,5 +1,5 @@
 import { db } from "./config";
-import { collection, doc, setDoc, getDoc, getDocs, deleteDoc } from "firebase/firestore";
+import { collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc } from "firebase/firestore";
 import { auth } from "./config";
 
 const getNotifications = async () => {
@@ -17,6 +17,7 @@ const addNotification = async (notificationData) => {
   try {
     const notificationDocRef = doc(collection(db, "notifications"));
     await setDoc(notificationDocRef, notificationData);
+    await updateDoc(notificationDocRef, { id: notificationDocRef.id }, { merge: true });
     return true;
   } catch (error) {
     throw error;

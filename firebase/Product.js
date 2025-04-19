@@ -2,7 +2,7 @@ import { collection, addDoc, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc 
 import { db } from "./config";
 
 // Function to add a product to Firestore
-export async function addProduct(productData) {
+async function addProduct(productData) {
   try {
     const docRef = await addDoc(collection(db, "products"), productData);
     await updateDoc(docRef, { id: docRef.id });
@@ -15,7 +15,7 @@ export async function addProduct(productData) {
 }
 
 // Function to delete a product from Firestore
-export async function deleteProduct(productId) {
+async function deleteProduct(productId) {
   try {
     const productRef = doc(db, "products", productId);
     await deleteDoc(productRef);
@@ -71,4 +71,4 @@ const updateProduct = async (id, product) => {
   }
 }
 
-export { getProduct, getAllProducts, updateProduct };
+export { getProduct, getAllProducts, updateProduct, addProduct, deleteProduct };
