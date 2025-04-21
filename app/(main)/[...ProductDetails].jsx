@@ -10,7 +10,6 @@ import {
   Dimensions,
   Pressable,
   SafeAreaView,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import Icon from "@expo/vector-icons/AntDesign";
@@ -29,6 +28,7 @@ import {
   inWishlist,
 } from "../../firebase/Wishlist";
 import fallbackImage from "../../assets/icon.png";
+import CheckAlert from "../../Components/CheckAlert";
 
 const { width, height } = Dimensions.get("window");
 
@@ -136,15 +136,14 @@ export default function ProductDetails() {
       if (isWishList) {
         await removeFromWishlist(id);
         setIsWishList(false);
-        Alert.alert("Success", "Product removed from wishlist");
+        <CheckAlert state="success" title="Product removed from wishlist"/>
       } else {
         await addToWishlist(id);
         setIsWishList(true);
-        Alert.alert("Success", "Product added to wishlist");
+        <CheckAlert state="success" title="Product added to wishlist"/>
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to update wishlist");
-      console.error(error);
+      <CheckAlert state="error" title="Failed to update wishlist"/>
     }
   };
 
@@ -153,17 +152,20 @@ export default function ProductDetails() {
       if (isCart) {
         await removeFromCart(id);
         setIsCart(false);
-        Alert.alert("Success", "Product removed from cart");
+        <CheckAlert state="success" title="Product removed from cart"/>
       } else {
         await addToCart(id);
         setIsCart(true);
-        Alert.alert("Success", "Product added to cart");
+        <CheckAlert state="success" title="Product added to cart"/>
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to update cart");
-      console.error(error);
+      <CheckAlert state="error" title="Failed to update cart"/>
     }
   };
+
+  const handleBuyNow = ()=>{
+    return(<CheckAlert state="error" title="Not now"/>)
+  }
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -335,7 +337,7 @@ export default function ProductDetails() {
                 </Pressable>
 
                 <Pressable
-                  onPress={() => Alert.alert("Buy Now", "Proceeding to checkout...")}
+                  onPress={() => handleBuyNow}
                   style={({ pressed }) => [
                     styles.actionButton,
                     { backgroundColor: "#5A31F4" },

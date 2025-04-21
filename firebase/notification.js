@@ -1,6 +1,7 @@
 import { db } from "./config";
 import { collection, doc, setDoc, getDoc, getDocs, deleteDoc, updateDoc } from "firebase/firestore";
 import { auth } from "./config";
+import CheckAlert from "../Components/CheckAlert";
 
 const getNotifications = async () => {
   try {
@@ -9,7 +10,7 @@ const getNotifications = async () => {
     const notifications = notificationsSnapshot.docs.map((doc) => doc.data());
     return notifications;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 
@@ -20,7 +21,7 @@ const addNotification = async (notificationData) => {
     await updateDoc(notificationDocRef, { id: notificationDocRef.id }, { merge: true });
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 
@@ -30,7 +31,7 @@ const deleteNotification = async (notificationId) => {
     await deleteDoc(notificationDocRef);
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 const getNotification = async (notificationId) => {
@@ -39,7 +40,7 @@ const getNotification = async (notificationId) => {
     const notificationDoc = await getDoc(notificationDocRef);
     return notificationDoc.data();
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 

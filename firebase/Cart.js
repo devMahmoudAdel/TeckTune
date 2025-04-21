@@ -2,6 +2,7 @@ import { db } from "./config";
 import { collection, doc, setDoc, deleteDoc, getDocs , getDoc, updateDoc, addDoc} from "firebase/firestore";
 import { auth } from "./config";
 import { getProduct } from "./Product";
+import CheckAlert from "../Components/CheckAlert";
 const addToCart = async (productId, quantity=1) => {
   try {
     const user = auth.currentUser;
@@ -13,7 +14,7 @@ const addToCart = async (productId, quantity=1) => {
     await setDoc(cartDocRef, {  quantity, ...product }, { merge: true });
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 
@@ -24,7 +25,7 @@ const removeFromCart = async (productId) => {
     await deleteDoc(cartDocRef);
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 
@@ -36,7 +37,7 @@ const getCart = async () => {
     const cart = cartSnapshot.docs.map((doc) => doc.data());
     return cart;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 
@@ -47,7 +48,7 @@ const inCart = async (productId) => {
     const cartDoc = await getDoc(cartDocRef);
     return cartDoc.exists();
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 
@@ -61,7 +62,7 @@ const deleteAll = async () => {
     });
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 
