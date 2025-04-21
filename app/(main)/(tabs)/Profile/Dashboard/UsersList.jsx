@@ -132,7 +132,7 @@ export default function UsersList() {
 
       <FlatList
         data={filteredUsers}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id || item.email}
         renderItem={({ item }) => (
           <View style={styles.userCard}>
             <View style={styles.userInfo}>

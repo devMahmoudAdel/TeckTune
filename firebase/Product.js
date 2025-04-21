@@ -2,7 +2,7 @@ import { collection, addDoc, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc 
 import { db } from "./config";
 
 // Function to add a product to Firestore
-export async function addProduct(productData) {
+async function addProduct(productData) {
   try {
     // Create product without ID first
     const cleanProductData = { ...productData };
@@ -21,7 +21,7 @@ export async function addProduct(productData) {
 }
 
 // Function to delete a product from Firestore
-export async function deleteProduct(productId) {
+async function deleteProduct(productId) {
   try {
     if (!productId) {
       console.error("[Delete Error] Product ID is missing");
@@ -114,4 +114,4 @@ const updateProduct = async (id, product) => {
   }
 }
 
-export { getProduct, getAllProducts, updateProduct };
+export { getProduct, getAllProducts, updateProduct, addProduct, deleteProduct };

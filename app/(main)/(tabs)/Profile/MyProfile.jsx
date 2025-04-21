@@ -9,15 +9,16 @@ import {
   ScrollView,
   StatusBar,
   Platform,
+  Alert,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../../../context/useAuth";
-import { getUser, createUser} from "../../../../firebase/User";
+import { getUser, createUser } from "../../../../firebase/User";
 import { auth } from "../../../../firebase/config";
 const MyProfile = () => {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, deleteAccount } = useAuth();
   const [userData, setUserData] = useState({});
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
@@ -37,55 +38,55 @@ const MyProfile = () => {
         setUserData(await getUser(user.id));
       } catch (error) {
         console.error("Error fetching user data:", error);
-      };
-    }
+      }
+    };
     fetchUserData();
   }, [userData]);
   const handleFirstName = (text) => {
     setFirstName(text);
     handleChanged();
-  }
+  };
   const handleLastName = (text) => {
     setLastName(text);
     handleChanged();
-  }
+  };
   const handleUsername = (text) => {
     setUsername(text);
     handleChanged();
-  }
+  };
   const handleEmail = (text) => {
     setEmail(text);
     handleChanged();
-  }
+  };
   const handlePhone = (text) => {
     setPhone(text);
     handleChanged();
-  }
+  };
   const handleAddress = (text) => {
     setAddress(text);
     handleChanged();
-  }
+  };
   const handleProfilePic = (text) => {
     setProfilePic(text);
     handleChanged();
-  }
+  };
   const handleCurrentPassword = (text) => {
     setCurrentPassword(text);
     handleChanged();
-  }
+  };
   const handleNewPassword = (text) => {
     setNewPassword(text);
     handleChanged();
-  }
+  };
   const handleConfirmPassword = (text) => {
     setConfirmPassword(text);
     handleChanged();
-  }
-  function handleChanged(){
-    if(
+  };
+  function handleChanged() {
+    if (
       firstName !== user.firstName ||
       lastName !== user.lastName ||
-      username !== user.username || 
+      username !== user.username ||
       email !== user.email ||
       phone !== user.phoneNumber ||
       address !== user.address ||
@@ -93,13 +94,14 @@ const MyProfile = () => {
       currentPassword !== "" ||
       newPassword !== "" ||
       confirmPassword !== ""
-    ){
+    ) {
       setChanged(true);
-    }else{
+    } else {
       setChanged(false);
-    }}
-  const handleSave = () =>{
-    createUser(useAuth().user.id,{
+    }
+  }
+  const handleSave = () => {
+    createUser(useAuth().user.id, {
       firstName,
       lastName,
       username,
@@ -107,8 +109,47 @@ const MyProfile = () => {
       phoneNumber: phone,
       address,
       profilePic,
-    })
-  }
+    });
+  };
+
+  const handleDeleteAccount = () => {
+    // For native platforms, show an alert
+    if (Platform.OS !== "web") {
+      Alert.alert(
+        "Delete Account",
+        "Are you sure you want to delete your account? This action cannot be undone.",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Delete",
+            onPress: () => confirmDeleteAccount(),
+            style: "destructive",
+          },
+        ]
+      );
+    } else {
+      // For web, use confirm dialog
+      if (
+        window.confirm(
+          "Are you sure you want to delete your account? This action cannot be undone."
+        )
+      ) {
+        confirmDeleteAccount();
+      }
+    }
+  };
+
+  const confirmDeleteAccount = async () => {
+    try {
+      deleteAccount();
+      router.replace("../../../(auth)/SignIn");
+    } catch (error) {
+      console.error("Error deleting account:", error);
+    }
+  };
   const scrollViewProps =
     Platform.OS === "web"
       ? { style: { maxHeight: "100vh", overflowY: "auto" } }
@@ -223,6 +264,13 @@ const MyProfile = () => {
             <Text style={styles.btnText}>Save Changes</Text>
           </Pressable>
         )}
+
+        {/* Delete Account Button */}
+        <View style={{ width: "100%", alignItems: "center", marginTop: 20 }}>
+          <Pressable style={styles.deleteBtn} onPress={handleDeleteAccount}>
+            <Text style={styles.deleteBtnText}>Delete Account</Text>
+          </Pressable>
+        </View>
       </View>
     </ScrollView>
   );
@@ -280,6 +328,21 @@ const styles = StyleSheet.create({
     marginBottom: 70,
   },
   btnText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+  deleteBtn: {
+    backgroundColor: "#FF3B30",
+    padding: 10,
+    borderRadius: 5,
+    width: "80%",
+    height: 45,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 20,
+    marginBottom: 70,
+  },
+  deleteBtnText: {
     color: "white",
     fontWeight: "bold",
   },

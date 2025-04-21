@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { addToWishlist,removeFromWishlist,inWishlist} from '../firebase/Wishlist';
 import Stars from './Stars';
 const Product = ({id, title, images, rating, price}) => {
-  const [isWishList, setIsWishList] = useState(true);
+  const [isWishList, setIsWishList] = useState(false);
     const [loading, setLoading] = useState(false);
   const handleAddToWishList = async () => {
       try {

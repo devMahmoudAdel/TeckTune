@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Alert, StatusBar, ActivityIndicator, ToastAndroid, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { addProduct, getProduct, updateProduct } from '@firebase/Product';
+// import { addProduct, getProduct, updateProduct } from '@firebase/Product';
+import {
+  getProduct,
+  getAllProducts,
+  updateProduct,
+  addProduct,
+  deleteProduct,
+} from "../../../../../../firebase/Product";
 import Toast from 'react-native-toast-message';
 
 export default function ProductForm() {

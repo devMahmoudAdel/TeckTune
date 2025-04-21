@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable, Alert, TextInput, StatusBar, ActivityIndicator, ToastAndroid, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, AntDesign } from '@expo/vector-icons';
-import { getAllProducts, deleteProduct } from '@firebase/Product';
+// import { getAllProducts, deleteProduct } from '@firebase/Products';
+import {
+  getProduct,
+  getAllProducts,
+  updateProduct,
+  addProduct,
+  deleteProduct,
+} from "../../../../../firebase/Product";
 import Toast from 'react-native-toast-message';
 
 export default function AdminProducts() {
@@ -164,7 +171,7 @@ export default function AdminProducts() {
           <Ionicons name="arrow-back" size={24} color="black" />
         </Pressable>
         <Text style={styles.title}>Products Management</Text>
-        <View style={{ width: 24 }} /> {/* Empty view for even spacing */}
+        <View style={{ width: 24 }} />
       </View>
 
       {/* Show delete status message */}
@@ -242,14 +249,12 @@ export default function AdminProducts() {
                 {item.description}
               </Text>
             )}
-            //mahmoud
             {/* Individual delete button for each product */}
             <Pressable 
               style={styles.productDeleteButton}
               onPress={() => handleDeleteProduct(item.id, item.title)}
             >
               <AntDesign name="delete" size={18} color="#fff" />
-              {/* <Text style={styles.productDeleteText}>Delete</Text> */}
             </Pressable>
           </View>
         )}
