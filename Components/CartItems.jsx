@@ -5,6 +5,7 @@ import CartItem from './CartItem';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import {addToCart, removeFromCart, getCart , inCart, deleteAll} from '../firebase/Cart';
 import Empty from './Empty';
+import Loading from './Loading';
 const screen = Dimensions.get('window');
 const CartItems = ({navigation}) => {
   const [products, setProducts] = useState([]);
@@ -55,9 +56,7 @@ const CartItems = ({navigation}) => {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Loading...</Text>
-      </View>
+      <Loading/>
     );
   }
   if (products.length === 0) {

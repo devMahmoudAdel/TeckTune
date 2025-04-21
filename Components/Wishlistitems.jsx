@@ -4,6 +4,7 @@ import { Dimensions, Text, FlatList, StyleSheet, Pressable,RefreshControl, Touch
 import CartItem from './Wishlistitem';
 import {addToWishlist, getWishlist, removeFromWishlist, inWishlist, deleteAll} from '../firebase/Wishlist';
 import Empty from './Empty';
+import Loading from './Loading';
 const screen = Dimensions.get('window');
 const Wishlistitems = () => {
   const [products, setProducts] = useState([]);
@@ -25,9 +26,7 @@ const Wishlistitems = () => {
     );
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>Loading...</Text>
-      </View>
+      <Loading/>
     );
   }
   if (products.length === 0) {

@@ -1,16 +1,16 @@
 import { collection, addDoc, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./config";
+import CheckAlert from "../Components/CheckAlert";
 
 // Function to add a product to Firestore
 async function addProduct(productData) {
   try {
     const docRef = await addDoc(collection(db, "products"), productData);
     await updateDoc(docRef, { id: docRef.id });
-    console.log("Product added with ID: ", docRef.id);
+    <CheckAlert state="success" title="Product added successfully"/>
     return docRef.id;
   } catch (error) {
-    console.error("Error adding product: ", error);
-    throw error;
+    <CheckAlert state="error" title="error adding product"/>
   }
 }
 
@@ -19,10 +19,9 @@ async function deleteProduct(productId) {
   try {
     const productRef = doc(db, "products", productId);
     await deleteDoc(productRef);
-    console.log("Product deleted with ID: ", productId);
+    <CheckAlert state="success" title="product deleted successfully"/>
   } catch (error) {
-    console.error("Error deleting product: ", error);
-    throw error;
+    <CheckAlert state="error" title="Error deleting product"/>
   }
 }
 
@@ -32,7 +31,7 @@ const getProduct = async (id) => {
   if (productDoc.exists()) {
     return productDoc.data();
   } else {
-    throw new Error('Product does not exist');
+    <CheckAlert state="error" title="product does not exist"/>
   }
 }
 
@@ -43,7 +42,7 @@ const getAllProducts = async () => {
   const products = productsSnapshot.docs.map((doc) => doc.data());
   return products;
   }catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 
@@ -67,7 +66,7 @@ const updateProduct = async (id, product) => {
   );
   return true;
 }catch (error) {
-    throw error;
+  <CheckAlert state="error" title={error.message}/>
   }
 }
 

@@ -24,7 +24,8 @@
     "react-native-screens": "~4.4.0",
     "react-native-swipe-list-view": "^3.2.9",
     "react-native-toast-message": "^2.2.1",
-    "react-native-web": "~0.19.13"
+    "react-native-web": "~0.19.13",
+    "sweetalert2": "^11.19.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

@@ -1,3 +1,4 @@
+import CheckAlert from '../Components/CheckAlert';
 import { db } from './config';
 import { collection, doc, setDoc, getDoc, getDocs } from 'firebase/firestore';
 
@@ -8,10 +9,10 @@ const getUser = async (userId) => {
     if (userDoc.exists()) {
       return userDoc.data();
     } else {
-      throw new Error('User does not exist');
+      <CheckAlert state="error" title="user does not exist"/>
     }
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 
@@ -32,7 +33,7 @@ const createUser = async (userId, userData) => {
     }, { merge: true });
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 const isUnique = async(userName)=>{
@@ -52,7 +53,7 @@ const isUnique = async(userName)=>{
       const users = usersSnapshot.docs.map((doc) => doc.data());
       return users;
     } catch (error) {
-      throw error;
+      <CheckAlert state="error" title={error.message}/>
     }
   };
 

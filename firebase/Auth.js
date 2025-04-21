@@ -6,6 +6,7 @@ import {
 import { auth, db } from "./config";
 
 import { doc, deleteDoc } from "firebase/firestore";
+import CheckAlert from "../Components/CheckAlert";
 
 export const register = async (email, password) => {
   try {
@@ -16,7 +17,7 @@ export const register = async (email, password) => {
     );
     return userCredential.user;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 
@@ -37,7 +38,7 @@ export const logout = async () => {
   try {
     await signOut(auth);
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 
@@ -52,7 +53,6 @@ export const deleteAccount = async (userId) => {
 
     return true;
   } catch (error) {
-    console.error("Error deleting account:", error);
-    throw error;
+    <CheckAlert state="error" title="Error deleting account"/>
   }
 };
