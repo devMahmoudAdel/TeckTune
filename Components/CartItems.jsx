@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { Dimensions, Text, Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
 import CartItem from './CartItem';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import {addToCart, removeFromCart, getCart , inCart, deleteAll} from '../firebase/Cart';
+import Empty from './Empty';
 const screen = Dimensions.get('window');
 const CartItems = ({navigation}) => {
   const [products, setProducts] = useState([]);
@@ -34,19 +36,23 @@ const CartItems = ({navigation}) => {
       console.error(error);
     }
   };
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const cartItems = await getCart();
-        setProducts(cartItems);
-      } catch (error) {
-        console.error(error);
-      }
-      setLoading(false);
-    };
-    fetchProducts();
-  },[])
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const cartItems = await getCart();
+      setProducts(cartItems);
+    } catch (error) {
+      console.error(error);
+    }
+    setLoading(false);
+  };
+  useFocusEffect(
+    useCallback(() => {
+      fetchProducts();
+    }, [])
+  );
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -56,8 +62,8 @@ const CartItems = ({navigation}) => {
   }
   if (products.length === 0) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>No products in cart</Text>
+      <View style={{width:"100%" ,flex:1,justifyContent:"center",alignItems:"center"}}>
+        <Empty text="Cart is empty" subText="Add products and try again"/>
       </View>
     );
   }

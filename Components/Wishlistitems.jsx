@@ -1,24 +1,28 @@
-import React, {useState, useEffect} from 'react';
-import { Dimensions, Text, FlatList, StyleSheet, Pressable,RefreshControl, TouchableOpacity, View } from 'react-native';
+import React, {useState, useEffect,useCallback} from 'react';
+import { useFocusEffect } from 'expo-router';
+import { Dimensions, Text, FlatList, StyleSheet, Pressable,RefreshControl, TouchableOpacity, View, _View } from 'react-native';
 import CartItem from './Wishlistitem';
 import {addToWishlist, getWishlist, removeFromWishlist, inWishlist, deleteAll} from '../firebase/Wishlist';
+import Empty from './Empty';
 const screen = Dimensions.get('window');
 const Wishlistitems = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const wishlistItems = await getWishlist();
-        setProducts(wishlistItems);
-      } catch (error) {
-        console.error(error);
-      }
-      setLoading(false);
-    };
-    fetchProducts();
-  },[])
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const wishlistItems = await getWishlist();
+      setProducts(wishlistItems);
+    } catch (error) {
+      console.error(error);
+    }
+    setLoading(false);
+  };
+  useFocusEffect(
+      useCallback(() => {
+        fetchProducts();
+      }, [])
+    );
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -28,8 +32,8 @@ const Wishlistitems = () => {
   }
   if (products.length === 0) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text>No products in wishlist</Text>
+      <View style={{width:"100%" ,flex:1,justifyContent:"center",alignItems:"center"}}>
+        <Empty text="The wishlist is empty" subText="Add the product and try again"/>
       </View>
     );
   }
