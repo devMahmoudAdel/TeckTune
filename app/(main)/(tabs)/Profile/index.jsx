@@ -16,6 +16,7 @@ import DashboardStack from "../../../../navigation/DashboardStack";
 import { useAuth } from "../../../../context/useAuth";
 export default function Profile() {
   const router = useRouter();
+  const { user, guest } = useAuth();
   const scrollViewProps =
     Platform.OS === "web"
       ? { style: { maxHeight: "100vh", overflowY: "auto" } }
@@ -45,15 +46,21 @@ export default function Profile() {
           <Text style={styles.emailText}>{useAuth().user.email}</Text>
         </View>
         <TouchableOpacity
-          onPress={() => router.navigate("/(tabs)/Profile/MyProfile")}
+          onPress={() =>
+            guest
+              ? router.push("/restricted-modal")
+              : router.navigate("/(tabs)/Profile/MyProfile")
+          }
         >
           <ProfileTags name="Profile" image={"person"} />
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => router.navigate("/(tabs)/Profile/Dashboard")}
-        >
-          <ProfileTags name="Dashboard" image={"person"} />
-        </TouchableOpacity>
+        {user?.role === "admin" && (
+          <TouchableOpacity
+            onPress={() => router.navigate("/(tabs)/Profile/Dashboard")}
+          >
+            <ProfileTags name="Dashboard" image={"person"} />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           onPress={() => router.navigate("/(tabs)/Profile/Settings")}
         >

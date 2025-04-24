@@ -1,15 +1,21 @@
 import {db} from './config.js';
 import {collection, doc, setDoc, deleteDoc, getDocs, getDoc} from 'firebase/firestore';
 import {auth} from './config.js';
+import { getProduct } from './Product.js';
+import CheckAlert from '../Components/CheckAlert.jsx';
 // import { useAuth } from '../context/useAuth.js';
 const addToWishlist = async (productId) => {
   try {
     const user = auth.currentUser;
+    const product = await getProduct(productId);
+    if (!product) {
+      <CheckAlert state="question" title="product not found"/>
+    }
     const wishlistDocRef = doc(db, 'users', user.uid, 'wishlist', productId);
-    await setDoc(wishlistDocRef, {productId}, {merge: true});
+    await setDoc(wishlistDocRef, {...product}, {merge: true});
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 const getWishlist = async () => {
@@ -20,7 +26,7 @@ const getWishlist = async () => {
     const wishlist = wishlistSnapshot.docs.map((doc) => doc.data());
     return wishlist;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 
@@ -31,7 +37,7 @@ const removeFromWishlist = async (productId) => {
     await deleteDoc(wishlistDocRef);
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 
@@ -42,7 +48,7 @@ const inWishlist = async (productId) => {
     const wishlistDoc = await getDoc(wishlistDocRef);
     return wishlistDoc.exists();
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 
@@ -56,7 +62,7 @@ const deleteAll = async () => {
     });
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 export {addToWishlist, getWishlist, removeFromWishlist, inWishlist, deleteAll};

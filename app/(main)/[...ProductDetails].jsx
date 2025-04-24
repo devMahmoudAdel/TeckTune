@@ -10,7 +10,6 @@ import {
   Dimensions,
   Pressable,
   SafeAreaView,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import Icon from "@expo/vector-icons/AntDesign";
@@ -18,7 +17,8 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { AddToWishList } from "../../Components/AddToWishList";
-import { AddToCart } from "../../Components/AddToCart";
+// import { AddToCart } from "../../Components/AddToCart";
+import { addToCart, removeFromCart, getCart , inCart, deleteAll } from "../../firebase/Cart";
 import { useRouter, useLocalSearchParams, Link } from "expo-router";
 import { getReviews } from "../../firebase/reviews";
 import {
@@ -27,8 +27,11 @@ import {
   removeFromWishlist,
   inWishlist,
 } from "../../firebase/Wishlist";
+import fallbackImage from "../../assets/icon.png";
+import CheckAlert from "../../Components/CheckAlert";
 
 const { width, height } = Dimensions.get("window");
+
 
 export default function ProductDetails() {
   const router = useRouter();
@@ -36,50 +39,84 @@ export default function ProductDetails() {
   const [dynamicReviews, setDynamicReviews] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isWishList, setIsWishList] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [isCart, setIsCart] = useState(false);
+  const [loading, setLoading] = useState(true); 
+  const [images, setImages] = useState([]);
+  const [colors, setColors] = useState([]);
 
-  const { id, title, price, imagess, rating, colorss, description, reviews } =
-    useLocalSearchParams();
+  const params = useLocalSearchParams();
+  const title = params.title || "Product Title";
+  const price = params.price || "0";
+  const rating = params.rating || "0";
+  const description = params.description || "No description available";
+  const reviews = params.reviews || "0";
+  const id = params.id || "";
 
-  const images = imagess ? JSON.parse(imagess) : [];
-  const colors = colorss ? JSON.parse(colorss) : [];
+  useEffect(() => {
+    try {
+      const parsedImages = params.imagess ? JSON.parse(params.imagess) : [];
+      const validatedImages = parsedImages.map((img) =>
+        typeof img === "string" && img.trim() !== "" ? { uri: img } : fallbackImage
+      );
+      setImages(validatedImages);
+      setColors(params.colorss ? JSON.parse(params.colorss) : []);
+    } catch (error) {
+      console.error("Error parsing data:", error);
+      setImages([fallbackImage]); 
+      setColors([]);
+    }
+  }, [params.imagess, params.colorss]);
 
-  const handleScroll = (event) => {
-    const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
-    setActiveIndex(slideIndex);
-  };
+  useEffect(() => {
+    const checkWishListStatus = async () => {
+      try {
+        const inList = await inWishlist(id);
+        setIsWishList(inList);
+      } catch (error) {
+        console.error("Error checking wishlist:", error);
+      }
+    };
+
+    if (id) {
+      checkWishListStatus();
+    }
+  }, [id]);
+
+
+  useEffect(() => {
+    const checkCartStatus = async () => {
+      try {
+        const inList = await inCart(id);
+        setIsCart(inList);
+      } catch (error) {
+        console.error("Error checking cart:", error);
+      }
+    };
+
+    if (id) {
+      checkCartStatus();
+    }
+  }, [id]);
+
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        setLoading(true);
         const reviews = await getReviews(id);
-        setDynamicReviews(reviews.sort((a, b) => b.rating - a.rating).slice(0, 5));
+        if (Array.isArray(reviews)) {
+          setDynamicReviews(reviews.sort((a, b) => b.rating - a.rating).slice(0, 5));
+        } else {
+          setDynamicReviews([]);
+        }
       } catch (error) {
         console.error(error);
       } finally {
-        setLoading(false);
+        setLoading(false); 
       }
     };
+
     fetchReviews();
   }, [id]);
-
-  const handleAddToWishList = async () => {
-    try {
-      if (isWishList) {
-        await removeFromWishlist(id);
-        setIsWishList(false);
-        Alert.alert("Success", "Product removed from wishlist");
-      } else {
-        await addToWishlist(id);
-        setIsWishList(true);
-        Alert.alert("Success", "Product added to wishlist");
-      }
-    } catch (error) {
-      Alert.alert("Error", "Failed to update wishlist");
-      console.error(error);
-    }
-  };
 
   if (loading) {
     return (
@@ -89,6 +126,46 @@ export default function ProductDetails() {
     );
   }
 
+  const handleScroll = (event) => {
+    const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
+    setActiveIndex(slideIndex);
+  };
+
+  const handleAddToWishList = async () => {
+    try {
+      if (isWishList) {
+        await removeFromWishlist(id);
+        setIsWishList(false);
+        <CheckAlert state="success" title="Product removed from wishlist"/>
+      } else {
+        await addToWishlist(id);
+        setIsWishList(true);
+        <CheckAlert state="success" title="Product added to wishlist"/>
+      }
+    } catch (error) {
+      <CheckAlert state="error" title="Failed to update wishlist"/>
+    }
+  };
+
+  const handleAddToCart = async () => {
+    try {
+      if (isCart) {
+        await removeFromCart(id);
+        setIsCart(false);
+        <CheckAlert state="success" title="Product removed from cart"/>
+      } else {
+        await addToCart(id);
+        setIsCart(true);
+        <CheckAlert state="success" title="Product added to cart"/>
+      }
+    } catch (error) {
+      <CheckAlert state="error" title="Failed to update cart"/>
+    }
+  };
+
+  const handleBuyNow = ()=>{
+    return(<CheckAlert state="error" title="Not now"/>)
+  }
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
@@ -109,6 +186,11 @@ export default function ProductDetails() {
                 onScroll={handleScroll}
                 scrollEventThrottle={200}
                 keyExtractor={(_, index) => index.toString()}
+                ListEmptyComponent={
+                  <View style={styles.imageContainer}>
+                    <Image source={fallbackImage} style={styles.image} resizeMode="cover" />
+                  </View>
+                }
               />
               <Pressable style={styles.wishlistButton} onPress={handleAddToWishList}>
                 <MaterialIcons
@@ -155,6 +237,9 @@ export default function ProductDetails() {
                   />
                 )}
                 showsHorizontalScrollIndicator={false}
+                ListEmptyComponent={
+                  <Text style={{ color: "#999", fontSize: 14 }}>No colors available</Text>
+                }
               />
 
               <Text style={styles.sectionTitle}>Customer Reviews</Text>
@@ -240,7 +325,7 @@ export default function ProductDetails() {
               )}
               <View style={styles.buttonContainer}>
                 <Pressable
-                  onPress={AddToCart}
+                  onPress={handleAddToCart}
                   style={({ pressed }) => [
                     styles.actionButton,
                     styles.cartButton,
@@ -248,10 +333,11 @@ export default function ProductDetails() {
                   ]}
                 >
                   <AntDesign name="shoppingcart" size={20} color="#5A31F4" />
-                  <Text style={styles.cartButtonText}>Add to cart</Text>
+                  <Text style={styles.cartButtonText}>{isCart ? "Remove from Cart" : "Add to Cart"}</Text>
                 </Pressable>
 
                 <Pressable
+                  onPress={() => handleBuyNow}
                   style={({ pressed }) => [
                     styles.actionButton,
                     { backgroundColor: "#5A31F4" },
@@ -294,8 +380,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   image: {
-    width: "100%",
-    height: "100%",
+    width: "300",
+    height: "300",
   },
   wishlistButton: {
     width: 44,

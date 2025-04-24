@@ -1,5 +1,6 @@
+import CheckAlert from '../Components/CheckAlert';
 import { db } from './config';
-import { collection, doc, setDoc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDoc, getDocs } from 'firebase/firestore';
 
 const getUser = async (userId) => {
   try {
@@ -8,21 +9,10 @@ const getUser = async (userId) => {
     if (userDoc.exists()) {
       return userDoc.data();
     } else {
-      throw new Error('User does not exist');
+      <CheckAlert state="error" title="user does not exist"/>
     }
   } catch (error) {
-    throw error;
-  }
-};
-
-const getAllUsers = async () => {
-  try {
-    const usersCollectionRef = collection(db, 'users');
-    const usersSnapshot = await getDocs(usersCollectionRef);
-    const users = usersSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-    return users;
-  } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 
@@ -43,30 +33,28 @@ const createUser = async (userId, userData) => {
     }, { merge: true });
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
-};
+}
+const isUnique = async(userName)=>{
+    const userNameQuery = doc(collection(db, 'users'), userName);
+    const existingUserName = await getDoc(userNameQuery);
 
-const isUnique = async (userName) => {
-  const userNameQuery = doc(collection(db, 'users'), userName);
-  const existingUserName = await getDoc(userNameQuery);
+    if (!existingUserName.exists()) {
+      // throw new Error('Username is already taken');
+      return userName;
+    }else{
+      throw new Error('Username is already taken');
+    }
+  };
+  const getAllUsers = async () => {
+    try {
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      const users = usersSnapshot.docs.map((doc) => doc.data());
+      return users;
+    } catch (error) {
+      <CheckAlert state="error" title={error.message}/>
+    }
+  };
 
-  if (!existingUserName.exists()) {
-    return userName;
-  } else {
-    throw new Error('Username is already taken');
-  }
-};
-
-const updateUser = async (userId, updates) => {
-  try {
-    const userDocRef = doc(db, "users", userId);
-    await updateDoc(userDocRef, updates);
-    return true;
-  } catch (error) {
-    console.error("Error updating user:", error);
-    throw error;
-  }
-};
-
-export { getUser, createUser, isUnique, getAllUsers, updateUser };
+export { getUser, createUser, isUnique, getAllUsers };

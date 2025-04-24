@@ -2,7 +2,7 @@ import { Text, View, FlatList, Pressable, RefreshControl, Platform, StatusBar, S
 import Product from "../../../../Components/Product";
 import Entypo from "@expo/vector-icons/Entypo";
 // import products from "../../../../Components/data";
-import { useEffect ,useState  } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, Link } from "expo-router";
 import Search from "../../../../Components/Search";
 
@@ -73,9 +73,9 @@ export default function ProductList() {
       setFilteredProducts(allProducts);
     }
   }, [searchQuery, allProducts]);
-  const containerStyle = Platform.OS === 'web' 
-  ? { height: '100vh', overflowY: 'auto' } 
-  : {}; 
+  const containerStyle = Platform.OS === 'web'
+    ? { height: '100vh', overflowY: 'auto' }
+    : {};
   // ---------------------------------------
   if (loading) {
     return (
@@ -90,7 +90,7 @@ export default function ProductList() {
       style={[
         containerStyle,
         {
-          paddingTop: StatusBar.currentHeight+20,
+          paddingTop: StatusBar.currentHeight + 20,
           flex: 1,
           paddingBottom: 55,
         },
@@ -125,7 +125,7 @@ export default function ProductList() {
             href={{
               pathname: `/${item.id}`,
               params: {
-                id : item.id ,
+                id: item.id,
                 title: item.title,
                 price: item.price,
                 imagess: JSON.stringify(item.images),
@@ -144,7 +144,7 @@ export default function ProductList() {
               rating={item.rating}
               colors={item.colors}
               description={item.description}
-              id ={item.id}
+              id={item.id}
 
             />
           </Link>

@@ -3,8 +3,20 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import Entypo from "@expo/vector-icons/Entypo";
 import CartItems from "../../../Components/CartItems";
 import { useRouter } from "expo-router";
+import { useState } from "react";
+import { deleteAll } from "../../../firebase/Cart";
 export default function Cart() {
-
+  const [deleting, setDeleting] = useState(false);
+  const handleDeleteAll = async () => {
+    setDeleting(true);
+    try {
+      await deleteAll();
+      Alert.alert("Success", "All products removed from cart");
+    } catch (error) {
+      Alert.alert("Error", "Failed to delete all products from cart");
+    }
+    setDeleting(false);
+  }
   const router = useRouter();
   return (
     <View style={styles.container}>
@@ -20,7 +32,7 @@ export default function Cart() {
         <Text style={styles.textHeader}>Cart</Text>
 
         {/* for delete all product */}
-        <Entypo name="eraser" size={21} color="black" onPress={() => (Alert.alert('Here hundle delete all product'))} />
+        <Entypo name="eraser" size={21} color="black" onPress={() => handleDeleteAll()} />
       </View>
       <CartItems/>
     </View>

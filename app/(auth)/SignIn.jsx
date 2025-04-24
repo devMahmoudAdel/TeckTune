@@ -21,9 +21,13 @@ export default function SignIn() {
 
   // Get router and auth context
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, enterGuestMode } = useAuth();
 
-  // Handle login submission
+  const handleSkip = () => {
+    enterGuestMode();
+    router.replace("../(main)/(tabs)/Home");
+  };
+
   const handleLogin = async () => {
     // Basic validation
     if (!email || !password) {
@@ -72,6 +76,11 @@ export default function SignIn() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Add Skip button */}
+      <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
+        <Text style={styles.skipText}>Skip</Text>
+      </TouchableOpacity>
+
       <View style={styles.headerContainer}>
         <Text style={styles.textTitle}>Login Now</Text>
         <Text style={styles.textsubTitle}>
@@ -237,5 +246,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#d9d9d9",
     marginHorizontal: 10,
     padding: 10,
+  },
+  skipButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    padding: 10,
+    zIndex: 1,
+  },
+  skipText: {
+    color: "#2f2baa",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
