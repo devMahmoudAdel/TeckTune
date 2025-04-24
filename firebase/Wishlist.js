@@ -7,12 +7,8 @@ import CheckAlert from '../Components/CheckAlert.jsx';
 const addToWishlist = async (productId) => {
   try {
     const user = auth.currentUser;
-    const product = await getProduct(productId);
-    if (!product) {
-      <CheckAlert state="question" title="product not found"/>
-    }
     const wishlistDocRef = doc(db, 'users', user.uid, 'wishlist', productId);
-    await setDoc(wishlistDocRef, {...product}, {merge: true});
+    await setDoc(wishlistDocRef, {productId, createdAt: new Date()}, {merge: true});
     return true;
   } catch (error) {
     <CheckAlert state="error" title={error.message}/>
@@ -23,7 +19,14 @@ const getWishlist = async () => {
     const user = auth.currentUser;
     const wishlistCollectionRef = collection(db, 'users', user.uid, 'wishlist');
     const wishlistSnapshot = await getDocs(wishlistCollectionRef);
-    const wishlist = wishlistSnapshot.docs.map((doc) => doc.data());
+    const wishlist = await Promise.all(wishlistSnapshot.docs.map(async (doc) => {
+      const data = doc.data();
+      const product = await getProduct(data.productId);
+      return {
+        ...data,
+        ...product,
+      };
+    }));
     return wishlist;
   } catch (error) {
     <CheckAlert state="error" title={error.message}/>
