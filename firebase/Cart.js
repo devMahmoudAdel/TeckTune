@@ -3,15 +3,11 @@ import { collection, doc, setDoc, deleteDoc, getDocs , getDoc, updateDoc, addDoc
 import { auth } from "./config";
 import { getProduct } from "./Product";
 import CheckAlert from "../Components/CheckAlert";
-const addToCart = async (productId, quantity=1) => {
+const addToCart = async (productId, quantity=1,attributes={}) => {
   try {
     const user = auth.currentUser;
-    const product = await getProduct(productId);
-    if (!product) {
-      throw new Error("Product not found");
-    }
     const cartDocRef = doc(db, "users", user.uid, "cart", productId);
-    await setDoc(cartDocRef, {  quantity, ...product }, { merge: true });
+    await setDoc(cartDocRef, {  quantity, productId, attributes, createdAt: new Date() }, { merge: true });
     return true;
   } catch (error) {
     <CheckAlert state="error" title={error.message}/>
@@ -34,7 +30,15 @@ const getCart = async () => {
     const user = auth.currentUser;
     const cartCollectionRef = collection(db, "users", user.uid, "cart");
     const cartSnapshot = await getDocs(cartCollectionRef);
-    const cart = cartSnapshot.docs.map((doc) => doc.data());
+    const cart = await Promise.all(cartSnapshot.docs.map(async (doc) => {
+      const data = doc.data();
+      const product = await getProduct(data.productId);
+      return {
+        ...data,
+        ...product,
+      };
+    }));
+
     return cart;
   } catch (error) {
     <CheckAlert state="error" title={error.message}/>
