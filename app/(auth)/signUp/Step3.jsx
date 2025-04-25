@@ -85,29 +85,29 @@ const Step3 = () => {
   };
 
   const pickImage = async () => {
-    // const hasPermissions = await requestPermissions();
-    // if (!hasPermissions) return;
+    const hasPermissions = await requestPermissions();
+    if (!hasPermissions) return;
 
-    // let result = await ImagePicker.launchImageLibraryAsync({
-    //   mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    //   allowsEditing: true,
-    //   aspect: [1, 1],
-    //   quality: 0.8,
-    // });
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
 
-    // if (!result.canceled) {
-    //   handleImageSelection(result.assets[0].uri);
-    // }
-
-
-    const res = await SelectAndUploadImage();
-
-    if (res.success) {
-      handleImageSelection(res.url);
-      console.log("url: " + res.url);
-    } else {
-      Alert.alert("failed upload image");
+    if (!result.canceled) {
+      handleImageSelection(result.assets[0].uri);
     }
+
+
+    // const res = await SelectAndUploadImage();
+
+    // if (res.success) {
+    //   handleImageSelection(res.url);
+    //   console.log("url: " + res.url);
+    // } else {
+    //   Alert.alert("failed upload image");
+    // }
       
 
   };
