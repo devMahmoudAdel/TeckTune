@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState,useCallback } from 'react';
 import Entypo from "@expo/vector-icons/Entypo";
 import { Text, View, StyleSheet, StatusBar, Alert } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter,useFocusEffect } from "expo-router";
 import Wishlistitems from "../../../Components/Wishlistitems";
 import { deleteAll } from '../../../firebase/Wishlist';
+import { useAuth } from "../../../context/useAuth";
+import Empty from '../../../Components/Empty';
 const Wishlist = () => {
   const router = useRouter();
+  const { user, guest } = useAuth();
   const [deleting, setDeleting] = useState(false);
   const handleDeleteAll = async () => {
     setDeleting(true);
@@ -31,9 +34,11 @@ const Wishlist = () => {
         <Text style={styles.textHeader}>Wishlist</Text>
 
         {/* for delete all product */}
-        <Entypo name="eraser" size={21} color="black" onPress={() => handleDeleteAll()} />
+        {!guest && <Entypo name="eraser" size={21} color="black" onPress={() => handleDeleteAll()} />}
       </View>
-      <Wishlistitems/>
+      <View style={[styles.container, { justifyContent: "center" }]}>
+      {guest ? <Empty text="Guest User" subText="Login to see your wishlist"/>:<Wishlistitems/>}
+      </View>
     </View>
   );
 };
@@ -43,6 +48,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
+    width: "100%",
     
   },
   header: {
