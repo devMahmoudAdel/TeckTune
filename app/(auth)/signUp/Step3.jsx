@@ -17,7 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { SelectAndUploadImage } from "../../../supabase/laodImage"
+import { processAndUploadAvatar } from "../../../supabase/loadImage";
 
 const { width } = Dimensions.get("window");
 const AVATAR_SIZE = width / 3 - 20;
@@ -98,18 +98,6 @@ const Step3 = () => {
     if (!result.canceled) {
       handleImageSelection(result.assets[0].uri);
     }
-
-
-    // const res = await SelectAndUploadImage();
-
-    // if (res.success) {
-    //   handleImageSelection(res.url);
-    //   console.log("url: " + res.url);
-    // } else {
-    //   Alert.alert("failed upload image");
-    // }
-      
-
   };
 
   const takePhoto = async () => {
@@ -147,6 +135,7 @@ const Step3 = () => {
     // Use the pre-generated random index from useRef
     selectDefaultAvatar(randomDefaultAvatarIndex.current);
   };
+
   const handleSignup = async () => {
     if (!avatar) {
       Alert.alert(
@@ -159,7 +148,22 @@ const Step3 = () => {
     setIsProcessing(true);
 
     try {
-      // Create user data object with all the required fields
+      let avatarInfo = null;
+
+      if (selectedDefaultAvatar !== null) {
+        const avatarResult = await processAndUploadAvatar(
+          selectedDefaultAvatar
+        );
+        if (avatarResult.success) {
+          avatarInfo = avatarResult.avatarInfo;
+        }
+      } else if (typeof avatar === "string") {
+        const avatarResult = await processAndUploadAvatar(avatar);
+        if (avatarResult.success) {
+          avatarInfo = avatarResult.avatarInfo;
+        }
+      }
+
       const userData = {
         username,
         email,
@@ -171,6 +175,7 @@ const Step3 = () => {
         avatarType: selectedDefaultAvatar !== null ? "default" : "custom",
         avatarIndex: selectedDefaultAvatar,
         avatarUri: typeof avatar === "string" ? avatar : null,
+        avatarInfo: avatarInfo,
       };
 
       console.log("Submitting user data:", {

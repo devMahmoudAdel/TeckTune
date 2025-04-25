@@ -9,6 +9,7 @@ import {
   deleteAccount as deleteAccountFromFirebase,
 } from "../firebase/Auth";
 import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
+import { processAndUploadAvatar } from "../supabase/loadImage";
 
 export const AuthContext = createContext();
 
@@ -79,7 +80,6 @@ export const AuthProvider = ({ children }) => {
       // Register with Firebase
       const firebaseUser = await register(userData.email, userData.password);
 
-      // let's put the password in a separate varaiable
       let pass = userData.password;
 
       // Remove password from userData before storing
@@ -92,6 +92,26 @@ export const AuthProvider = ({ children }) => {
         role: "user",
         createdAt: new Date().toISOString(),
       });
+
+      // If the avatar wasn't processed yet, I handle it now with the user ID
+      if (!userData.avatarInfo && userData.avatarUri) {
+        const avatarResult = await processAndUploadAvatar(
+          userData.avatarUri,
+          firebaseUser.uid
+        );
+
+        if (avatarResult.success) {
+          // Update the user document with avatar info
+          await setDoc(
+            doc(db, "users", firebaseUser.uid),
+            { avatarInfo: avatarResult.avatarInfo },
+            { merge: true }
+          );
+
+          // Add it to userData for local storage
+          userDataToStore.avatarInfo = avatarResult.avatarInfo;
+        }
+      }
 
       // Fetch the complete profile to store locally
       const fullUserData = {
@@ -118,11 +138,13 @@ export const AuthProvider = ({ children }) => {
       const firebaseUser = await firebaseLogin(email, password);
 
       if (!firebaseUser || !firebaseUser.uid) {
-        throw new Error("Authentication failed. Please check your credentials.");
+        throw new Error(
+          "Authentication failed. Please check your credentials."
+        );
       }
-      
+
       let pass = password;
-      
+
       // Get user profile from Firestore
       const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
 
@@ -216,46 +238,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const updateUserProfile = async (userId, userData) => {
-    try {
-      // Store the password in a separate variable if it exists
-      let pass = userData.password;
-
-      // Remove sensitive fields before storing in Firestore
-      const { password, ...userDataToStore } = userData;
-
-      // Update user profile in Firestore
-      await setDoc(
-        doc(db, "users", userId),
-        {
-          ...userDataToStore,
-          updatedAt: new Date().toISOString(),
-        },
-        { merge: true }
-      ); // Use merge to update fields without overwriting the entire document
-
-      // Get updated user profile
-      const userDoc = await getDoc(doc(db, "users", userId));
-
-      if (userDoc.exists()) {
-        const updatedUserData = {
-          id: userId,
-          email: userData.email,
-          password: pass,
-          ...userDoc.data(),
-        };
-
-        // Update local storage
-        await AsyncStorage.setItem("user", JSON.stringify(updatedUserData));
-        setUser(updatedUserData);
-
-        return updatedUserData;
-      }
-    } catch (error) {
-      console.error("Error updating user profile:", error);
-      throw error;
-    }
-  };
   return (
     <AuthContext.Provider
       value={{
@@ -265,7 +247,6 @@ export const AuthProvider = ({ children }) => {
         signup,
         login,
         logout,
-        updateUserProfile,
         enterGuestMode,
         deleteAccount,
       }}

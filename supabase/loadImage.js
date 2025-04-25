@@ -94,8 +94,89 @@ const deleteImage = async (fileName) => {
   }
 };
 
+const getStoredAvatar = async () => {
+  try {
+    const avatarJSON = await AsyncStorage.getItem('userAvatar');
+    if (avatarJSON) {
+      return { success: true, avatarInfo: JSON.parse(avatarJSON) };
+    }
+    return { success: false, error: 'No avatar found in storage' };
+  } catch (error) {
+    return { success: false, error: error.message || error };
+  }
+};
+
+
+const processAndUploadAvatar = async (avatarData, userId = null) => {
+  try {
+    if (typeof avatarData === 'number' || avatarData?.startsWith && avatarData.startsWith('file:///')) {
+    
+      let base64;
+      try {
+        base64 = await FileSystem.readAsStringAsync(avatarData, { 
+          encoding: 'base64' 
+        });
+      } catch (error) {
+        console.error("Error reading file:", error);
+        return { success: false, error: "Could not read image file" };
+      }
+
+      const fileExt = avatarData.split('.').pop() || 'png';
+      const userId_part = userId ? userId.substring(0, 8) : '';
+      const fileName = `avatar_${userId_part}_${Date.now()}.${fileExt}`;
+      
+      const imageData = {
+        base64,
+        uri: avatarData,
+        fileName,
+        type: `image/${fileExt}`
+      };
+
+      const uploadResult = await uploadImage(imageData, fileName);
+      
+      if (uploadResult.success) {
+        const avatarInfo = {
+          type: 'custom',
+          url: uploadResult.url,
+          filePath: uploadResult.filePath,
+          fileName: uploadResult.fileName
+        };
+        
+        await AsyncStorage.setItem('userAvatar', JSON.stringify(avatarInfo));
+        
+        return {
+          success: true,
+          avatarInfo
+        };
+      } else {
+        return uploadResult;
+      }
+    } else if (typeof avatarData === 'object') {
+      const avatarInfo = {
+        type: 'default',
+        index: avatarData,
+      };
+      
+      await AsyncStorage.setItem('userAvatar', JSON.stringify(avatarInfo));
+      
+      return {
+        success: true,
+        avatarInfo
+      };
+    }
+    
+    return { success: false, error: 'Invalid avatar data format' };
+  } catch (error) {
+    console.error("Error in processAndUploadAvatar:", error);
+    return { success: false, error: error.message || error };
+  }
+};
+
+
 export {
   selectImage,
   uploadImage,
   deleteImage,
+  processAndUploadAvatar,
+  getStoredAvatar
 };
