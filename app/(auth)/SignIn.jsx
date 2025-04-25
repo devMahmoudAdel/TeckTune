@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Platform,
 } from "react-native";
 import { TextInput } from "react-native";
 import { useState } from "react";
@@ -29,7 +30,6 @@ export default function SignIn() {
   };
 
   const handleLogin = async () => {
-    // Basic validation
     if (!email || !password) {
       Alert.alert("Error", "Please enter both email and password");
       return;
@@ -38,17 +38,33 @@ export default function SignIn() {
     try {
       setIsSubmitting(true);
 
-      // Call the Firebase login function from auth context
       await login(email, password);
 
-      // Navigate to the main app
       router.replace("../(main)/(tabs)/Home");
     } catch (error) {
       console.error("Login error:", error);
 
       // Handle specific Firebase errors
       let errorMessage = "Please check your credentials and try again.";
-      if (
+
+      if (error.message === "account-data-missing") {
+        Alert.alert(
+          "Account Data Missing",
+          "Your account data has been deleted. You can now create a new account with the same email address.",
+          [
+            {
+              text: "Create New Account",
+              onPress: () => router.push("/(auth)/signUp/Step1"),
+            },
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+          ]
+        );
+        setIsSubmitting(false);
+        return;
+      } else if (
         error.code === "auth/user-not-found" ||
         error.code === "auth/wrong-password"
       ) {
@@ -58,9 +74,22 @@ export default function SignIn() {
           "Too many failed login attempts. Please try again later.";
       } else if (error.code === "auth/network-request-failed") {
         errorMessage = "Network error. Please check your internet connection.";
+      } else if (error.code === "auth/invalid-credential") {
+        errorMessage =
+          "Invalid login credentials. Please double-check your email and password.";
+      } else if (error.message && error.message.includes("indexOf")) {
+        errorMessage =
+          "Login failed due to a system error. Please try again later.";
       }
 
-      Alert.alert("Login Failed", errorMessage);
+      if (error.message !== "account-data-missing") {
+        Alert.alert("Login Failed", errorMessage, [
+          {
+            text: "OK",
+            style: "default",
+          },
+        ]);
+      }
     } finally {
       setIsSubmitting(false);
     }

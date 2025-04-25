@@ -8,7 +8,7 @@ import {
   logout as firebaseLogout,
   deleteAccount as deleteAccountFromFirebase,
 } from "../firebase/Auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
 
 export const AuthContext = createContext();
 
@@ -117,8 +117,12 @@ export const AuthProvider = ({ children }) => {
       // Firebase login
       const firebaseUser = await firebaseLogin(email, password);
 
+      if (!firebaseUser || !firebaseUser.uid) {
+        throw new Error("Authentication failed. Please check your credentials.");
+      }
+      
       let pass = password;
-
+      
       // Get user profile from Firestore
       const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
 
@@ -130,20 +134,17 @@ export const AuthProvider = ({ children }) => {
           pasword: pass,
           ...userDoc.data(),
         };
+
+        // Store user in AsyncStorage
+        await AsyncStorage.setItem("user", JSON.stringify(userData));
+        setUser(userData);
+
+        return userData;
       } else {
-        // if there is no pre-stored data in the firestore
-        userData = {
-          id: firebaseUser.uid,
-          email: firebaseUser.email,
-          password: pass,
-        };
+        // if the pre-stored data in the firestore has been deleted.
+        await auth.currentUser.delete();
+        throw new Error("account-data-missing");
       }
-
-      // Store user in AsyncStorage
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
-      setUser(userData);
-
-      return userData;
     } catch (error) {
       console.error("Error during login:", error);
       throw error;
