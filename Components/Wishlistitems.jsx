@@ -9,8 +9,8 @@ const screen = Dimensions.get('window');
 const Wishlistitems = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const fetchProducts = async () => {
-    setLoading(true);
     try {
       const wishlistItems = await getWishlist();
       setProducts(wishlistItems);
@@ -18,12 +18,18 @@ const Wishlistitems = () => {
       console.error(error);
     }
     setLoading(false);
+    setRefreshing(false);
   };
   useFocusEffect(
       useCallback(() => {
+        setLoading(true);
         fetchProducts();
       }, [])
     );
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProducts();
+  };
   if (loading) {
     return (
       <Loading/>
@@ -45,9 +51,16 @@ const Wishlistitems = () => {
         gap: 10,
         paddingBottom: 100,
       }}
-      refreshControl={<RefreshControl refreshing={false} />}
       scrollEnabled={true}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={["#2f2baa"]} // Customize refresh indicator color
+                  tintColor="#2f2baa" // iOS only
+                />
+              }
       data={products}
       renderItem={({ item }) => (
         <Pressable>

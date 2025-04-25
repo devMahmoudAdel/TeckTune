@@ -23,11 +23,13 @@ import products from "../../../../Components/data";
 import { Link, useRouter } from "expo-router";
 import Product from "../../../../Components/Product";
 import { getAllProducts } from "../../../../firebase/Product";
+import Loading from "../../../../Components/Loading";
 
 
 export default function Home() {
   const { user } = useAuth(); // Ensure useContext is called consistently
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -44,43 +46,46 @@ export default function Home() {
       product.title.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery, allProducts, topProducts]);
+  const fetchProducts = async () => {
+    try {
+      const productsData = await getAllProducts();
+      const validatedProducts = productsData.map((product) => ({
+        id: product.id || Math.random().toString(36).substring(7),
+        title: product.title || "Untitled Product",
+        price: product.price || 0,
+        images: product.images || [],
+        rating: product.rating || 0,
+        colors: product.colors || [],
+        description: product.description || "",
+        reviews: product.reviews || [],
+        stock: product.stock || 0,
+        category: product.category || "Uncategorized",
+        createdAt: product.createdAt || new Date(),
+        updatedAt: product.updatedAt || new Date(),
+        productPics: product.productPics || [],
+      }));
+      setAllProducts(validatedProducts);
+    } catch (err) {
+      setError("Failed to load products. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const productsData = await getAllProducts();
-        const validatedProducts = productsData.map((product) => ({
-          id: product.id || Math.random().toString(36).substring(7),
-          title: product.title || "Untitled Product",
-          price: product.price || 0,
-          images: product.images || [],
-          rating: product.rating || 0,
-          colors: product.colors || [],
-          description: product.description || "",
-          reviews: product.reviews || [],
-          stock: product.stock || 0,
-          category: product.category || "Uncategorized",
-          createdAt: product.createdAt || new Date(),
-          updatedAt: product.updatedAt || new Date(),
-          productPics: product.productPics || [],
-        }));
-        setAllProducts(validatedProducts);
-      } catch (err) {
-        setError("Failed to load products. Please try again.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
+  useEffect(() => {    
     fetchProducts();
   }, []);
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProducts();
+  };
+
   if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ fontSize: 18, fontWeight: "bold" }}>Loading...</Text>
-      </View>
+      <Loading/>
     );
   }
   return (
@@ -183,13 +188,20 @@ export default function Home() {
         <FlatList
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={false} />}
           numColumns={2}
           contentContainerStyle={{
             justifyContent: "center",
             alignItems: "center",
           }}
           scrollEnabled={true}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#2f2baa"]} // Customize refresh indicator color
+              tintColor="#2f2baa" // iOS only
+            />
+          }
           data={filteredProducts}
           renderItem={({ item }) => (
             <Link
