@@ -29,7 +29,7 @@ import {
 } from "../../firebase/Wishlist";
 import fallbackImage from "../../assets/icon.png";
 import CheckAlert from "../../Components/CheckAlert";
-
+import { useAuth } from "../../context/useAuth";
 const { width, height } = Dimensions.get("window");
 
 
@@ -38,12 +38,12 @@ export default function ProductDetails() {
   const [selectedColor, setSelectedColor] = useState(null);
   const [dynamicReviews, setDynamicReviews] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isWishList, setIsWishList] = useState(true);
+  const [isWishList, setIsWishList] = useState(false);
   const [isCart, setIsCart] = useState(false);
   const [loading, setLoading] = useState(true); 
   const [images, setImages] = useState([]);
   const [colors, setColors] = useState([]);
-
+  const { user, guest } = useAuth();
   const params = useLocalSearchParams();
   const title = params.title || "Product Title";
   const price = params.price || "0";
@@ -68,6 +68,7 @@ export default function ProductDetails() {
   }, [params.imagess, params.colorss]);
 
   useEffect(() => {
+    if(!guest){
     const checkWishListStatus = async () => {
       try {
         const inList = await inWishlist(id);
@@ -79,11 +80,12 @@ export default function ProductDetails() {
 
     if (id) {
       checkWishListStatus();
-    }
+    }}
   }, [id]);
 
 
   useEffect(() => {
+    if(!guest){
     const checkCartStatus = async () => {
       try {
         const inList = await inCart(id);
@@ -95,7 +97,7 @@ export default function ProductDetails() {
 
     if (id) {
       checkCartStatus();
-    }
+    }}
   }, [id]);
 
 
@@ -132,34 +134,40 @@ export default function ProductDetails() {
   };
 
   const handleAddToWishList = async () => {
-    try {
-      if (isWishList) {
-        await removeFromWishlist(id);
-        setIsWishList(false);
-        <CheckAlert state="success" title="Product removed from wishlist"/>
-      } else {
-        await addToWishlist(id);
-        setIsWishList(true);
-        <CheckAlert state="success" title="Product added to wishlist"/>
+    if(guest){
+      router.push("/restricted-modal")
+    }else{
+      try {
+        if (isWishList) {
+          await removeFromWishlist(id);
+          setIsWishList(false);
+          <CheckAlert state="success" title="Product removed from wishlist"/>
+        } else {
+          await addToWishlist(id);
+          setIsWishList(true);
+          <CheckAlert state="success" title="Product added to wishlist"/>
+        }
+      } catch (error) {
+        <CheckAlert state="error" title="Failed to update wishlist"/>
       }
-    } catch (error) {
-      <CheckAlert state="error" title="Failed to update wishlist"/>
     }
   };
 
   const handleAddToCart = async () => {
-    try {
-      if (isCart) {
-        await removeFromCart(id);
-        setIsCart(false);
-        <CheckAlert state="success" title="Product removed from cart"/>
-      } else {
-        await addToCart(id);
-        setIsCart(true);
-        <CheckAlert state="success" title="Product added to cart"/>
+    if(guest){
+      router.push("/restricted-modal")
+    }else{
+      try {
+        if (isCart) {
+          router.push("/(main)/(tabs)/Cart");
+        } else {
+          await addToCart(id);
+          setIsCart(true);
+          <CheckAlert state="success" title="Product added to cart"/>
+        }
+      } catch (error) {
+        <CheckAlert state="error" title="Failed to update cart"/>
       }
-    } catch (error) {
-      <CheckAlert state="error" title="Failed to update cart"/>
     }
   };
 
@@ -333,7 +341,7 @@ export default function ProductDetails() {
                   ]}
                 >
                   <AntDesign name="shoppingcart" size={20} color="#5A31F4" />
-                  <Text style={styles.cartButtonText}>{isCart ? "Remove from Cart" : "Add to Cart"}</Text>
+                  <Text style={styles.cartButtonText}>{isCart ? "Go to Cart" : "Add to Cart"}</Text>
                 </Pressable>
 
                 <Pressable

@@ -1,6 +1,6 @@
 import React, { useState, useEffect,useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
-import { Dimensions, Text, Alert, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Text, Alert, StyleSheet, TouchableOpacity, View, RefreshControl } from 'react-native';
 import CartItem from './CartItem';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import {addToCart, removeFromCart, getCart , inCart, deleteAll} from '../firebase/Cart';
@@ -10,6 +10,7 @@ const screen = Dimensions.get('window');
 const CartItems = ({navigation}) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const handleDeleteAll = async () => {
     try {
       await deleteAll();
@@ -39,7 +40,6 @@ const CartItems = ({navigation}) => {
   };
 
   const fetchProducts = async () => {
-    setLoading(true);
     try {
       const cartItems = await getCart();
       setProducts(cartItems);
@@ -47,13 +47,19 @@ const CartItems = ({navigation}) => {
       console.error(error);
     }
     setLoading(false);
+    setRefreshing(false);
   };
   useFocusEffect(
     useCallback(() => {
+      setLoading(true);
       fetchProducts();
     }, [])
   );
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProducts();
+  };
   if (loading) {
     return (
       <Loading/>
@@ -71,6 +77,14 @@ const CartItems = ({navigation}) => {
     <View style={{ flex: 1, alignItems: 'center' }}>
     <SwipeListView
       keyExtractor={(item) => item.id}
+      refreshControl={
+                <RefreshControl
+                  refreshing={refreshing}
+                  onRefresh={onRefresh}
+                  colors={["#2f2baa"]} // Customize refresh indicator color
+                  tintColor="#2f2baa" // iOS only
+                />
+              }
       data={products}
       renderItem={({item}) => (
         <CartItem
