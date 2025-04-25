@@ -17,6 +17,7 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { SelectAndUploadImage } from "../../../supabase/laodImage"
 
 const { width } = Dimensions.get("window");
 const AVATAR_SIZE = width / 3 - 20;
@@ -84,19 +85,31 @@ const Step3 = () => {
   };
 
   const pickImage = async () => {
-    const hasPermissions = await requestPermissions();
-    if (!hasPermissions) return;
+    // const hasPermissions = await requestPermissions();
+    // if (!hasPermissions) return;
 
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
+    // let result = await ImagePicker.launchImageLibraryAsync({
+    //   mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    //   allowsEditing: true,
+    //   aspect: [1, 1],
+    //   quality: 0.8,
+    // });
 
-    if (!result.canceled) {
-      handleImageSelection(result.assets[0].uri);
+    // if (!result.canceled) {
+    //   handleImageSelection(result.assets[0].uri);
+    // }
+
+
+    const res = await SelectAndUploadImage();
+
+    if (res.success) {
+      handleImageSelection(res.url);
+      console.log("url: " + res.url);
+    } else {
+      Alert.alert("failed upload image");
     }
+      
+
   };
 
   const takePhoto = async () => {
