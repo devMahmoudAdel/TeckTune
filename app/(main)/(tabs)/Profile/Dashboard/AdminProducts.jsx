@@ -1,94 +1,56 @@
+// Simple AdminProducts Page - Displays products with CRUD functionality
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable, Alert, TextInput, StatusBar, ActivityIndicator, ToastAndroid, Platform } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Pressable, Alert, TextInput, StatusBar, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, AntDesign } from '@expo/vector-icons';
-import { getAllProducts, deleteProduct } from '@firebase/Product';
-import Toast from 'react-native-toast-message';
+import { getAllProducts, deleteProduct } from '../../../../../firebase/Product.js';
 
 export default function AdminProducts() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
-  const [deleteStatus, setDeleteStatus] = useState({ visible: false, success: false, message: '' });
+  // --- STATE MANAGEMENT ---
+  const [products, setProducts] = useState([]); // Stores all products
+  const [loading, setLoading] = useState(true); // Loading indicator
+  const [error, setError] = useState(null); // Error state
+  const [searchQuery, setSearchQuery] = useState(''); // Search input
+  const [refreshing, setRefreshing] = useState(false); // Pull-to-refresh state
   const router = useRouter();
 
+  // --- LIFECYCLE HOOKS ---
+  // Load products when component mounts
   useEffect(() => {
     fetchProducts();
   }, []);
-
-  // Function to show visual feedback based on platform
-  const showFeedback = (type, message, details = '') => {
-    // Use Toast for consistent UI across platforms
-    Toast.show({
-      type: type, // 'success', 'error', 'info'
-      text1: message,
-      text2: details,
-      position: 'bottom',
-      visibilityTime: 3000,
-    });
-    
-    // Additional feedback for Android
-    if (Platform.OS === 'android') {
-      ToastAndroid.showWithGravity(
-        message,
-        ToastAndroid.LONG,
-        ToastAndroid.CENTER
-      );
-    }
-    
-    // Show status message in UI
-    setDeleteStatus({
-      visible: true,
-      success: type === 'success',
-      message: `${message}: ${details}`
-    });
-    
-    // Auto-hide status after 3 seconds
-    setTimeout(() => {
-      setDeleteStatus({ visible: false, success: false, message: '' });
-    }, 3000);
-    
-    console.log(`[${type.toUpperCase()}]: ${message} - ${details}`);
-  };
-
-  // Enhanced fetchProducts to better handle product data
+  // --- DATA FETCHING ---
+  // Fetch all products from Firebase
   const fetchProducts = async () => {
     try {
       setLoading(true);
       const productsData = await getAllProducts();
-      
-      if (!productsData || productsData.length === 0) {
-        console.log('No products found or empty array returned');
-      } else {
-        console.log(`Fetched ${productsData.length} products`);
-      }
-      
       setProducts(productsData || []);
-      // Don't show success toast for initial load, it's distracting
-      // showFeedback('success', 'Products loaded successfully');
     } catch (err) {
       console.error('Failed to load products:', err);
       setError('Failed to load products');
-      showFeedback('error', 'Failed to load products', err.message || 'Unknown error');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
+  // --- EVENT HANDLERS ---
+  // Refresh products list
   const onRefresh = () => {
     setRefreshing(true);
     fetchProducts();
   };
   
+  // Filter products based on search query
   const filteredProducts = products.filter(product =>
     product.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // Function to delete a single product
+  
+  // Handle product deletion with confirmation
   const handleDeleteProduct = (productId, productTitle) => {
+    if (!productId) return;
+    
     Alert.alert(
       'Confirm Delete',
       `Are you sure you want to delete "${productTitle}"?`,
@@ -99,56 +61,28 @@ export default function AdminProducts() {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Show initial feedback
-              showFeedback('info', 'Deleting product...', 'Please wait');
-              const loadingId = Toast.show({
-                type: 'info',
-                text1: 'Deleting product...',
-                text2: 'Please wait',
-                position: 'bottom',
-                visibilityTime: 2000,
-              });
-              
-              console.log(`Starting deletion of product ${productId}`);
-              const result = await deleteProduct(productId);
-              
-              if (result) {
-                // Show success before refreshing products for better UX
-                Toast.hide(loadingId);
-                showFeedback(
-                  'success', 
-                  'Product deleted successfully', 
-                  `"${productTitle}" has been removed`
-                );
-                
-                // Refresh products
-                await fetchProducts();
-              }
+              await deleteProduct(String(productId));
+              // Refresh products list after deletion
+              await fetchProducts();
             } catch (error) {
               console.error(`Failed to delete product ${productId}:`, error);
-              showFeedback(
-                'error', 
-                'Failed to delete product', 
-                error.message || 'Unknown error occurred'
-              );
-            } finally {
-              setLoading(false);
             }
           },
         },
       ]
-    );
-  };
+    );  };
 
+  // --- LOADING STATE ---
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#2f2baa" />
-        <Text style={styles.loadingText}>Loading products...</Text>
+        <Text>Loading products...</Text>
       </View>
     );
   }
 
+  // --- ERROR STATE ---
   if (error) {
     return (
       <View style={styles.centered}>
@@ -157,26 +91,19 @@ export default function AdminProducts() {
     );
   }
 
+  // --- RENDER UI ---
   return (
     <View style={styles.container}>
+      {/* Header with back button */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="black" />
         </Pressable>
         <Text style={styles.title}>Products Management</Text>
-        <View style={{ width: 24 }} /> {/* Empty view for even spacing */}
+        <View style={{ width: 24 }} />
       </View>
 
-      {/* Show delete status message */}
-      {deleteStatus.visible && (
-        <View style={[
-          styles.statusMessage, 
-          deleteStatus.success ? styles.successMessage : styles.errorMessage
-        ]}>
-          <Text style={styles.statusText}>{deleteStatus.message}</Text>
-        </View>
-      )}
-
+      {/* Search input */}
       <TextInput
         style={styles.searchInput}
         placeholder="Search products..."
@@ -184,38 +111,30 @@ export default function AdminProducts() {
         onChangeText={setSearchQuery}
       />
 
+      {/* Add new product button */}
       <View style={styles.actionButtons}>
         <Pressable
-          style={[styles.button, styles.addButton]}
+          style={styles.addButton}
           onPress={() => router.push('/Profile/Dashboard/ProductForm')}
-        >
-          <Text style={styles.buttonText}>Add New Product</Text>
+        >          <Text style={styles.buttonText}>Add New Product</Text>
         </Pressable>
       </View>
 
+      {/* Products list */}
       <FlatList
         data={filteredProducts}
-        keyExtractor={(item) => item.id || item._id || String(Math.random())}
+        keyExtractor={(item) => item.id || String(Math.random())}
         contentContainerStyle={styles.listContainer}
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
-        windowSize={10}
-        showsVerticalScrollIndicator={true}
         onRefresh={onRefresh}
         refreshing={refreshing}
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No products found</Text>
-            <Pressable
-              style={[styles.button, styles.addButton, {marginTop: 20}]}
-              onPress={() => router.push('/Profile/Dashboard/ProductForm')}
-            >
-              <Text style={styles.buttonText}>Add New Product</Text>
-            </Pressable>
+            <Text>No products found</Text>
           </View>
         )}
         renderItem={({ item }) => (
           <View style={styles.productItem}>
+            {/* Product card (clickable) */}
             <Pressable
               style={styles.productContent}
               onPress={() => {
@@ -225,64 +144,44 @@ export default function AdminProducts() {
                 });
               }}
             >
+              {/* Product info */}
               <View style={styles.productInfo}>
                 <Text style={styles.productTitle}>{item.title || 'Untitled Product'}</Text>
                 <Text style={styles.productPrice}>${(item.price || 0).toFixed(2)}</Text>
-                <Text style={styles.productStock}>Stock: {item.stock || 0}</Text>
-                {item.category && (
-                  <Text style={styles.productCategory}>{item.category}</Text>
-                )}
+                <Text>Stock: {item.stock || 0}</Text>
+                {item.category && <Text>{item.category}</Text>}
               </View>
               
               <MaterialIcons name="chevron-right" size={24} color="#666" />
             </Pressable>
             
+            {/* Product description (if available) */}
             {item.description && (
               <Text numberOfLines={2} style={styles.productDescription}>
                 {item.description}
               </Text>
             )}
-            //mahmoud
-            {/* Individual delete button for each product */}
+            
+            {/* Delete button */}
             <Pressable 
-              style={styles.productDeleteButton}
-              onPress={() => handleDeleteProduct(item.id, item.title)}
+              style={styles.deleteButton}
+              onPress={() => handleDeleteProduct(item.id, item.title || 'Untitled Product')}
             >
               <AntDesign name="delete" size={18} color="#fff" />
-              {/* <Text style={styles.productDeleteText}>Delete</Text> */}
-            </Pressable>
-          </View>
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </Pressable>          </View>
         )}
       />
     </View>
   );
 }
 
+// --- STYLES ---
 const styles = StyleSheet.create({
-  statusMessage: {
-    marginHorizontal: 15,
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  successMessage: {
-    backgroundColor: '#d4edda',
-    borderColor: '#c3e6cb',
-    borderWidth: 1,
-  },
-  errorMessage: {
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
-    borderWidth: 1,
-  },
-  statusText: {
-    fontWeight: '500',
-    textAlign: 'center',
-  },
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: StatusBar.currentHeight + 10,
+    paddingTop: StatusBar.currentHeight || 10,
   },
   loadingContainer: {
     flex: 1,
@@ -301,12 +200,6 @@ const styles = StyleSheet.create({
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
-    backgroundColor: '#fff',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   title: {
     fontSize: 20,
@@ -319,48 +212,33 @@ const styles = StyleSheet.create({
     borderColor: '#ddd',
     borderRadius: 8,
     backgroundColor: '#f8f8f8',
-    fontSize: 16,
   },
   actionButtons: {
     padding: 15,
     alignItems: 'center',
   },
-  button: {
+  addButton: {
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    width: '100%',
-  },
-  addButton: {
     backgroundColor: '#2f2baa',
-  },
-  deleteButton: {
-    backgroundColor: '#ff4444',
+    width: '100%',
   },
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16,
   },
   listContainer: {
     padding: 15,
-    paddingBottom: 80,  // Add extra padding at the bottom
+    paddingBottom: 20,
   },
   productItem: {
     padding: 15,
     backgroundColor: '#fff',
     borderRadius: 8,
     marginBottom: 15,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: '#eee',
     position: 'relative',
   },
   productContent: {
@@ -375,7 +253,6 @@ const styles = StyleSheet.create({
   productTitle: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#333',
   },
   productPrice: {
     fontSize: 15,
@@ -383,58 +260,30 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 4,
   },
-  productStock: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  productCategory: {
-    fontSize: 13,
-    color: '#888',
-    marginTop: 4,
-    fontStyle: 'italic',
-  },
   productDescription: {
-    fontSize: 14,
-    color: '#666',
     marginTop: 8,
-    marginBottom: 30,  // Give space for the delete button
-    lineHeight: 20,
+    marginBottom: 40,
+    color: '#666',
   },
-  productDeleteButton: {
+  deleteButton: {
     position: 'absolute',
     bottom: 10,
     right: 15,
     backgroundColor: '#ff4444',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    padding: 8,
     borderRadius: 6,
   },
-  productDeleteText: {
+  deleteButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
     marginLeft: 5,
-    fontSize: 12,
   },
   emptyContainer: {
     padding: 20,
     alignItems: 'center',
   },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
-  },
   errorText: {
-    fontSize: 16,
     color: '#ff4444',
-    textAlign: 'center',
   },
 });
