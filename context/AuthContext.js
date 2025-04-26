@@ -6,7 +6,7 @@ import {
   register,
   login as firebaseLogin,
   logout as firebaseLogout,
-} from "../firebase/Auth";
+} from "../firebase/Auth.js";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
 export const AuthContext = createContext();
