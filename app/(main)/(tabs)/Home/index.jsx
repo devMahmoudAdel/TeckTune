@@ -104,8 +104,8 @@ export default function Home() {
             <Text style={styles.helloText}>Hello!</Text>
 
             <Text style={styles.userNameText}>
-              {useAuth().user.firstName
-                ? useAuth().user.firstName + "!"
+              {user.firstName
+                ? user.firstName + "!"
                 : "Guest!"}
             </Text>
 

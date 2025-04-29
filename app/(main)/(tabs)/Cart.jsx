@@ -5,8 +5,11 @@ import CartItems from "../../../Components/CartItems";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { deleteAll } from "../../../firebase/Cart";
+import { useAuth } from "../../../context/useAuth";
+import Empty from "../../../Components/Empty";
 export default function Cart() {
   const [deleting, setDeleting] = useState(false);
+  const { guest } = useAuth();
   const handleDeleteAll = async () => {
     setDeleting(true);
     try {
@@ -32,9 +35,11 @@ export default function Cart() {
         <Text style={styles.textHeader}>Cart</Text>
 
         {/* for delete all product */}
-        <Entypo name="eraser" size={21} color="black" onPress={() => handleDeleteAll()} />
+        { !guest && <Entypo name="eraser" size={21} color="black" onPress={() => handleDeleteAll()} />}
       </View>
-      <CartItems/>
+      <View style={[styles.container,{justifyContent:"center"}]}>
+      {guest ? <Empty text="Guest User" subText="Login to see your cart"/> : <CartItems/>}
+      </View>
     </View>
   );
 }
@@ -43,6 +48,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
+    width: "100%",
     
   },
   header: {
