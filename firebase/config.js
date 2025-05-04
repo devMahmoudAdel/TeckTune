@@ -7,12 +7,12 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBiUeOSt7zYlFEeW74Wlep2QlDGF-vweN8",
-  authDomain: "tecktune-fcaca.firebaseapp.com",
-  projectId: "tecktune-fcaca",
-  storageBucket: "tecktune-fcaca.firebasestorage.app",
-  messagingSenderId: "604049454935",
-  appId: "1:604049454935:web:f5fa40b5accf837d23f012",
+  apiKey: "AIzaSyCuzHbnOeWZZZLX9ihVn1JqPB2BqOQV4jw",
+  authDomain: "software-3b26b.firebaseapp.com",
+  projectId: "software-3b26b",
+  storageBucket: "software-3b26b.firebasestorage.app",
+  messagingSenderId: "781918532588",
+  appId: "1:781918532588:web:911f648f05ed84c06f06c9",
 };
 
 // Initialize Firebase

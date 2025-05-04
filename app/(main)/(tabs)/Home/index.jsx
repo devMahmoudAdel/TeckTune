@@ -24,6 +24,9 @@ import { Link, useRouter } from "expo-router";
 import Product from "../../../../Components/Product";
 import { getAllProducts } from "../../../../firebase/Product";
 import Loading from "../../../../Components/Loading";
+import Notifications from "../../../../Components/Notifications";
+import Swiper from "../../../../Components/Swiper";
+
 
 
 export default function Home() {
@@ -89,7 +92,7 @@ export default function Home() {
     );
   }
   return (
-    <>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.userContainer}>
@@ -122,41 +125,11 @@ export default function Home() {
       </View>
 
       {/* Notification Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Notifications</Text>
-            <FlatList
-              data={notifications
-                .sort((a, b) => new Date(b.time) - new Date(a.time))
-                .slice(0, 5)}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.notificationCard}>
-                  <Text style={styles.notificationTitle}>{item.title}</Text>
-                  <Text style={styles.notificationDescription}>
-                    {item.description}
-                  </Text>
-                </View>
-              )}
-            />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <Notifications modalVisible={modalVisible} setModalVisible={setModalVisible}/>
 
       {/* Search */}
       <Search setFilter={setSearchQuery} />
+      <Swiper/>
       <View
         style={{
           flexDirection: "row",
@@ -164,6 +137,7 @@ export default function Home() {
           alignItems: "center",
           paddingHorizontal: 15,
           marginVertical: 10,
+          width: "95%",
         }}
       >
         <Text style={{ fontSize: 20, fontWeight: "bold" }}>Top Rated</Text>
@@ -231,13 +205,22 @@ export default function Home() {
           )}
         />
       </View>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container:{
+    flex: 1,
+    width: "100%",
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: StatusBar.currentHeight + 5,
+  },
   header: {
-    marginTop: 50,
+    width: "100%",
+    
     paddingHorizontal: 15,
     paddingVertical: 20,
     flexDirection: "row",
@@ -271,6 +254,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   searchContainer: {
+    
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#e5e5e5",
