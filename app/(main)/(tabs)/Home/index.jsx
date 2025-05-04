@@ -26,6 +26,7 @@ import { getAllProducts } from "../../../../firebase/Product";
 import Loading from "../../../../Components/Loading";
 import Notifications from "../../../../Components/Notifications";
 import Swiper from "../../../../Components/Swiper";
+import { StatusBar } from "react-native";
 
 
 
