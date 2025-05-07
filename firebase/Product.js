@@ -62,10 +62,10 @@ const updateProduct = async (id, product) => {
       stock: product.stock,
       colors: product.colors,
       rating: product.rating,
-      // Add the new fields from our enhanced form
       imageUrl: product.imageUrl,
       brand: product.brand,
       featured: product.featured,
+      productImages: product.productImages || [], // Include the array of Supabase images
       updatedAt: new Date()
     };
     
