@@ -80,7 +80,7 @@ export const selectImage = async (useCamera = false) => {
       width: asset.width,
       height: asset.height,
       fileType: fileType,
-      fileName: asset.fileName || `image_${Date.now()}.${fileType}`,
+      fileName: `product_${Date.now()}.${fileType}`,
     };
   } catch (error) {
     // Log and return any errors that occur
@@ -111,8 +111,7 @@ export const uploadImage = async (imageData, nameFile = null, onProgress = null)
     }
 
     // Step 2: Generate a filename - use provided or create one
-    const extension = imageData.fileType || 'jpg';
-    const fileName = nameFile || `product_${Date.now()}.${extension}`;
+    const fileName = nameFile || imageData.fileName || `product_${Date.now()}.${imageData.fileType}`;
     const filePath = `products/${fileName}`; // Store in 'products' folder
     
     console.log(`Starting upload: ${fileName} from URI: ${imageData.uri}`);

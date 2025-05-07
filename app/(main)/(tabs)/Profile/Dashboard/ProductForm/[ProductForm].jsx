@@ -18,7 +18,7 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { getProduct, updateProduct, addProduct, deleteProduct } from "../../../../../../firebase/Product";
-import { selectImage, uploadImage, deleteImage } from '../../../../../../supabase/laodImage';
+import { selectImage, uploadImage, deleteImage } from '../../../../../../firebase/imageStorage';
 import Toast from 'react-native-toast-message';
 
 export default function ProductForm() {
