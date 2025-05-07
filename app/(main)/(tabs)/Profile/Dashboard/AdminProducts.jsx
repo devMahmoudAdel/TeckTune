@@ -161,7 +161,7 @@ export default function AdminProducts() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={24} color="black" />
+          <Ionicons name="arrow-back" size={24} color="#2f2baa" />
         </Pressable>
         <Text style={styles.title}>Products Management</Text>
         <View style={{ width: 24 }} />
@@ -181,19 +181,10 @@ export default function AdminProducts() {
       <TextInput
         style={styles.searchInput}
         placeholder="Search products..."
+        placeholderTextColor="#666"
         value={searchQuery}
         onChangeText={setSearchQuery}
       />
-
-      {/* Add Product Button */}
-      <View style={styles.actionButtons}>
-        <Pressable
-          style={styles.addButton}
-          onPress={() => router.push('/Profile/Dashboard/ProductForm')}
-        >
-          <Text style={styles.buttonText}>Add New Product</Text>
-        </Pressable>
-      </View>
 
       {/* Products List */}
       <FlatList
@@ -217,15 +208,26 @@ export default function AdminProducts() {
             </Pressable>
           </View>
         )}
-        renderItem={({ item }) => (
-          <View style={styles.productCard}>
+        ListHeaderComponent={() => (
+          <View style={styles.actionButtons}>
             <Pressable
-              style={styles.productContent}
-              onPress={() => router.push({
-                pathname: "/Profile/Dashboard/ProductForm/[ProductForm]",
-                params: { id: item.id }
-              })}
+              style={styles.addButton}
+              onPress={() => router.push('/Profile/Dashboard/ProductForm')}
             >
+              <MaterialIcons name="add" size={24} color="#fff" style={{marginRight: 8}} />
+              <Text style={styles.buttonText}>Add New Product</Text>
+            </Pressable>
+          </View>
+        )}
+        renderItem={({ item }) => (
+          <Pressable
+            style={styles.productCard}
+            onPress={() => router.push({
+              pathname: "/Profile/Dashboard/ProductForm/[ProductForm]",
+              params: { id: item.id }
+            })}
+          >
+            <View style={styles.productContent}>
               <View style={styles.productInfo}>
                 <Text style={styles.productTitle}>
                   {item.title || 'Untitled Product'}
@@ -241,8 +243,8 @@ export default function AdminProducts() {
                 )}
               </View>
               
-              <MaterialIcons name="chevron-right" size={24} color="#666" />
-            </Pressable>
+              <MaterialIcons name="chevron-right" size={24} color="#2f2baa" />
+            </View>
             
             {item.description && (
               <Text numberOfLines={2} style={styles.productDescription}>
@@ -257,7 +259,7 @@ export default function AdminProducts() {
               <AntDesign name="delete" size={18} color="#fff" />
               <Text style={styles.deleteButtonText}>Delete</Text>
             </Pressable>
-          </View>
+          </Pressable>
         )}
       />
     </View>
@@ -267,8 +269,167 @@ export default function AdminProducts() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f8f9fa',
     paddingTop: StatusBar.currentHeight || 0,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    backgroundColor: '#fff',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    paddingTop: StatusBar.currentHeight + 15 || 15,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  searchInput: {
+    margin: 15,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    fontSize: 16,
+    color: '#333',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+  },
+  actionButtons: {
+    padding: 15,
+    paddingTop: 0,
+  },
+  addButton: {
+    backgroundColor: '#2f2baa',
+    padding: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  productCard: {
+    backgroundColor: '#fff',
+    padding: 15,
+    borderRadius: 12,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#eee',
+    position: 'relative',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  productContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  productInfo: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  productTitle: {
+    fontSize: 17,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 6,
+  },
+  productPrice: {
+    fontSize: 16,
+    color: '#2f2baa',
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  productStock: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
+  },
+  productCategory: {
+    fontSize: 14,
+    color: '#666',
+    fontStyle: 'italic',
+  },
+  productDescription: {
+    marginTop: 10,
+    color: '#666',
+    fontSize: 14,
+    lineHeight: 20,
+    marginBottom: 35,
+  },
+  deleteButton: {
+    position: 'absolute',
+    bottom: 15,
+    right: 15,
+    backgroundColor: '#ff4444',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+    borderRadius: 8,
+    elevation: 1,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    marginLeft: 5,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  statusMessage: {
+    marginHorizontal: 15,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  successMessage: {
+    backgroundColor: '#d4edda',
+    borderColor: '#c3e6cb',
+    borderWidth: 1,
+  },
+  errorMessage: {
+    backgroundColor: '#f8d7da',
+    borderColor: '#f5c6cb',
+    borderWidth: 1,
+    elevation: 1,
+  },
+  statusText: {
+    fontWeight: '500',
+    textAlign: 'center',
+    color: '#333',
+  },
+  emptyContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
   },
   loadingContainer: {
     flex: 1,
@@ -285,161 +446,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-    backgroundColor: '#fff',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  statusMessage: {
-    marginHorizontal: 15,
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
-    marginTop: 10,
-  },
-  successMessage: {
-    backgroundColor: '#d4edda',
-    borderColor: '#c3e6cb',
-    borderWidth: 1,
-  },
-  errorMessage: {
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
-    borderWidth: 1,
-  },
-  statusText: {
-    fontWeight: '500',
-    textAlign: 'center',
-  },
   errorText: {
     fontSize: 16,
     color: '#ff4444',
     textAlign: 'center',
   },
-  searchInput: {
-    margin: 15,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#f8f8f8',
-    fontSize: 16,
-  },
-  actionButtons: {
-    padding: 15,
-    paddingTop: 0,
-    alignItems: 'center',
-  },
-  addButton: {
-    backgroundColor: '#2f2baa',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    width: '100%',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
   listContainer: {
     paddingHorizontal: 15,
     paddingBottom: 20,
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-  },
-  productCard: {
-    backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#eee',
-    position: 'relative',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 1,
-  },
-  productContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  productInfo: {
-    flex: 1,
-    paddingRight: 10,
-  },
-  productTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  productPrice: {
-    fontSize: 15,
-    color: '#2f2baa',
-    fontWeight: 'bold',
-    marginTop: 4,
-  },
-  productStock: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-  },
-  productCategory: {
-    fontSize: 14,
-    color: '#666',
-    marginTop: 4,
-    fontStyle: 'italic',
-  },
-  productDescription: {
-    marginTop: 8,
-    marginBottom: 40,
-    color: '#666',
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  deleteButton: {
-    position: 'absolute',
-    bottom: 10,
-    right: 15,
-    backgroundColor: '#ff4444',
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-    borderRadius: 6,
-    elevation: 1,
-  },
-  deleteButtonText: {
-    color: '#fff',
-    marginLeft: 5,
-    fontSize: 14,
-    fontWeight: 'bold',
   },
 });
