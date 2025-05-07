@@ -3,7 +3,10 @@ import { View, Image, StyleSheet, Dimensions } from 'react-native';
 import Swiper from 'react-native-swiper';
 
 const { width } = Dimensions.get('window');
-
+const data = [
+  { id: 1, image: require('../assets/banner/banner1.png') },
+  { id: 2, image: require('../assets/banner/banner2.png') },
+  { id: 3, image: require('../assets/banner/banner3.png') },]
 function Swiperr (){
   return (
     <View style={styles.container}>
@@ -16,9 +19,7 @@ function Swiperr (){
         activeDotStyle={styles.activeDotStyle}
         paginationStyle={styles.pagination}
       >
-        <Image source={require('../assets/icon.png')} style={styles.image} />
-        <Image source={require('../assets/icon.png')} style={styles.image} />
-        <Image source={require('../assets/icon.png')} style={styles.image} />
+        {data.map((item) => (<Image key={item.id} source={item.image} style={styles.image} />))} 
       </Swiper>
     </View>
   );
@@ -26,7 +27,7 @@ function Swiperr (){
 
 const styles = StyleSheet.create({
   container: {
-    height: 180,
+    height: 150,
     width:"85%",
     overflow: 'hidden',
     justifyContent: 'center',
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width:"100%",
-    height: 180,
+    height: 150,
     resizeMode: 'cover',
     borderRadius: 10,
     marginHorizontal: "auto",
