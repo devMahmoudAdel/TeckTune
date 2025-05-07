@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
       await setDoc(doc(db, "users", firebaseUser.uid), {
         ...userDataToStore,
         status: "active",
-        role: "user",
+        role: userDataToStore.role || "user", // Use the role from userData or default to "user"
         createdAt: new Date().toISOString(),
       });
 
@@ -131,7 +131,7 @@ export const AuthProvider = ({ children }) => {
         userData = {
           id: firebaseUser.uid,
           email: firebaseUser.email,
-          pasword: pass,
+          password: pass,
           ...userDoc.data(),
         };
 

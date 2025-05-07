@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, Pressable, Alert, TextInput, StatusBar, ActivityIndicator, ToastAndroid, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Ionicons, MaterialIcons, AntDesign } from '@expo/vector-icons';
-// import { getAllProducts, deleteProduct } from '@firebase/Products';
 import {
-  getProduct,
-  getAllProducts,
-  updateProduct,
-  addProduct,
-  deleteProduct,
-} from "../../../../../firebase/Product";
-import Toast from 'react-native-toast-message';
+  View,
+  Text,
+  TextInput,
+  FlatList,
+  StyleSheet,
+  Pressable,
+  Alert,
+  StatusBar,
+  ActivityIndicator,
+  ToastAndroid,
+  Platform
+} from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons, AntDesign, MaterialIcons } from '@expo/vector-icons';
+import { getAllProducts, deleteProduct } from '../../../../../firebase/Product';
 
 export default function AdminProducts() {
+  // State Management
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -21,22 +26,14 @@ export default function AdminProducts() {
   const [deleteStatus, setDeleteStatus] = useState({ visible: false, success: false, message: '' });
   const router = useRouter();
 
+  // Load products on mount
   useEffect(() => {
     fetchProducts();
   }, []);
 
-  // Function to show visual feedback based on platform
+  // Function to show visual feedback
   const showFeedback = (type, message, details = '') => {
-    // Use Toast for consistent UI across platforms
-    Toast.show({
-      type: type, // 'success', 'error', 'info'
-      text1: message,
-      text2: details,
-      position: 'bottom',
-      visibilityTime: 3000,
-    });
-    
-    // Additional feedback for Android
+    // Platform specific feedback
     if (Platform.OS === 'android') {
       ToastAndroid.showWithGravity(
         message,
@@ -49,7 +46,7 @@ export default function AdminProducts() {
     setDeleteStatus({
       visible: true,
       success: type === 'success',
-      message: `${message}: ${details}`
+      message: `${message}${details ? ': ' + details : ''}`
     });
     
     // Auto-hide status after 3 seconds
@@ -60,7 +57,7 @@ export default function AdminProducts() {
     console.log(`[${type.toUpperCase()}]: ${message} - ${details}`);
   };
 
-  // Enhanced fetchProducts to better handle product data
+  // Data fetching function
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -73,8 +70,6 @@ export default function AdminProducts() {
       }
       
       setProducts(productsData || []);
-      // Don't show success toast for initial load, it's distracting
-      // showFeedback('success', 'Products loaded successfully');
     } catch (err) {
       console.error('Failed to load products:', err);
       setError('Failed to load products');
@@ -85,17 +80,21 @@ export default function AdminProducts() {
     }
   };
 
+  // Pull to refresh handler
   const onRefresh = () => {
     setRefreshing(true);
     fetchProducts();
   };
-  
+
+  // Search filter
   const filteredProducts = products.filter(product =>
     product.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Function to delete a single product
+  // Delete product handler
   const handleDeleteProduct = (productId, productTitle) => {
+    if (!productId) return;
+    
     Alert.alert(
       'Confirm Delete',
       `Are you sure you want to delete "${productTitle}"?`,
@@ -108,20 +107,12 @@ export default function AdminProducts() {
             try {
               // Show initial feedback
               showFeedback('info', 'Deleting product...', 'Please wait');
-              const loadingId = Toast.show({
-                type: 'info',
-                text1: 'Deleting product...',
-                text2: 'Please wait',
-                position: 'bottom',
-                visibilityTime: 2000,
-              });
               
               console.log(`Starting deletion of product ${productId}`);
-              const result = await deleteProduct(productId);
+              const result = await deleteProduct(String(productId));
               
               if (result) {
                 // Show success before refreshing products for better UX
-                Toast.hide(loadingId);
                 showFeedback(
                   'success', 
                   'Product deleted successfully', 
@@ -138,8 +129,6 @@ export default function AdminProducts() {
                 'Failed to delete product', 
                 error.message || 'Unknown error occurred'
               );
-            } finally {
-              setLoading(false);
             }
           },
         },
@@ -147,6 +136,7 @@ export default function AdminProducts() {
     );
   };
 
+  // Loading state
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -156,6 +146,7 @@ export default function AdminProducts() {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <View style={styles.centered}>
@@ -164,8 +155,10 @@ export default function AdminProducts() {
     );
   }
 
+  // Main UI render
   return (
     <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color="black" />
@@ -184,6 +177,7 @@ export default function AdminProducts() {
         </View>
       )}
 
+      {/* Search */}
       <TextInput
         style={styles.searchInput}
         placeholder="Search products..."
@@ -191,18 +185,20 @@ export default function AdminProducts() {
         onChangeText={setSearchQuery}
       />
 
+      {/* Add Product Button */}
       <View style={styles.actionButtons}>
         <Pressable
-          style={[styles.button, styles.addButton]}
+          style={styles.addButton}
           onPress={() => router.push('/Profile/Dashboard/ProductForm')}
         >
           <Text style={styles.buttonText}>Add New Product</Text>
         </Pressable>
       </View>
 
+      {/* Products List */}
       <FlatList
         data={filteredProducts}
-        keyExtractor={(item) => item.id || item._id || String(Math.random())}
+        keyExtractor={(item) => item.id || String(Math.random())}
         contentContainerStyle={styles.listContainer}
         initialNumToRender={10}
         maxToRenderPerBatch={10}
@@ -214,7 +210,7 @@ export default function AdminProducts() {
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No products found</Text>
             <Pressable
-              style={[styles.button, styles.addButton, {marginTop: 20}]}
+              style={[styles.addButton, {marginTop: 20}]}
               onPress={() => router.push('/Profile/Dashboard/ProductForm')}
             >
               <Text style={styles.buttonText}>Add New Product</Text>
@@ -222,20 +218,24 @@ export default function AdminProducts() {
           </View>
         )}
         renderItem={({ item }) => (
-          <View style={styles.productItem}>
+          <View style={styles.productCard}>
             <Pressable
               style={styles.productContent}
-              onPress={() => {
-                router.push({
-                  pathname: "/Profile/Dashboard/ProductForm/[ProductForm]",
-                  params: { id: item.id }
-                });
-              }}
+              onPress={() => router.push({
+                pathname: "/Profile/Dashboard/ProductForm/[ProductForm]",
+                params: { id: item.id }
+              })}
             >
               <View style={styles.productInfo}>
-                <Text style={styles.productTitle}>{item.title || 'Untitled Product'}</Text>
-                <Text style={styles.productPrice}>${(item.price || 0).toFixed(2)}</Text>
-                <Text style={styles.productStock}>Stock: {item.stock || 0}</Text>
+                <Text style={styles.productTitle}>
+                  {item.title || 'Untitled Product'}
+                </Text>
+                <Text style={styles.productPrice}>
+                  ${(item.price || 0).toFixed(2)}
+                </Text>
+                <Text style={styles.productStock}>
+                  Stock: {item.stock || 0}
+                </Text>
                 {item.category && (
                   <Text style={styles.productCategory}>{item.category}</Text>
                 )}
@@ -249,12 +249,13 @@ export default function AdminProducts() {
                 {item.description}
               </Text>
             )}
-            {/* Individual delete button for each product */}
+            
             <Pressable 
-              style={styles.productDeleteButton}
-              onPress={() => handleDeleteProduct(item.id, item.title)}
+              style={styles.deleteButton}
+              onPress={() => handleDeleteProduct(item.id, item.title || 'Untitled Product')}
             >
               <AntDesign name="delete" size={18} color="#fff" />
+              <Text style={styles.deleteButtonText}>Delete</Text>
             </Pressable>
           </View>
         )}
@@ -264,35 +265,20 @@ export default function AdminProducts() {
 }
 
 const styles = StyleSheet.create({
-  statusMessage: {
-    marginHorizontal: 15,
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  successMessage: {
-    backgroundColor: '#d4edda',
-    borderColor: '#c3e6cb',
-    borderWidth: 1,
-  },
-  errorMessage: {
-    backgroundColor: '#f8d7da',
-    borderColor: '#f5c6cb',
-    borderWidth: 1,
-  },
-  statusText: {
-    fontWeight: '500',
-    textAlign: 'center',
-  },
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: StatusBar.currentHeight + 10,
+    backgroundColor: '#f5f5f5',
+    paddingTop: StatusBar.currentHeight || 0,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
   },
   centered: {
     flex: 1,
@@ -317,6 +303,32 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
   },
+  statusMessage: {
+    marginHorizontal: 15,
+    padding: 10,
+    borderRadius: 8,
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  successMessage: {
+    backgroundColor: '#d4edda',
+    borderColor: '#c3e6cb',
+    borderWidth: 1,
+  },
+  errorMessage: {
+    backgroundColor: '#f8d7da',
+    borderColor: '#f5c6cb',
+    borderWidth: 1,
+  },
+  statusText: {
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#ff4444',
+    textAlign: 'center',
+  },
   searchInput: {
     margin: 15,
     padding: 12,
@@ -328,9 +340,11 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     padding: 15,
+    paddingTop: 0,
     alignItems: 'center',
   },
-  button: {
+  addButton: {
+    backgroundColor: '#2f2baa',
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -341,32 +355,37 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     width: '100%',
   },
-  addButton: {
-    backgroundColor: '#2f2baa',
-  },
-  deleteButton: {
-    backgroundColor: '#ff4444',
-  },
   buttonText: {
     color: '#fff',
-    fontWeight: 'bold',
     fontSize: 16,
+    fontWeight: 'bold',
   },
   listContainer: {
-    padding: 15,
-    paddingBottom: 80,  // Add extra padding at the bottom
+    paddingHorizontal: 15,
+    paddingBottom: 20,
   },
-  productItem: {
-    padding: 15,
+  emptyContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+  },
+  productCard: {
     backgroundColor: '#fff',
+    padding: 15,
     borderRadius: 8,
     marginBottom: 15,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: '#eee',
     position: 'relative',
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
   },
   productContent: {
     flexDirection: 'row',
@@ -394,52 +413,33 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   productCategory: {
-    fontSize: 13,
-    color: '#888',
+    fontSize: 14,
+    color: '#666',
     marginTop: 4,
     fontStyle: 'italic',
   },
   productDescription: {
-    fontSize: 14,
-    color: '#666',
     marginTop: 8,
-    marginBottom: 30,  // Give space for the delete button
+    marginBottom: 40,
+    color: '#666',
+    fontSize: 14,
     lineHeight: 20,
   },
-  productDeleteButton: {
+  deleteButton: {
     position: 'absolute',
     bottom: 10,
     right: 15,
     backgroundColor: '#ff4444',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    padding: 8,
     borderRadius: 6,
+    elevation: 1,
   },
-  productDeleteText: {
+  deleteButtonText: {
     color: '#fff',
-    fontWeight: 'bold',
     marginLeft: 5,
-    fontSize: 12,
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#ff4444',
-    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

@@ -179,24 +179,39 @@ const Step3 = () => {
       });
 
       // Call signup function from AuthContext
-      await signup(userData);
+      const result = await signup(userData);
+      
+      console.log("Signup successful, user data:", {
+        id: result.id,
+        email: result.email,
+      });
 
-      // After successful signup, redirect to main application
-      router.replace("../../(main)/(tabs)/Home");
+      Alert.alert(
+        "Success",
+        "Your account has been created successfully!",
+        [
+          {
+            text: "Continue",
+            onPress: () => {
+              // Direct navigation to Home screen with replace
+              router.replace("/(main)/(tabs)/Home");
+            }
+          }
+        ]
+      );
+      
     } catch (error) {
       console.error("Error during signup:", error);
 
       // Display appropriate error message based on the error code
-      let errorMessage =
-        "There was an error creating your account. Please try again.";
+      let errorMessage = error.message || "There was an error creating your account. Please try again.";
+      
       if (error.code === "auth/email-already-in-use") {
-        errorMessage =
-          "This email is already registered. Please use a different email or sign in.";
+        errorMessage = "This email is already registered. Please use a different email or sign in.";
       } else if (error.code === "auth/invalid-email") {
         errorMessage = "The email address is invalid.";
       } else if (error.code === "auth/weak-password") {
-        errorMessage =
-          "The password is too weak. Please use a stronger password.";
+        errorMessage = "The password is too weak. Please use a stronger password.";
       } else if (error.code === "auth/network-request-failed") {
         errorMessage = "Network error. Please check your internet connection.";
       }

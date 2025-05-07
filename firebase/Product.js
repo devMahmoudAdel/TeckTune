@@ -20,8 +20,11 @@ async function deleteProduct(productId) {
     const productRef = doc(db, "products", productId);
     await deleteDoc(productRef);
     <CheckAlert state="success" title="product deleted successfully"/>
+    return true; // Return true on successful deletion
   } catch (error) {
+    console.error("Error deleting product:", error);
     <CheckAlert state="error" title="Error deleting product"/>
+    return false; // Return false on error
   }
 }
 
@@ -48,25 +51,33 @@ const getAllProducts = async () => {
 
 const updateProduct = async (id, product) => {
   try {
-  const productDocRef = doc(collection(db, 'products'), id);
-  await setDoc(
-    productDocRef,
-    {
+    const productDocRef = doc(collection(db, 'products'), id);
+    
+    // Create an updated product object that includes all fields from the form
+    const updatedProduct = {
       title: product.title,
       description: product.description,
       price: product.price,
       category: product.category,
-      productPics: product.productPics,
-      createdAt: new Date(),
-      rating: product.rating,
-      colors: product.colors,
       stock: product.stock,
-    },
-    { merge: true }
-  );
-  return true;
-}catch (error) {
-  <CheckAlert state="error" title={error.message}/>
+      colors: product.colors,
+      rating: product.rating,
+      // Add the new fields from our enhanced form
+      imageUrl: product.imageUrl,
+      brand: product.brand,
+      featured: product.featured,
+      updatedAt: new Date()
+    };
+    
+    // Use setDoc with merge option to update the document
+    await setDoc(productDocRef, updatedProduct, { merge: true });
+    
+    <CheckAlert state="success" title="Product updated successfully" />
+    return true;
+  } catch (error) {
+    console.error("Error updating product:", error);
+    <CheckAlert state="error" title={error.message} />
+    return false;
   }
 }
 
