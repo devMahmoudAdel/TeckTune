@@ -354,7 +354,7 @@ export default function ProductForm() {
                 onPress={() => handleRemoveImage(index)}
                 disabled={saving}
               >
-                <MaterialIcons name="delete-outline" size={20} color="#ff4444" />
+                <MaterialIcons name="delete-outline" size={12} color="#ff4444" />
               </Pressable>
             </View>
           ))}
@@ -365,7 +365,7 @@ export default function ProductForm() {
               onPress={() => setShowImagePicker(true)}
               disabled={uploadingImage || saving}
             >
-              <MaterialIcons name="add-photo-alternate" size={32} color="#2f2baa" />
+              <MaterialIcons name="add-photo-alternate" size={16} color="#2f2baa" />
               <Text style={styles.addImageText}>Add Image</Text>
             </Pressable>
           )}
@@ -519,31 +519,31 @@ const styles = StyleSheet.create({
   imageGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 16,
+    gap: 4,
+    marginBottom: 12,
   },
   imageContainer: {
-    width: '15%', // Reduced from 23% to make images smaller
+    width: '12%', // Even smaller width
     aspectRatio: 1,
-    borderRadius: 4,
+    borderRadius: 3,
     backgroundColor: '#f8f8f8',
     position: 'relative',
-    marginRight: 8,
-    marginBottom: 8,
+    marginRight: 4,
+    marginBottom: 4,
   },
   productImage: {
     width: '100%',
     height: '100%',
-    borderRadius: 4,
+    borderRadius: 3,
   },
   removeImageButton: {
     position: 'absolute',
-    top: -6,
-    right: -6,
+    top: -4,
+    right: -4,
     backgroundColor: '#fff',
-    borderRadius: 10,
-    width: 20,
-    height: 20,
+    borderRadius: 8,
+    width: 16,
+    height: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 2,
@@ -553,21 +553,21 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
   },
   addImageButton: {
-    width: '15%', // Match the image container size
+    width: '12%', // Match the image container size
     aspectRatio: 1,
-    borderRadius: 4,
+    borderRadius: 3,
     backgroundColor: '#f8f8f8',
     borderWidth: 1,
     borderColor: '#ddd',
     borderStyle: 'dashed',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 8,
+    marginRight: 4,
   },
   addImageText: {
     color: '#2f2baa',
-    marginTop: 4,
-    fontSize: 10,
+    marginTop: 2,
+    fontSize: 8,
   },
   progressContainer: {
     flexDirection: 'row',

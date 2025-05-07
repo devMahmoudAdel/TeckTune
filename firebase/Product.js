@@ -51,28 +51,13 @@ const getAllProducts = async () => {
 
 const updateProduct = async (id, product) => {
   try {
-    const productDocRef = doc(collection(db, 'products'), id);
-    
-    // Create an updated product object that includes all fields from the form
+    const productRef = doc(db, "products", id);
     const updatedProduct = {
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      stock: product.stock,
-      colors: product.colors,
-      rating: product.rating,
-      imageUrl: product.imageUrl,
-      brand: product.brand,
-      featured: product.featured,
-      productImages: product.productImages || [], // Include the array of Supabase images
+      ...product,
       updatedAt: new Date()
     };
     
-    // Use setDoc with merge option to update the document
-    await setDoc(productDocRef, updatedProduct, { merge: true });
-    
-    <CheckAlert state="success" title="Product updated successfully" />
+    await updateDoc(productRef, updatedProduct);
     return true;
   } catch (error) {
     console.error("Error updating product:", error);
