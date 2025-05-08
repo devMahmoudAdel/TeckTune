@@ -13,7 +13,7 @@ export default function Empty(props) {
 const styles = StyleSheet.create({
     noContainer: {
         backgroundColor: "#f8f9fa",
-        width: "85%",
+        width: "90%",
         borderRadius: 10,
         padding: 20,
         alignItems: "center",
