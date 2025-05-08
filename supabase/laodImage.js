@@ -2,6 +2,47 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { decode } from 'base64-arraybuffer';
 import { supabase } from './initSupabase';
+const takePhoto = async () => {
+  try {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      return { success: false, error: 'Camera permission denied' };
+    }
+    const options: ImagePicker.ImagePickerOptions = {
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+      cameraType: ImagePicker.CameraType.back, // or 'front'
+    };
+
+    const result = await ImagePicker.launchCameraAsync(options);
+
+    if (result.canceled) {
+      return { success: false, error: 'Camera operation was cancelled' };
+    }
+
+    const img = result.assets[0];
+    const base64 = await FileSystem.readAsStringAsync(img.uri, { 
+      encoding: 'base64' 
+    });
+
+    return {
+      success: true,
+      base64,
+      uri: img.uri,
+      fileName: img.fileName || `photo_${Date.now()}.jpg`,
+      type: img.type || 'image/jpeg',
+      width: img.width,
+      height: img.height
+    };
+  } catch (error) {
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Unknown error occurred' 
+    };
+  }
+};
+
 const selectImage = async () => {
   try {
     const options = {
@@ -95,6 +136,7 @@ const deleteImage = async (fileName) => {
 };
 
 export {
+  takePhoto,
   selectImage,
   uploadImage,
   deleteImage,

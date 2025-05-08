@@ -33,7 +33,7 @@ export default function AdminProducts() {
       text1: message,
       text2: details,
       position: 'bottom',
-      visibilityTime: 3000,
+      visibilityTime: 1500,
     });
     
     // Additional feedback for Android
@@ -65,7 +65,6 @@ export default function AdminProducts() {
     try {
       setLoading(true);
       const productsData = await getAllProducts();
-      
       if (!productsData || productsData.length === 0) {
         console.log('No products found or empty array returned');
       } else {
@@ -113,23 +112,19 @@ export default function AdminProducts() {
                 text1: 'Deleting product...',
                 text2: 'Please wait',
                 position: 'bottom',
-                visibilityTime: 2000,
+                visibilityTime: 1500,
               });
               
               console.log(`Starting deletion of product ${productId}`);
               const result = await deleteProduct(productId);
               
               if (result) {
-                // Show success before refreshing products for better UX
                 Toast.hide(loadingId);
                 showFeedback(
                   'success', 
                   'Product deleted successfully', 
                   `"${productTitle}" has been removed`
                 );
-                
-                // Refresh products
-                await fetchProducts();
               }
             } catch (error) {
               console.error(`Failed to delete product ${productId}:`, error);
@@ -139,6 +134,7 @@ export default function AdminProducts() {
                 error.message || 'Unknown error occurred'
               );
             } finally {
+              fetchProducts();
               setLoading(false);
             }
           },
@@ -213,12 +209,6 @@ export default function AdminProducts() {
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No products found</Text>
-            <Pressable
-              style={[styles.button, styles.addButton, {marginTop: 20}]}
-              onPress={() => router.push('/Profile/Dashboard/ProductForm')}
-            >
-              <Text style={styles.buttonText}>Add New Product</Text>
-            </Pressable>
           </View>
         )}
         renderItem={({ item }) => (
