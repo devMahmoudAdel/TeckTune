@@ -105,7 +105,6 @@ export default function AdminProducts() {
           style: 'destructive',
           onPress: async () => {
             try {
-              // Show initial feedback
               showFeedback('info', 'Deleting product...', 'Please wait');
               const loadingId = Toast.show({
                 type: 'info',
@@ -400,6 +399,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 10,
     right: 15,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#ff4444',
     flexDirection: 'row',
     alignItems: 'center',
