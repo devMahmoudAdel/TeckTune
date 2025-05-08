@@ -1,6 +1,7 @@
 import CheckAlert from "../Components/CheckAlert";
 import { db } from "./config";
 import { collection, doc, setDoc, getDoc, getDocs } from "firebase/firestore";
+import { query, where } from "firebase/firestore";
 
 const getUser = async (userId) => {
   try {
@@ -54,7 +55,7 @@ const getAllUsers = async () => {
 const isUsernameExists = async (userName) => {
   try {
     const usersRef = collection(db, "users");
-    const q = query(usersRef, where("username", "==", username));
+    const q = query(usersRef, where("username", "==", userName));
     const querySnapshot = await getDocs(q);
     return !querySnapshot.empty;
   } catch (error) {
