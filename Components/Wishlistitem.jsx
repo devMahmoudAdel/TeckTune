@@ -31,7 +31,7 @@ const Wishlistitem = (prodcutInof) => {
   }, []);
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={prodcutInof.image} />
+      <Image style={styles.image} source={{uri: prodcutInof.image}} />
 
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>{prodcutInof.title}</Text>

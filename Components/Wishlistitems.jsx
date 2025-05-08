@@ -68,7 +68,7 @@ const Wishlistitems = () => {
             id={item.id}
             title={item.title}
             price={item.price}
-            image={item.image}
+            image={item.images[0]}
             rating={item.rating}
             quantity={item.quantity}
 
