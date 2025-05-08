@@ -19,6 +19,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#e5e5e5",
     width: "85%",
+    height: 60,
     paddingVertical: 10,
     paddingHorizontal: 20,
     marginHorizontal: 20,
@@ -32,6 +33,12 @@ const styles = StyleSheet.create({
   inputSearch: {
     fontSize: 16,
     marginLeft: 10,
+    width: "90%",
+    color: "#212121",
+    fontFamily: "Poppins",
+    fontWeight: "500",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
   },
 });
 export default Search;

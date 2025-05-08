@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Alert, StatusBar, ActivityIndicator, ToastAndroid, Platform } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import React, { useState,useCallback } from 'react';
+import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Alert, StatusBar, ActivityIndicator, ToastAndroid, Platform, Image, FlatList,Modal, TouchableOpacity } from 'react-native';
+import { useRouter, useLocalSearchParams,useFocusEffect } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 // import { addProduct, getProduct, updateProduct } from '@firebase/Product';
 import {
@@ -11,15 +12,18 @@ import {
   deleteProduct,
 } from "../../../../../../firebase/Product";
 import Toast from 'react-native-toast-message';
-
+import {takePhoto, selectImage,uploadImage,} from '../../../../../../supabase/laodImage';
 export default function ProductForm() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const isEditing = !!params.id;
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [percent, setPercent] = useState(0);
 
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    images: [],
     price: '',
     stock: '',
     category: '',
@@ -29,39 +33,16 @@ export default function ProductForm() {
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (isEditing) {
-      fetchProduct();
-    }
-  }, [params.id]);
-
-  // Function to show visual feedback based on platform
-  const showFeedback = (type, message, details = '') => {
-    // Use Toast for consistent UI across platforms
-    Toast.show({
-      type: type, // 'success', 'error', 'info'
-      text1: message,
-      text2: details,
-      position: 'bottom',
-      visibilityTime: 3000,
-    });
-    
-    // Additional feedback for Android
-    if (Platform.OS === 'android') {
-      ToastAndroid.showWithGravity(
-        message,
-        ToastAndroid.LONG,
-        ToastAndroid.CENTER
-      );
-    }
-    
-    console.log(`[${type.toUpperCase()}]: ${message} - ${details}`);
-  };
-
+  useFocusEffect(
+    useCallback(() => {
+      if (isEditing) {
+        fetchProduct();
+      }
+    }, [params.id])
+  );  
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      console.log('Fetching product with ID:', params.id);
       const product = await getProduct(params.id);
       
       if (!product) {
@@ -73,16 +54,15 @@ export default function ProductForm() {
       setFormData({
         title: product.title || '',
         description: product.description || '',
+        images: product.images || [],
         price: product.price?.toString() || '',
         stock: product.stock?.toString() || '',
         category: product.category || '',
         colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
         rating: product.rating?.toString() || '0',
       });
-      showFeedback('success', 'Product details loaded', product.title);
     } catch (error) {
       console.error('Error fetching product:', error);
-      showFeedback('error', 'Failed to load product', error.message || 'Please try again');
     } finally {
       setLoading(false);
     }
@@ -109,63 +89,110 @@ export default function ProductForm() {
       errors.push('Rating must be between 0 and 5');
     }
 
+    if (!formData.category.trim()) {
+      errors.push('Category is required');
+    }
+
+    if (!formData.colors.trim()) {
+      errors.push('Colors are required');
+    }
+
+    if(formData.images.length === 0) {
+      errors.push('At least one image is required');
+    }
+
     return errors;
   };
+  const showFeedback = (type, title, message) => {
+    if (Platform.OS === 'android') {
+      ToastAndroid.showWithGravity(
+        `${title}: ${message}`,
+        ToastAndroid.LONG,
+        ToastAndroid.CENTER
+      );
+    } else {
+      Toast.show({
+        type: type, // 'success', 'error', 'info'
+        text1: title,
+        text2: message,
+        position: 'bottom',
+        visibilityTime: 1500,
+      });
+    }
+  };
+  const handleTakePhoto = async () => {
+    setShowImagePicker(true);
+    const image = await takePhoto();
+    if (image.success) {
+      setShowImagePicker(false);
+      const uploadedImage = await uploadImage(image, null, (percent) => {setPercent(percent)});
+      if (uploadedImage.success) {
+        setFormData({ ...formData, images: [...formData.images, uploadedImage.url] });
+        setPercent(0);
+      }
+    }
+
+  }
+  const handleSelectImage = async () => {
+    setShowImagePicker(true);
+    const image = await selectImage();
+    if (image.success) {
+      setShowImagePicker(false);
+      const uploadedImage = await uploadImage(image, null, (percent) => {
+        setPercent(percent);
+      });
+      if (uploadedImage.success) {
+      setFormData({ ...formData, images: [...formData.images, uploadedImage.url] });
+      setPercent(0);
+      }
+    }
+  }
+  const handleDeleteImage = (image) => {
+    setFormData({ ...formData, images: formData.images.filter((img) => img !== image) })
+  }
   
   const handleSubmit = async () => {
     try {
-      // Validate form data
       const errors = validateForm();
       if (errors.length > 0) {
         showFeedback('error', 'Validation Error', errors.join(', '));
         return;
       }
-
+  
       setSaving(true);
       setLoading(true);
-      
-      // Prepare data
+  
+      // Destructure form data for cleaner assignment
+      const { price, stock, rating, colors, images } = formData;
+  
+      // Prepare transformed product data
       const productData = {
         ...formData,
-        price: parseFloat(formData.price),
-        stock: parseInt(formData.stock) || 0,
-        rating: parseFloat(formData.rating) || 0,
-        colors: formData.colors.split(',').map(color => color.trim()).filter(Boolean),
-        id: isEditing ? params.id : undefined, // Make sure ID is preserved for updates
+        price: parseFloat(price),
+        stock: parseInt(stock, 10) || 0,
+        rating: parseFloat(rating) || 0,
+        colors: colors
+          .split(',')
+          .map((color) => color.trim())
+          .filter(Boolean),
+        images: Array.isArray(images) ? images : [images],
+        id: isEditing ? params.id : undefined,
         updatedAt: new Date(),
       };
-
-      // Show initial feedback
-      showFeedback('info', isEditing ? 'Updating product...' : 'Adding product...', 'Please wait');
-      
+  
+      const actionLabel = isEditing ? 'Updating product...' : 'Adding product...';
+      showFeedback('info', actionLabel, 'Please wait');
+  
+      let result;
       if (isEditing) {
-        console.log(`Updating product with ID: ${params.id}`, productData);
-        const success = await updateProduct(params.id, productData);
-        
-        if (success) {
-          showFeedback('success', 'Product Updated', 'Product has been updated successfully');
-          
-          // Allow toast to be visible before navigating back
-          setTimeout(() => {
-            router.back();
-          }, 2000);
-        } else {
-          throw new Error("Failed to update product");
-        }
+        result = await updateProduct(params.id, productData);
+        showFeedback('success', 'Product Updated', 'Product has been updated successfully');
       } else {
-        const newProductId = await addProduct(productData);
-        
-        if (newProductId) {
-          showFeedback('success', 'Product Added', `Product "${productData.title}" has been added successfully`);
-          
-          // Allow toast to be visible before navigating back
-          setTimeout(() => {
-            router.back();
-          }, 2000);
-        } else {
-          throw new Error("Failed to add product");
-        }
+        result = await addProduct(productData);
+        showFeedback('success', 'Product Added', `Product "${productData.title}" has been added successfully`);
       }
+  
+      setTimeout(() => router.back(), 2000);
     } catch (error) {
       console.error("Operation failed:", error);
       showFeedback('error', 'Operation Failed', error.message || 'Failed to save product');
@@ -174,7 +201,6 @@ export default function ProductForm() {
       setLoading(false);
     }
   };
-
   if (loading && !saving) {
     return (
       <View style={styles.loadingContainer}>
@@ -185,7 +211,6 @@ export default function ProductForm() {
       </View>
     );
   }
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -217,6 +242,34 @@ export default function ProductForm() {
           editable={!saving}
         />
 
+        <Text style={styles.label}>Images (up to 5 images)</Text>
+        <View style={styles.imagesContainer}>
+        {formData.images.length < 5 && <Pressable style={styles.addImg} onPress={() => setShowImagePicker(true)}>
+          <Text style={styles.uploadText}>+</Text>
+        </Pressable>}
+        <FlatList
+          data={formData.images}
+          renderItem={({ item }) => (
+            <View style={{ margin: 5 }}>
+              <Image
+                source={{ uri: item }}
+                style={styles.image}
+              />
+              <MaterialIcons name="delete" size={24} color="red" style={styles.deleteIcon} onPress={() => handleDeleteImage(item)}/>
+            </View>
+          )}
+          keyExtractor={item => item}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+        />
+
+        </View>
+        {percent > 0 && percent < 100 && (
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressBar, { width: `${percent}%` }]} />
+            <Text style={styles.progressText}>{percent}%</Text>
+          </View>
+        )}
         <Text style={styles.label}>Price *</Text>
         <TextInput
           style={styles.input}
@@ -284,6 +337,37 @@ export default function ProductForm() {
           )}
         </Pressable>
       </ScrollView>
+      <Modal
+        visible={showImagePicker}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowImagePicker(false)}
+      >
+        <Pressable 
+          style={styles.modalOverlay}
+          onPress={() => setShowImagePicker(false)}
+        >
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Choose Image Source</Text>
+            <TouchableOpacity 
+              style={styles.modalOption}
+              onPress={() => handleTakePhoto()}
+            >
+              <MaterialIcons name="camera-alt" size={24} color="#2f2baa" />
+              <Text style={styles.modalOptionText}>Take a Photo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.modalOption}
+              onPress={() => handleSelectImage()}
+            >
+              <MaterialIcons name="photo-library" size={24} color="#2f2baa" />
+              <Text style={styles.modalOptionText}>Choose from Gallery</Text>
+            </TouchableOpacity>
+            
+            
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -337,7 +421,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 40,
+    marginBottom: 80,
   },
   disabledButton: {
     backgroundColor: '#9e9dc6',
@@ -368,5 +452,104 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#ff4444',
     textAlign: 'center',
-  }
+  },
+  addImg: {
+    width: 60,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#e2e2e2',
+    borderRadius: 6,
+    borderStyle: 'dashed',
+    borderColor: '#919191',
+    borderWidth: 2,
+    marginVertical: 15,
+  },
+  uploadText: {
+    color: '#919191',
+    fontSize: 25,
+    padding: 5
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 10,
+    backgroundColor: '#f8f8f8',
+  },
+  modalOptionText: {
+    fontSize: 16,
+    color: '#2f2baa',
+    marginLeft: 12,
+    fontWeight: '500',
+  },
+  image: {
+    width: 60,
+    height: 60,
+    borderRadius: 8
+  },
+  deleteIcon: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    padding: 2,
+    borderRadius: 50,
+    backgroundColor: 'white' 
+  },
+  savingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imagesContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    height: 25,
+    width: '100%',
+    backgroundColor: '#e0e0e0',
+    borderRadius: 5,
+    overflow: 'hidden',
+    marginBottom: 15,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+  },
+  progressBar: {
+    height: '5',
+    backgroundColor: '#2f2baa',
+  },
+  progressText: {
+    color: '#000',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
 });

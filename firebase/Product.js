@@ -5,8 +5,8 @@ import CheckAlert from "../Components/CheckAlert";
 // Function to add a product to Firestore
 async function addProduct(productData) {
   try {
-    const docRef = await addDoc(collection(db, "products"), productData);
-    await updateDoc(docRef, { id: docRef.id });
+    const docRef = doc(collection(db, "products"));
+    await setDoc(docRef, {...productData, id: docRef.id});
     <CheckAlert state="success" title="Product added successfully"/>
     return docRef.id;
   } catch (error) {
@@ -51,17 +51,7 @@ const updateProduct = async (id, product) => {
   const productDocRef = doc(collection(db, 'products'), id);
   await setDoc(
     productDocRef,
-    {
-      title: product.title,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      productPics: product.productPics,
-      createdAt: new Date(),
-      rating: product.rating,
-      colors: product.colors,
-      stock: product.stock,
-    },
+    product,
     { merge: true }
   );
   return true;

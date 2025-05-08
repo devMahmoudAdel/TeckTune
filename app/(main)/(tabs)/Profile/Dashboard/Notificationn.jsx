@@ -2,11 +2,13 @@ import { View, Text, FlatList, StyleSheet, Pressable, Modal, TextInput, Alert, R
 import React, { useState,useEffect } from "react";
 import { getNotifications, addNotification, deleteNotification, getNotification } from "../../../../../firebase/notification";
 import Empty from "../../../../../Components/Empty";
+import Loading from "../../../../../Components/Loading";
 export default function Notificationn({ isAdmin = true }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [notifications, setNotifications] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const fetchNotifications = async () => {
     try {
       const notificationsData = await getNotifications();
@@ -14,9 +16,12 @@ export default function Notificationn({ isAdmin = true }) {
     } catch (error) {
       console.error("Error fetching notifications:", error);
     }
+    setIsLoading(false);
   };
   useEffect(()=>{
+    setIsLoading(true);
     fetchNotifications();
+  
   },[])
   const formatDate = (isoString) => {
     const date = new Date(isoString);
@@ -65,7 +70,11 @@ export default function Notificationn({ isAdmin = true }) {
     );
   };
 
+  if (isLoading) {
+    return (<Loading/>)
+  }
   const sortedNotifications = [...notifications].sort((a, b) => new Date(b.time) - new Date(a.time));
+  
   if (notifications.length === 0) {
     return (
       <View style={styles.container}>
