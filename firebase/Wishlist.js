@@ -1,15 +1,17 @@
-import {db} from './firebase.js';
+import {db} from './config.js';
 import {collection, doc, setDoc, deleteDoc, getDocs, getDoc} from 'firebase/firestore';
-import {auth} from './firebase.js';
-
-const addToWishlist = async (product) => {
+import {auth} from './config.js';
+import { getProduct } from './Product.js';
+import CheckAlert from '../Components/CheckAlert.jsx';
+// import { useAuth } from '../context/useAuth.js';
+const addToWishlist = async (productId) => {
   try {
     const user = auth.currentUser;
-    const wishlistDocRef = doc(collection(db, 'users', user.uid, 'wishlist'));
-    await setDoc(wishlistDocRef, ...product);
+    const wishlistDocRef = doc(db, 'users', user.uid, 'wishlist', productId);
+    await setDoc(wishlistDocRef, {productId, createdAt: new Date()}, {merge: true});
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 const getWishlist = async () => {
@@ -17,10 +19,17 @@ const getWishlist = async () => {
     const user = auth.currentUser;
     const wishlistCollectionRef = collection(db, 'users', user.uid, 'wishlist');
     const wishlistSnapshot = await getDocs(wishlistCollectionRef);
-    const wishlist = wishlistSnapshot.docs.map((doc) => doc.data());
+    const wishlist = await Promise.all(wishlistSnapshot.docs.map(async (doc) => {
+      const data = doc.data();
+      const product = await getProduct(data.productId);
+      return {
+        ...data,
+        ...product,
+      };
+    }));
     return wishlist;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 
@@ -31,7 +40,7 @@ const removeFromWishlist = async (productId) => {
     await deleteDoc(wishlistDocRef);
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 
@@ -42,7 +51,21 @@ const inWishlist = async (productId) => {
     const wishlistDoc = await getDoc(wishlistDocRef);
     return wishlistDoc.exists();
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
-export {addToWishlist, getWishlist, removeFromWishlist, inWishlist};
+
+const deleteAll = async () => {
+  try {
+    const user = auth.currentUser;
+    const wishlistCollectionRef = collection(db, 'users', user.uid, 'wishlist');
+    const wishlistSnapshot = await getDocs(wishlistCollectionRef);
+    wishlistSnapshot.forEach(async (doc) => {
+      await deleteDoc(doc.ref);
+    });
+    return true;
+  } catch (error) {
+    <CheckAlert state="error" title={error.message}/>
+  }
+}
+export {addToWishlist, getWishlist, removeFromWishlist, inWishlist, deleteAll};

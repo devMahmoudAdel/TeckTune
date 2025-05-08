@@ -1,84 +1,99 @@
-import { Button,ScrollView, Text, View, Image, TextInput, StyleSheet, Modal, FlatList, TouchableOpacity, Pressable, RefreshControl } from "react-native";
+import {
+  Button,
+  ScrollView,
+  Text,
+  View,
+  Image,
+  TextInput,
+  StyleSheet,
+  Modal,
+  FlatList,
+  TouchableOpacity,
+  Pressable,
+  RefreshControl,
+} from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import ProductList from "./ProductList";
 import Search from "../../../../Components/Search";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import notifications from "../../../../Components/notifictionsdata";
 import { useAuth } from "../../../../context/useAuth";
-// import products from "../../../../Components/data";
+import products from "../../../../Components/data";
 import { Link, useRouter } from "expo-router";
 import Product from "../../../../Components/Product";
 import { getAllProducts } from "../../../../firebase/Product";
+import Loading from "../../../../Components/Loading";
+import Notifications from "../../../../Components/Notifications";
+import Swiper from "../../../../Components/Swiper";
+import { StatusBar } from "react-native";
+
+
 
 export default function Home() {
-  const [products, setProducts] = useState([]);
+  const { user } = useAuth(); // Ensure useContext is called consistently
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState(products);
   const [allProducts, setAllProducts] = useState([]);
-  
   const router = useRouter();
-  // Filter products based on search query
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const productsData = await getAllProducts();
-        const validatedProducts = productsData.map((product) => ({
-          id: product.id || Math.random().toString(36).substring(7),
-          title: product.title || "Untitled Product",
-          price: product.price || 0,
-          images: product.images || [],
-          rating: product.rating || 0,
-          colors: product.colors || [],
-          description: product.description || "",
-          reviews: product.reviews || [],
-          stock: product.stock || 0,
-          category: product.category || "Uncategorized",
-          createdAt: product.createdAt || new Date(),
-          updatedAt: product.updatedAt || new Date(),
-          productPics: product.productPics || [],
-        }));
-        setAllProducts(validatedProducts);
-        console.log("Products:", productsData);
-        console.log("All Products:", allProducts);
-        console.log("Filtered Products:", filteredProducts);
-      } catch (err) {
-        setError("Failed to load products. Please try again.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
 
+  const topProducts = useMemo(() => {
+    return [...allProducts].sort((a, b) => b.rating - a.rating).slice(0, 10);
+  }, [allProducts]);
+
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) return topProducts;
+    return allProducts.filter((product) =>
+      product.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery, allProducts, topProducts]);
+  const fetchProducts = async () => {
+    try {
+      const productsData = await getAllProducts();
+      const validatedProducts = productsData.map((product) => ({
+        id: product.id || Math.random().toString(36).substring(7),
+        title: product.title || "Untitled Product",
+        price: product.price || 0,
+        images: product.images || [],
+        rating: product.rating || 0,
+        colors: product.colors || [],
+        description: product.description || "",
+        reviews: product.reviews || [],
+        stock: product.stock || 0,
+        category: product.category || "Uncategorized",
+        createdAt: product.createdAt || new Date(),
+        updatedAt: product.updatedAt || new Date(),
+        productPics: product.productPics || [],
+      }));
+      setAllProducts(validatedProducts);
+    } catch (err) {
+      setError("Failed to load products. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {    
     fetchProducts();
   }, []);
-  useEffect(() => {
-  
-    if (searchQuery.trim()) {
 
-      const filtered = topProducts.filter((product) =>
-        product.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts(topProducts);
-    }
-  }, [searchQuery, topProducts]);
-  const topProductss = JSON.parse(JSON.stringify(allProducts));
-  topProductss.sort((a, b) => b.rating - a.rating);
-  const topProducts = topProductss.slice(0, 10);
-  if(loading) {
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProducts();
+  };
+
+  if (loading) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ fontSize: 18, fontWeight: "bold" }}>Loading...</Text>
-      </View>
+      <Loading/>
     );
   }
   return (
-    <>
+    <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.userContainer}>
@@ -91,7 +106,13 @@ export default function Home() {
           />
           <View>
             <Text style={styles.helloText}>Hello!</Text>
-            <Text style={styles.userNameText}>{useAuth().user.firstName}!</Text>
+
+            <Text style={styles.userNameText}>
+              {user.firstName
+                ? user.firstName + "!"
+                : "Guest!"}
+            </Text>
+
           </View>
         </View>
         <TouchableOpacity onPress={() => setModalVisible(true)}>
@@ -105,41 +126,11 @@ export default function Home() {
       </View>
 
       {/* Notification Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Notifications</Text>
-            <FlatList
-              data={notifications
-                .sort((a, b) => new Date(b.time) - new Date(a.time))
-                .slice(0, 5)}
-              keyExtractor={(item) => item.id.toString()}
-              renderItem={({ item }) => (
-                <View style={styles.notificationCard}>
-                  <Text style={styles.notificationTitle}>{item.title}</Text>
-                  <Text style={styles.notificationDescription}>
-                    {item.description}
-                  </Text>
-                </View>
-              )}
-            />
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setModalVisible(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <Notifications modalVisible={modalVisible} setModalVisible={setModalVisible}/>
 
       {/* Search */}
       <Search setFilter={setSearchQuery} />
+      <Swiper/>
       <View
         style={{
           flexDirection: "row",
@@ -147,6 +138,7 @@ export default function Home() {
           alignItems: "center",
           paddingHorizontal: 15,
           marginVertical: 10,
+          width: "95%",
         }}
       >
         <Text style={{ fontSize: 20, fontWeight: "bold" }}>Top Rated</Text>
@@ -169,20 +161,27 @@ export default function Home() {
       <View style={{ flex: 1 }}>
         {/* <ProductList filterSearch={filterSearch} /> */}
         <FlatList
-          keyExtractor={(item) => item.title}
+          keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
-          refreshControl={<RefreshControl refreshing={false} />}
           numColumns={2}
           contentContainerStyle={{
             justifyContent: "center",
             alignItems: "center",
           }}
           scrollEnabled={true}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              colors={["#2f2baa"]} // Customize refresh indicator color
+              tintColor="#2f2baa" // iOS only
+            />
+          }
           data={filteredProducts}
           renderItem={({ item }) => (
             <Link
               href={{
-                pathname: `/${item.id}`,
+                pathname: `/app/(main)/${item.id}`,
                 params: {
                   title: item.title,
                   price: item.price,
@@ -207,13 +206,22 @@ export default function Home() {
           )}
         />
       </View>
-    </>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container:{
+    flex: 1,
+    width: "100%",
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: StatusBar.currentHeight + 5,
+  },
   header: {
-    marginTop: 50,
+    width: "100%",
+    
     paddingHorizontal: 15,
     paddingVertical: 20,
     flexDirection: "row",
@@ -225,7 +233,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-
   },
   helloText: {
     fontSize: 16,
@@ -248,6 +255,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   searchContainer: {
+    
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#e5e5e5",

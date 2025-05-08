@@ -2,10 +2,10 @@ import { Text, View, FlatList, Pressable, RefreshControl, Platform, StatusBar, S
 import Product from "../../../../Components/Product";
 import Entypo from "@expo/vector-icons/Entypo";
 // import products from "../../../../Components/data";
-import { useEffect ,useState  } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, Link } from "expo-router";
 import Search from "../../../../Components/Search";
-
+import Loading from "../../../../Components/Loading";
 import { getAllProducts } from "../../../../firebase/Product";
 
 // const fetchProducts = async () => {
@@ -25,42 +25,46 @@ export default function ProductList() {
   const navigation = useRouter();
   // const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const router = useRouter();
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const productsData = await getAllProducts();
-        const validatedProducts = productsData.map((product) => ({
-          id: product.id || Math.random().toString(36).substring(7),
-          title: product.title || "Untitled Product",
-          price: product.price || 0,
-          images: product.images || [],
-          rating: product.rating || 0,
-          colors: product.colors || [],
-          description: product.description || "",
-          reviews: product.reviews || [],
-          stock: product.stock || 0,
-          category: product.category || "Uncategorized",
-          createdAt: product.createdAt || new Date(),
-          updatedAt: product.updatedAt || new Date(),
-          productPics: product.productPics || [],
-        }));
-        setAllProducts(validatedProducts);
-        console.log("Products:", productsData);
-        console.log("All Products:", allProducts);
-        console.log("Filtered Products:", filteredProducts);
-      } catch (err) {
-        setError("Failed to load products. Please try again.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  
+  const fetchProducts = async () => {
+    try {
+      const productsData = await getAllProducts();
+      const validatedProducts = productsData.map((product) => ({
+        id: product.id || Math.random().toString(36).substring(7),
+        title: product.title || "Untitled Product",
+        price: product.price || 0,
+        images: product.images || [],
+        rating: product.rating || 0,
+        colors: product.colors || [],
+        description: product.description || "",
+        reviews: product.reviews || [],
+        stock: product.stock || 0,
+        category: product.category || "Uncategorized",
+        createdAt: product.createdAt || new Date(),
+        updatedAt: product.updatedAt || new Date(),
+        productPics: product.productPics || [],
+      }));
+      setAllProducts(validatedProducts);
+      console.log("Products:", productsData);
+      console.log("All Products:", allProducts);
+      console.log("Filtered Products:", filteredProducts);
+    } catch (err) {
+      setError("Failed to load products. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
+  useEffect(() => {    
+    setLoading(true);
     fetchProducts();
   }, []);
   useEffect(() => {
@@ -73,24 +77,24 @@ export default function ProductList() {
       setFilteredProducts(allProducts);
     }
   }, [searchQuery, allProducts]);
-  const containerStyle = Platform.OS === 'web' 
-  ? { height: '100vh', overflowY: 'auto' } 
-  : {}; 
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProducts();
+  };
+  const containerStyle = Platform.OS === 'web'
+    ? { height: '100vh', overflowY: 'auto' }
+    : {};
   // ---------------------------------------
   if (loading) {
-    return (
-
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text style={{ fontSize: 18, fontWeight: "bold" }}>Loading...</Text>
-      </View>
-    );
+    return (<Loading/>)
   }
   return (
     <View
       style={[
         containerStyle,
         {
-          paddingTop: StatusBar.currentHeight+20,
+          paddingTop: StatusBar.currentHeight + 20,
           flex: 1,
           paddingBottom: 55,
         },
@@ -110,21 +114,29 @@ export default function ProductList() {
 
       <Search setFilter={setSearchQuery} />
       <FlatList
-        keyExtractor={(item) => item.title}
+        keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        refreshControl={<RefreshControl refreshing={false} />}
         numColumns={2}
         contentContainerStyle={{
           justifyContent: "center",
           alignItems: "center",
         }}
         scrollEnabled={true}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#2f2baa"]} // Customize refresh indicator color
+            tintColor="#2f2baa" // iOS only
+          />
+        }
         data={filteredProducts}
         renderItem={({ item }) => (
           <Link
             href={{
               pathname: `/${item.id}`,
               params: {
+                id: item.id,
                 title: item.title,
                 price: item.price,
                 imagess: JSON.stringify(item.images),
@@ -142,7 +154,9 @@ export default function ProductList() {
               images={item.images}
               rating={item.rating}
               colors={item.colors}
-              navigation={navigation}
+              description={item.description}
+              id={item.id}
+
             />
           </Link>
         )}

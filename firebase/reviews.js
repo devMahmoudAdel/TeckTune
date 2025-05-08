@@ -1,12 +1,15 @@
+import CheckAlert from "../Components/CheckAlert";
 import { db } from "./config";
 import { collection, doc, setDoc, getDoc, getDocs, deleteDoc } from "firebase/firestore";
+
+
 const addReview = async (reviewData, productId) => {
   try {
     const reviewDocRef = doc(collection(db, "products", productId, "reviews"));
     await setDoc(reviewDocRef, reviewData);
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 
@@ -18,7 +21,7 @@ const getReviews = async (productId) => {
     return reviews;
   }
   catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 
@@ -28,7 +31,7 @@ const deleteReview = async (productId, reviewId) => {
     await deleteDoc(reviewDocRef);
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 const getReview = async (productId, reviewId) => {
@@ -37,7 +40,7 @@ const getReview = async (productId, reviewId) => {
     const reviewDoc = await getDoc(reviewDocRef);
     return reviewDoc.data();
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 

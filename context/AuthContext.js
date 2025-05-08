@@ -6,14 +6,17 @@ import {
   register,
   login as firebaseLogin,
   logout as firebaseLogout,
+  deleteAccount as deleteAccountFromFirebase,
 } from "../firebase/Auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, deleteDoc } from "firebase/firestore";
+import { processAndUploadAvatar } from "../supabase/loadImage";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [guest, setGuest] = useState(null);
 
   // Listen for Firebase auth state changes
   useEffect(() => {
@@ -77,19 +80,45 @@ export const AuthProvider = ({ children }) => {
       // Register with Firebase
       const firebaseUser = await register(userData.email, userData.password);
 
+      let pass = userData.password;
+
       // Remove password from userData before storing
       const { password, ...userDataToStore } = userData;
 
       // Store additional user data in Firestore
       await setDoc(doc(db, "users", firebaseUser.uid), {
         ...userDataToStore,
+        status: "active",
+        role: "user",
+        id : firebaseUser.uid, 
         createdAt: new Date().toISOString(),
       });
+
+      // If the avatar wasn't processed yet, I handle it now with the user ID
+      if (!userData.avatarInfo && userData.avatarUri) {
+        const avatarResult = await processAndUploadAvatar(
+          userData.avatarUri,
+          firebaseUser.uid
+        );
+
+        if (avatarResult.success) {
+          // Update the user document with avatar info
+          await setDoc(
+            doc(db, "users", firebaseUser.uid),
+            { avatarInfo: avatarResult.avatarInfo },
+            { merge: true }
+          );
+
+          // Add it to userData for local storage
+          userDataToStore.avatarInfo = avatarResult.avatarInfo;
+        }
+      }
 
       // Fetch the complete profile to store locally
       const fullUserData = {
         id: firebaseUser.uid,
         email: firebaseUser.email,
+        password: pass,
         ...userDataToStore,
       };
 
@@ -109,6 +138,14 @@ export const AuthProvider = ({ children }) => {
       // Firebase login
       const firebaseUser = await firebaseLogin(email, password);
 
+      if (!firebaseUser || !firebaseUser.uid) {
+        throw new Error(
+          "Authentication failed. Please check your credentials."
+        );
+      }
+
+      let pass = password;
+
       // Get user profile from Firestore
       const userDoc = await getDoc(doc(db, "users", firebaseUser.uid));
 
@@ -117,79 +154,103 @@ export const AuthProvider = ({ children }) => {
         userData = {
           id: firebaseUser.uid,
           email: firebaseUser.email,
+          pasword: pass,
           ...userDoc.data(),
         };
+
+        // Store user in AsyncStorage
+        await AsyncStorage.setItem("user", JSON.stringify(userData));
+        setUser(userData);
+
+        return userData;
       } else {
-        userData = {
-          id: firebaseUser.uid,
-          email: firebaseUser.email,
-        };
+        // if the pre-stored data in the firestore has been deleted.
+        await auth.currentUser.delete();
+        throw new Error("account-data-missing");
       }
-
-      // Store user in AsyncStorage
-      await AsyncStorage.setItem("user", JSON.stringify(userData));
-      setUser(userData);
-
-      return userData;
     } catch (error) {
       console.error("Error during login:", error);
       throw error;
     }
   };
 
-  const logout = async () => {
+  const enterGuestMode = async () => {
+    const guestData = {
+      id: "guest",
+      email: "guest@example.com",
+      password: "",
+      firstName: "Guest",
+      lastName: "User",
+      address: "###########",
+      phoneNumber: "00000000000",
+      status: "active",
+      role: "guest",
+      avatarType: "default",
+      avatarUri: require("../assets/avatars/avatar7.png"),
+      createdAt: new Date().toISOString(),
+    };
+
+    // store-locally, my state & data as - guest - :
+    await AsyncStorage.setItem("guest", JSON.stringify(guestData));
+    setUser(guestData);
+
+    setGuest(guestData);
+  };
+
+  const deleteAccount = async () => {
     try {
-      // Firebase logout
-      await firebaseLogout();
-      // Clear AsyncStorage
+      if (!user && !guest) throw new Error("No user is logged in.");
+
+      if (guest) {
+        await AsyncStorage.removeItem("guest");
+        setUser(null);
+        setGuest(null);
+        return;
+      }
+      // Delete account from Firestore and Firebase Auth
+      await deleteAccountFromFirebase(user.id);
+
+      // Clear local storage and state
       await AsyncStorage.removeItem("user");
       setUser(null);
+    } catch (error) {
+      console.error("Error during account deletion:", error);
+      throw error;
+    }
+  };
+  const logout = async () => {
+    try {
+      if (!guest) {
+        // Firebase logout
+        await firebaseLogout();
+        // Clear AsyncStorage
+        await AsyncStorage.removeItem("user");
+        // set the local state to null
+        setUser(null);
+      } else {
+        // if (guest) :
+        setUser(null);
+        setGuest(null);
+        await AsyncStorage.removeItem("guest");
+      }
     } catch (error) {
       console.error("Error during logout:", error);
       throw error;
     }
   };
 
-  // Add this function to the AuthContext component
-  const updateUserProfile = async (userId, userData) => {
-    try {
-      // Remove sensitive fields before storing in Firestore
-      const { password, ...userDataToStore } = userData;
-
-      // Update user profile in Firestore
-      await setDoc(
-        doc(db, "users", userId),
-        {
-          ...userDataToStore,
-          updatedAt: new Date().toISOString(),
-        },
-        { merge: true }
-      ); // Use merge to update fields without overwriting the entire document
-
-      // Get updated user profile
-      const userDoc = await getDoc(doc(db, "users", userId));
-
-      if (userDoc.exists()) {
-        const updatedUserData = {
-          id: userId,
-          email: userData.email,
-          ...userDoc.data(),
-        };
-
-        // Update local storage
-        await AsyncStorage.setItem("user", JSON.stringify(updatedUserData));
-        setUser(updatedUserData);
-
-        return updatedUserData;
-      }
-    } catch (error) {
-      console.error("Error updating user profile:", error);
-      throw error;
-    }
-  };
   return (
     <AuthContext.Provider
-      value={{ user, signup, login, logout, loading, updateUserProfile }}
+      value={{
+        user,
+        loading,
+        guest,
+        signup,
+        login,
+        logout,
+        enterGuestMode,
+        deleteAccount,
+      }}
     >
       {children}
     </AuthContext.Provider>

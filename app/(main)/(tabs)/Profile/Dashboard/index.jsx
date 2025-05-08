@@ -10,7 +10,7 @@ const Dashboard = () => {
     { name: "AdminProducts", title: "Admin Products" },
     { name: "UsersList", title: "Users" },
     { name: "Notificationn", title: "Notifications" },
-    { name: "ProductForm", title: "Product Form testing", params: { id: 1 } },
+    // { name: "ProductForm", title: "Product Form testing", params: { id: 1 } },
   ];
 
   const handleButtonPress = (fileName, params) => {

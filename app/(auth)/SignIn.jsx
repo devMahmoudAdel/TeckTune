@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  Platform,
 } from "react-native";
 import { TextInput } from "react-native";
 import { useState } from "react";
@@ -21,11 +22,14 @@ export default function SignIn() {
 
   // Get router and auth context
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, enterGuestMode } = useAuth();
 
-  // Handle login submission
+  const handleSkip = () => {
+    enterGuestMode();
+    router.replace("../(main)/(tabs)/Home");
+  };
+
   const handleLogin = async () => {
-    // Basic validation
     if (!email || !password) {
       Alert.alert("Error", "Please enter both email and password");
       return;
@@ -34,17 +38,33 @@ export default function SignIn() {
     try {
       setIsSubmitting(true);
 
-      // Call the Firebase login function from auth context
       await login(email, password);
 
-      // Navigate to the main app
       router.replace("../(main)/(tabs)/Home");
     } catch (error) {
       console.error("Login error:", error);
 
       // Handle specific Firebase errors
       let errorMessage = "Please check your credentials and try again.";
-      if (
+
+      if (error.message === "account-data-missing") {
+        Alert.alert(
+          "Account Data Missing",
+          "Your account data has been deleted. You can now create a new account with the same email address.",
+          [
+            {
+              text: "Create New Account",
+              onPress: () => router.push("/(auth)/signUp/Step1"),
+            },
+            {
+              text: "Cancel",
+              style: "cancel",
+            },
+          ]
+        );
+        setIsSubmitting(false);
+        return;
+      } else if (
         error.code === "auth/user-not-found" ||
         error.code === "auth/wrong-password"
       ) {
@@ -54,9 +74,22 @@ export default function SignIn() {
           "Too many failed login attempts. Please try again later.";
       } else if (error.code === "auth/network-request-failed") {
         errorMessage = "Network error. Please check your internet connection.";
+      } else if (error.code === "auth/invalid-credential") {
+        errorMessage =
+          "Invalid login credentials. Please double-check your email and password.";
+      } else if (error.message && error.message.includes("indexOf")) {
+        errorMessage =
+          "Login failed due to a system error. Please try again later.";
       }
 
-      Alert.alert("Login Failed", errorMessage);
+      if (error.message !== "account-data-missing") {
+        Alert.alert("Login Failed", errorMessage, [
+          {
+            text: "OK",
+            style: "default",
+          },
+        ]);
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -72,6 +105,11 @@ export default function SignIn() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Add Skip button */}
+      <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
+        <Text style={styles.skipText}>Skip</Text>
+      </TouchableOpacity>
+
       <View style={styles.headerContainer}>
         <Text style={styles.textTitle}>Login Now</Text>
         <Text style={styles.textsubTitle}>
@@ -237,5 +275,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#d9d9d9",
     marginHorizontal: 10,
     padding: 10,
+  },
+  skipButton: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    padding: 10,
+    zIndex: 1,
+  },
+  skipText: {
+    color: "#2f2baa",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

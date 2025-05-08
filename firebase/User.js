@@ -1,5 +1,6 @@
+import CheckAlert from '../Components/CheckAlert';
 import { db } from './config';
-import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, getDoc, getDocs } from 'firebase/firestore';
 
 const getUser = async (userId) => {
   try {
@@ -8,10 +9,10 @@ const getUser = async (userId) => {
     if (userDoc.exists()) {
       return userDoc.data();
     } else {
-      throw new Error('User does not exist');
+      <CheckAlert state="error" title="user does not exist"/>
     }
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 };
 const getAllUsers = async () => {
@@ -42,7 +43,7 @@ const createUser = async (userId, userData) => {
     }, { merge: true });
     return true;
   } catch (error) {
-    throw error;
+    <CheckAlert state="error" title={error.message}/>
   }
 }
 
@@ -58,5 +59,14 @@ const isUnique = async(userName)=>{
       throw new Error('Username is already taken');
     }
   };
+  const getAllUsers = async () => {
+    try {
+      const usersSnapshot = await getDocs(collection(db, 'users'));
+      const users = usersSnapshot.docs.map((doc) => doc.data());
+      return users;
+    } catch (error) {
+      <CheckAlert state="error" title={error.message}/>
+    }
+  };
 
-export { getUser, createUser, isUnique };
+export { getUser, createUser, isUnique, getAllUsers };

@@ -1,12 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, Pressable, Dimensions, Alert } from 'react-native';
 import { AntDesign } from "@expo/vector-icons"; 
+import { inWishlist, removeFromWishlist } from '../firebase/Wishlist';
 const screen = Dimensions.get('window');
 const Wishlistitem = (prodcutInof) => {
+  const [ isWishList, setIsWishList ] = useState(false);
 
+  const handleDeleteFromWishlist = async () => {
+    try {
+      await removeFromWishlist(prodcutInof.id);
+      setIsWishList(false);
+      Alert.alert("Success", "Product removed from wishlist");
+    } catch (error) {
+      Alert.alert("Error", "Failed to remove product from wishlist");
+    }
+  };
+
+  useEffect(() => {
+    const checkWishListStatus = async () => {
+      try {
+        const inList = await inWishlist(prodcutInof.id);
+        setIsWishList(inList);
+      } catch (error) {
+        console.error("Error checking wishlist:", error);
+      }
+    };
+    if (prodcutInof.id) {
+      checkWishListStatus();
+    }
+  }, []);
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={prodcutInof.image} />
+      <Image style={styles.image} source={{uri: prodcutInof.image}} />
 
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>{prodcutInof.title}</Text>
@@ -14,8 +39,8 @@ const Wishlistitem = (prodcutInof) => {
       </View>
 
       <View style={styles.loveContainer}>
-        <Pressable onPress={() => Alert.alert("handle here del. product from wishlist")} style={styles.button}>
-          <AntDesign name="heart" size={21} color="#2e2a9d" />
+        <Pressable onPress={() => handleDeleteFromWishlist()} style={styles.button}>
+          <AntDesign name={isWishList ? "heart" : "hearto"} size={21} color="#2e2a9d" />
         </Pressable>
       </View>
     </View>

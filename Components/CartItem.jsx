@@ -1,22 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, Pressable, Dimensions, Alert } from 'react-native';
 import { AntDesign } from "@expo/vector-icons"; 
-import CartFireBase from '../firebase/Cart';
+import {addToCart, removeFromCart, getCart , inCart, deleteAll} from '../firebase/Cart';
+import { getProduct } from '../firebase/Product';
 const screen = Dimensions.get('window');
 
 const CartItem = (prodcutInof) => {
-  const [counter, setCounter] = useState(1);
+  const [counter, setCounter] = useState(prodcutInof.quantity || 1);
 
   const incCounter = async () =>{
     try{
-      const cleanItem = {
-        id: prodcutInof.id,
-        title: prodcutInof.title,
-        price: prodcutInof.price,
-        image: prodcutInof.image,
-        rating: prodcutInof.rating,
-      };
-      await CartFireBase.addToCart(cleanItem);
+      await addToCart(prodcutInof.id, counter + 1);
       setCounter(counter + 1);
     }catch (e){
       console.error("Faild add product", e);
@@ -26,7 +20,7 @@ const CartItem = (prodcutInof) => {
   const decCounter = async () => {
     try{
         if (counter > 1){
-          await CartFireBase.removeFromCart(prodcutInof.id)
+          await addToCart(prodcutInof.id, counter - 1);
           setCounter(counter - 1);
         } 
     }catch{
@@ -36,7 +30,7 @@ const CartItem = (prodcutInof) => {
 
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={prodcutInof.image} />
+      <Image style={styles.image} source={{uri: prodcutInof.image}} />
 
       <View style={styles.detailsContainer}>
         <Text style={styles.title}>{prodcutInof.title}</Text>

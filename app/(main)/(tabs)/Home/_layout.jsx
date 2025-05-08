@@ -14,6 +14,11 @@ export default function ProductStack() {
           name="ProductList"
           options={{ headerShown: false }}
         />
+        <Stack.Screen
+          name="reviewList"
+          options={{ headerShown: false }}
+        />
+        
       </Stack>
     </>
   );

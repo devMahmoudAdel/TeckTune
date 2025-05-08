@@ -4,7 +4,7 @@ import { useRouter, Link } from "expo-router";
 const members = [
   {
     name: "Mahmoud Adel",
-    nickName: "Dolsika",
+    nickName: "2227100",
     image: require("../../../../../assets/icon.png"),
     description: "lorem ipsum",
     socialMedia: {
@@ -17,8 +17,8 @@ const members = [
     phone: "01033612081",
   },
   {
-    name: "youssef.ah",
-    nickName: "Ebn_ahmed",
+    name: "youssef ahmed",
+    nickName: "2227471",
     image: require("../../../../../assets/icon.png"),
     description: "description not needed",
     socialMedia: {
@@ -31,22 +31,22 @@ const members = [
     phone: "1234567890",
   },
   {
-    name: "hazem",
-    nickName: " نقاش",
+   name: " hazem hussien",
+    nickName: "2227175",
     image: require("../../../../../assets/icon.png"),
-    description: "دمي خفيف ",
-    email: "hazemhussein392@gmail.com",
-    phone: "01558277796 ",
-    socialMedial: {
-      facebook: "https://www.facebook.com/hazem.hussein.1004 ",
-      whatsapp: "https:wa.me/201558277796 ",
-      linkedin: " ",
-      github: " ",
+    description: "description not needed",
+    socialMedia: {
+      facebook: "https://www.facebook.com",
+      github: "https://github.com/YousseefAh",
+      linkedin: "https://www.linkedin.com/in/yousseefah/",
+      whatsapp: "https://www.whatsapp.com",
     },
+    email: "yousseef.ah@gmail.com",
+    phone: "1234567890",
   },
   {
     name: "Ahmed Hassan",
-    nickName: "Capa",
+    nickName: "2227066",
     image: require("../../../../../assets/icon.png"),
     description: "",
     email: "elbana795@gmail.com",
@@ -60,8 +60,8 @@ const members = [
   },
 
   {
-    name: "Member 5",
-    nickName: "Role 5",
+    name: "Badr Ahmed",
+    nickName: "2227137",
     image: require("../../../../../assets/icon.png"),
     description: "Description 1",
     socialMedia: {
@@ -74,8 +74,8 @@ const members = [
     phone: "1234567890",
   },
   {
-    name: "Member 6",
-    nickName: "Role 6",
+    name: "Abdelrahman Medhat",
+    nickName: "2227040",
     image: require("../../../../../assets/icon.png"),
     description: "Description 1",
     socialMedia: {
@@ -88,8 +88,8 @@ const members = [
     phone: "1234567890",
   },
   {
-    name: "Member 7",
-    nickName: "Role 7",
+    name: "Omar Hassan",
+    nickName: "2227385",
     image: require("../../../../../assets/icon.png"),
     description: "Description 1",
     socialMedia: {
@@ -101,20 +101,20 @@ const members = [
     email: "email@domain",
     phone: "1234567890",
   },
-  {
-    name: "Member 8",
-    nickName: "Role 8",
-    image: require("../../../../../assets/icon.png"),
-    description: "Description 1",
-    socialMedia: {
-      facebook: "https://www.facebook.com",
-      github: "https://www.github.com",
-      linkedin: "https://www.linkedin.com",
-      whatsapp: "https://www.whatsapp.com",
-    },
-    email: "email@domain",
-    phone: "1234567890",
-  },
+  // {
+  //   name: "Member 8",
+  //   nickName: "Role 8",
+  //   image: require("../../../../../assets/icon.png"),
+  //   description: "Description 1",
+  //   socialMedia: {
+  //     facebook: "https://www.facebook.com",
+  //     github: "https://www.github.com",
+  //     linkedin: "https://www.linkedin.com",
+  //     whatsapp: "https://www.whatsapp.com",
+  //   },
+  //   email: "email@domain",
+  //   phone: "1234567890",
+  // },
 ];
 export default function About() {
   const router = useRouter();

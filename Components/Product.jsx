@@ -1,14 +1,16 @@
 import React from 'react';
-import { View, Text, Image,StyleSheet,Pressable } from 'react-native';
+import { View, Text, Image,StyleSheet,Pressable, Alert } from 'react-native';
 import ProductDetails from '../app/(main)/[...ProductDetails]';
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { useState, useEffect } from 'react';
+import { addToWishlist,removeFromWishlist,inWishlist} from '../firebase/Wishlist';
 import Stars from './Stars';
-const Product = ({ title, images, rating, price}) => {
+const Product = ({id, title, images, rating, price}) => {
   return (
     <View style={styles.container}>
       <Image
-        source={images[0]}
+        source={typeof images[0] === "string" ? { uri: images[0] } : images[0]}
         style={styles.image}
         resizeMode="cover"
         defaultSource={require("../assets/icon.png")}
@@ -23,9 +25,6 @@ const Product = ({ title, images, rating, price}) => {
         <Text>({rating})</Text>
       </View>
       <Text style={styles.productPrice}>${Number(price).toFixed(2)}</Text>
-      <View style={styles.favProduct}>
-        <MaterialIcons name="favorite-border" size={25} color={"#fff"} />
-      </View>
     </View>
   );
 };
@@ -36,8 +35,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     backgroundColor: "#e5e5e5",
-    borderRadius: 10,
+    borderRadius: 6,
     margin: 10,
+    overflow: "hidden",
+    width: 160,
   },
   productTitle: {
     fontSize: 18,
