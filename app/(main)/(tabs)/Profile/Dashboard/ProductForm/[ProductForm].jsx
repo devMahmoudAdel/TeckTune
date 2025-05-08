@@ -12,7 +12,7 @@ import {
   deleteProduct,
 } from "../../../../../../firebase/Product";
 import Toast from 'react-native-toast-message';
-import {takePhoto, selectImage,uploadImage,} from '../../../../../../supabase/laodImage';
+import {takePhoto, selectImage,uploadImage,} from '../../../../../../supabase/loadImage';
 export default function ProductForm() {
   const router = useRouter();
   const params = useLocalSearchParams();
