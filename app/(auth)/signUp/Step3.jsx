@@ -17,7 +17,11 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { processAndUploadAvatar } from "../../../supabase/loadImage";
+import {
+  takePhoto,
+  selectImage,
+  uploadImage,
+} from "../../../supabase/loadImage";
 
 const { width } = Dimensions.get("window");
 const AVATAR_SIZE = width / 3 - 20;
@@ -51,7 +55,7 @@ const Step3 = () => {
     phoneNumber = "",
   } = params;
 
-  const [avatar, setAvatar] = useState(null);
+  const [selectedAvatar, setAvatar] = useState(null);
   const [selectedDefaultAvatar, setSelectedDefaultAvatar] = useState(null);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -84,37 +88,51 @@ const Step3 = () => {
     return true;
   };
 
-  const pickImage = async () => {
-    const hasPermissions = await requestPermissions();
-    if (!hasPermissions) return;
+  const handleSelectImage = async () => {
+    const setPercent = (p) => {
+      if (p > 0 && p < 100) {
+        setIsUploading(true);
+      } else {
+        setIsUploading(false);
+      }
+    };
+    const image = await selectImage();
+    if (image.success) {
+      const uploadedImage = await uploadImage(image, null, (percent) => {
+        setPercent(percent);
+      });
+      if (uploadedImage.success) {
+        // setFormData({ ...formData, images: [...formData.images, uploadedImage.url] });
+        setAvatar(uploadedImage.url);
+        setPercent(0);
+        console.log(selectedAvatar);
 
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) {
-      handleImageSelection(result.assets[0].uri);
+      }
     }
   };
 
-  const takePhoto = async () => {
-    const hasPermissions = await requestPermissions();
-    if (!hasPermissions) return;
+  const handleTakePhoto = async () => {
+    const setPercent = (p) => {
+      if (p > 0 && p < 100) {
+        setIsUploading(true);
+      } else {
+        setIsUploading(false);
+      }
+    };
 
-    let result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) {
-      handleImageSelection(result.assets[0].uri);
+    const image = await takePhoto();
+    if (image.success) {
+      const uploadedImage = await uploadImage(image, null, (percent) => {
+        setPercent(percent);
+      });
+      if (uploadedImage.success) {
+        // setFormData({ ...formData, images: [...formData.images, uploadedImage.url] });
+        setAvatar(uploadedImage.url);
+        setPercent(0);
+        console.log(selectedAvatar);
+      }
     }
   };
-
   const handleImageSelection = (imageUri) => {
     setIsUploading(true);
 
@@ -137,7 +155,7 @@ const Step3 = () => {
   };
 
   const handleSignup = async () => {
-    if (!avatar) {
+    if (!selectedAvatar) {
       Alert.alert(
         "Profile Picture Required",
         "Please select a profile picture or choose a default avatar."
@@ -148,22 +166,6 @@ const Step3 = () => {
     setIsProcessing(true);
 
     try {
-      let avatarInfo = null;
-
-      if (selectedDefaultAvatar !== null) {
-        const avatarResult = await processAndUploadAvatar(
-          selectedDefaultAvatar
-        );
-        if (avatarResult.success) {
-          avatarInfo = avatarResult.avatarInfo;
-        }
-      } else if (typeof avatar === "string") {
-        const avatarResult = await processAndUploadAvatar(avatar);
-        if (avatarResult.success) {
-          avatarInfo = avatarResult.avatarInfo;
-        }
-      }
-
       const userData = {
         username,
         email,
@@ -172,11 +174,9 @@ const Step3 = () => {
         lastName,
         address: address || "",
         phoneNumber: phoneNumber || "",
-        avatarType: selectedDefaultAvatar !== null ? "default" : "custom",
-        avatarIndex: selectedDefaultAvatar,
-        avatarUri: typeof avatar === "string" ? avatar : null,
-        avatarInfo: avatarInfo,
+        profilePic: selectedAvatar,
       };
+      
 
       console.log("Submitting user data:", {
         ...userData,
@@ -251,10 +251,14 @@ const Step3 = () => {
                 <ActivityIndicator size="large" color="#6055D8" />
                 <Text style={styles.uploadingText}>Uploading...</Text>
               </View>
-            ) : avatar ? (
+            ) : selectedAvatar ? (
               <>
                 <Image
-                  source={typeof avatar === "string" ? { uri: avatar } : avatar}
+                  source={
+                    typeof selectedAvatar === "string"
+                      ? { uri: selectedAvatar }
+                      : selectedAvatar
+                  }
                   style={styles.avatar}
                 />
                 <TouchableOpacity
@@ -276,7 +280,7 @@ const Step3 = () => {
         <View style={styles.optionsContainer}>
           <TouchableOpacity
             style={[styles.optionButton, styles.cameraButton]}
-            onPress={takePhoto}
+            onPress={handleTakePhoto}
           >
             <Ionicons name="camera" size={24} color="#6055D8" />
             <Text style={styles.optionText}>Take Photo</Text>
@@ -284,7 +288,7 @@ const Step3 = () => {
 
           <TouchableOpacity
             style={[styles.optionButton, styles.galleryButton]}
-            onPress={pickImage}
+            onPress={handleSelectImage}
           >
             <Ionicons name="images" size={24} color="#6055D8" />
             <Text style={styles.optionText}>Choose from Gallery</Text>
@@ -306,9 +310,12 @@ const Step3 = () => {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.finishButton, !avatar && styles.disabledButton]}
+            style={[
+              styles.finishButton,
+              !selectedAvatar && styles.disabledButton,
+            ]}
             onPress={handleSignup}
-            disabled={!avatar || isProcessing}
+            disabled={!selectedAvatar || isProcessing}
           >
             {isProcessing ? (
               <ActivityIndicator color="#fff" size="small" />
@@ -622,3 +629,5 @@ const styles = StyleSheet.create({
 });
 
 export default Step3;
+
+// cancel default avatar.

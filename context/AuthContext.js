@@ -255,26 +255,6 @@ export const AuthProvider = ({ children }) => {
     if (!user) return false;
     
     // if (user)
-
-    // If avatar is being updated
-    if (updatedData.avatarUri && !updatedData.avatarInfo) {
-      const avatarResult = await processAndUploadAvatar(
-        updatedData.avatarUri,
-        user.id
-      );
-      
-      if (avatarResult.success) {
-        updatedData.avatarInfo = avatarResult.avatarInfo;
-      }
-    }
-    
-
-    // Update Firestore
-    await setDoc(
-      doc(db, "users", user.id), 
-      updatedData, 
-      { merge: true }
-    );
     
     const updatedUserData = { ...user, ...updatedData };
     
