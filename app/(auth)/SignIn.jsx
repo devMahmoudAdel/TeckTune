@@ -27,12 +27,8 @@ export default function SignIn() {
 
   // Get router and auth context
   const router = useRouter();
-  const { login, enterGuestMode } = useAuth();
+  const { login } = useAuth();
 
-  const handleSkip = () => {
-    enterGuestMode();
-    router.replace("../(main)/(tabs)/Home");
-  };
 
   const validateEmail = (email) => {
     if (!email.trim()) return "Email is required";
@@ -231,11 +227,6 @@ export default function SignIn() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Add Skip button */}
-      <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
-        <Text style={styles.skipText}>Skip</Text>
-      </TouchableOpacity>
-
       <View style={styles.headerContainer}>
         <Text style={styles.textTitle}>Login Now</Text>
         <Text style={styles.textsubTitle}>
@@ -397,18 +388,6 @@ const styles = StyleSheet.create({
     color: "#555",
     fontSize: 20,
     textAlign: "center",
-  },
-  skipButton: {
-    position: "absolute",
-    top: 40,
-    right: 20,
-    padding: 10,
-    zIndex: 1,
-  },
-  skipText: {
-    color: "#2f2baa",
-    fontSize: 16,
-    fontWeight: "bold",
   },
   // New styles for enhanced validation
   focusedInput: {
