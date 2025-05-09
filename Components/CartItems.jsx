@@ -17,7 +17,7 @@ import OrderSummary from './OrderSummary';
 
 const screen = Dimensions.get('window');
 
-const CartItems = ({ navigation }) => {
+const CartItems = () => {
   const router = useRouter();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -179,7 +179,7 @@ const CartItems = ({ navigation }) => {
             />
             <TouchableOpacity
               style={styles.checkoutButton}
-              onPress={() => router.replace({
+              onPress={() => router.push({
                 pathname: "../../(checkout)/Checkout",
                 params: {
                   subtotal: subtotal,
