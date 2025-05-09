@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, StatusBar,Pressable ,TouchableOpacity, Alert  } from 'react-native'
-import React, { use, useState,useEffect } from 'react';
+import React, { use, useState } from 'react';
 import Order_Summary from '../../Components/OrderSummary'
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
@@ -8,26 +8,14 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/useAuth';
 import { getCart } from '../../firebase/Cart';
 import { addOrder } from '../../firebase/Order';
-import {getUser} from '../../firebase/User';
-import Loading from '../../Components/Loading';
+import { updateProductRecommendation } from '../../firebase/Product';
+
 const Checkout = () => {
     const router = useRouter();
     const { user } = useAuth();
     const [isChecked, setIsChecked] = useState(false);
     const { subtotal, discount, delivery, count, total } = useLocalSearchParams();
     const [selectedPayment, setSelectedPayment] = useState("");
-    const [userData, setUserData] = useState(null);
-    const [loading, setLoading] = useState(false);
-
-    const fetchUser = async () => {
-        setLoading(true);
-        const userData = await getUser(user.id);
-        setUserData(userData);
-        setLoading(false);
-    }
-    useEffect(() => {
-        fetchUser();
-    },[])
     const handleConfirm = async() => {
         const cart = await getCart();
         if (cart.length === 0) {
@@ -42,10 +30,12 @@ const Checkout = () => {
             price: item.price,
             quantity: item.quantity,
         }));
+        const productIds = products.map(p => p.id);
+        await updateProductRecommendation(productIds);
         console.log("Products:", products);
         const orderData = {
             products: products,
-            address: userData.address,
+            address: user.address,
             payment_method: selectedPayment,
             user_name: user.username,
             user_id: user.id,
@@ -68,11 +58,6 @@ const Checkout = () => {
             setSelectedPayment(value);
         }
     }
-    if(loading){
-        return(
-            <Loading/>
-        )
-    }
   return (
     <View style={{flex:1, backgroundColor:"#fff", padding:10}}>
         <View
@@ -87,12 +72,12 @@ const Checkout = () => {
                 <Text style={styles.textHeader}>Checkout</Text>
               </View>
         <View style={{marginTop:25}}>
-            {(user.address || userData.address) ? (
+            {user.address ? (
                 <View style={styles.info_delivery_container}>
                 <View style={styles.info_delivery_icon}>
                     <MaterialIcons name="location-on" size={24} color="#5f55da" />
                 </View>
-            <Text style={styles.info_delivery_text1}>{user.address || userData.address}</Text>
+            <Text style={styles.info_delivery_text1}>{user.address}</Text>
             </View>
            ) : (
                <View style={styles.info_delivery_container}>
@@ -152,9 +137,9 @@ const Checkout = () => {
         </View>
 
         <TouchableOpacity
-            style = {[styles.btn_confirm, (isChecked && userData.address) && styles.btn_confirmed ]}
+            style = {[styles.btn_confirm, (isChecked && user.address) && styles.btn_confirmed ]}
             onPress={handleConfirm}
-            disabled={!isChecked || !userData.address}
+            disabled={!isChecked || !user.address}
         >
             <Text style={{color:'white', fontSize:16}}>Confirm</Text>
 
