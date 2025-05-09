@@ -66,7 +66,18 @@ const getAllOrders = async () => {
     <CheckAlert state="error" title={error.message} />;
   }
 };
-
+const getAllOrdersByUserId = async (userId) => {
+  try {
+    const ordersCollectionRef = collection(db, "orders");
+    const ordersSnapshot = await getDocs(ordersCollectionRef);
+    const userOrders = ordersSnapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((order) => order.user_id === userId);
+    return userOrders;
+  } catch (error) {
+    <CheckAlert state="error" title={error.message} />;
+  }
+};
 const updateOrder = async (userId, orderId, orderData) => {
   try {
     console.log(userId, orderId, orderData);
