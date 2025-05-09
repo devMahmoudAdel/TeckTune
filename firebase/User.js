@@ -59,14 +59,5 @@ const isUnique = async(userName)=>{
       throw new Error('Username is already taken');
     }
   };
-  const getAllUsers = async () => {
-    try {
-      const usersSnapshot = await getDocs(collection(db, 'users'));
-      const users = usersSnapshot.docs.map((doc) => doc.data());
-      return users;
-    } catch (error) {
-      <CheckAlert state="error" title={error.message}/>
-    }
-  };
 
 export { getUser, createUser, isUnique, getAllUsers };
