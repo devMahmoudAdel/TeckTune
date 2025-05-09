@@ -2,7 +2,8 @@ import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
 import { StyleSheet, View } from "react-native";
 import AuthFlow from "./navigation/AuthFlow";
-import { AuthProvider, AuthContext } from "./context/AuthContext";
+import { AuthProvider, AuthContext } from "./context/AuthContext"
+import 'react-native-reanimated';
 
 export default function App() {
   return (

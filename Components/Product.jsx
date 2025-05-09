@@ -6,7 +6,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useState, useEffect } from 'react';
 import { addToWishlist,removeFromWishlist,inWishlist} from '../firebase/Wishlist';
 import Stars from './Stars';
-const Product = ({id, title, images, rating, price}) => {
+const Product = ({id, title, images, rating, price }) => {
   return (
     <View style={styles.container}>
       <Image
@@ -22,7 +22,9 @@ const Product = ({id, title, images, rating, price}) => {
         <View style={styles.stars}>
           <Stars number={rating} />
         </View>
-        <Text>({rating})</Text>
+        <Text style={{ marginLeft: 4, color: "#FFD700", fontWeight: "bold" }}>
+          {Number(rating).toFixed(1)}
+        </Text>
       </View>
       <Text style={styles.productPrice}>${Number(price).toFixed(2)}</Text>
     </View>
