@@ -53,24 +53,6 @@ export default function RestrictedModal() {
             <Text style={styles.benefitText}>Unlock Full Access</Text>
           </View>
         </View>
-
-        {/* Navigation Buttons */}
-        <View style={styles.buttonContainer}>
-          <Pressable
-            style={styles.signUpButton}
-            onPress={() => router.push("/(auth)/signUp/Step1")}
-          >
-            <Text style={styles.buttonText}>Create Account</Text>
-          </Pressable>
-
-          <Pressable
-            style={styles.signInButton}
-            onPress={() => router.push("/(auth)/SignIn")}
-          >
-            <Text style={styles.signInButtonText}>Sign In</Text>
-          </Pressable>
-        </View>
-
         {/* Continue as Guest Option */}
         <Pressable style={styles.guestButton} onPress={() => router.back()}>
           <Text style={styles.guestButtonText}>Continue Browsing</Text>

@@ -9,9 +9,11 @@ import {
   Platform,
   ScrollView,
   Animated,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { isUsernameExists, isEmailExists } from "../../../firebase/User";
 
 const Step1 = () => {
   const router = useRouter();
@@ -22,6 +24,7 @@ const Step1 = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
 
   const [errors, setErrors] = useState({});
   const [focusedField, setFocusedField] = useState(null);
@@ -144,12 +147,54 @@ const Step1 = () => {
     );
   };
 
-  const handleNext = () => {
+  const showAlert = (title, message) => {
+    if (Platform.OS === "web") {
+      window.alert(`${title}\n${message}`);
+    } else {
+      Alert.alert(title, message);
+    }
+  };
+
+  const handleNext = async () => {
     if (validateInputs()) {
-      router.push({
-        pathname: "/(auth)/signUp/Step2",
-        params: { username, email, password },
-      });
+      setIsChecking(true);
+
+      try {
+        const usernameExists = await isUsernameExists(username);
+        const emailExists = await isEmailExists(email);
+
+        if (usernameExists && emailExists) {
+          setErrors((prev) => ({
+            ...prev,
+            username: "Username is already taken",
+            email: "Email is already registered",
+          }));
+        } else if (usernameExists) {
+          setErrors((prev) => ({
+            ...prev,
+            username: "Username is already taken",
+          }));
+        } else if (emailExists) {
+          setErrors((prev) => ({
+            ...prev,
+            email: "Email is already registered",
+          }));
+        } else {
+          // proceed to next step
+          router.push({
+            pathname: "/(auth)/signUp/Step2",
+            params: { username, email, password },
+          });
+        }
+      } catch (error) {
+        console.error("Error during validation:", error);
+        showAlert(
+          "Error",
+          "An error occurred while checking your information. Please try again."
+        );
+      } finally {
+        setIsChecking(false);
+      }
     }
   };
 
@@ -340,9 +385,19 @@ const Step1 = () => {
               <Text style={styles.errorText}>{errors.confirmPassword}</Text>
             )}
           </View>
-          <TouchableOpacity style={styles.button} onPress={handleNext}>
-            <Text style={styles.buttonText}>Next</Text>
-            <Ionicons name="arrow-forward" size={22} color="#fff" />
+          <TouchableOpacity
+            style={[styles.button, isChecking && styles.disabledButton]}
+            onPress={handleNext}
+            disabled={isChecking}
+          >
+            {isChecking ? (
+              <Text style={styles.buttonText}>Checking...</Text>
+            ) : (
+              <>
+                <Text style={styles.buttonText}>Next</Text>
+                <Ionicons name="arrow-forward" size={22} color="#fff" />
+              </>
+            )}
           </TouchableOpacity>
 
           <View style={styles.signInContainer}>
@@ -356,7 +411,6 @@ const Step1 = () => {
     </KeyboardAvoidingView>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -517,6 +571,9 @@ const styles = StyleSheet.create({
     marginTop: 20,
     flexDirection: "row",
     justifyContent: "center",
+  },
+  disabledButton: {
+    backgroundColor: "#9E99E8",
   },
   buttonText: {
     color: "#fff",
