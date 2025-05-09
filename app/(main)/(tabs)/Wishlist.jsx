@@ -9,11 +9,13 @@ import Empty from '../../../Components/Empty';
 const Wishlist = () => {
   const router = useRouter();
   const { user, guest } = useAuth();
+  const [refreshing, setRefreshing] = useState(0);
   const [deleting, setDeleting] = useState(false);
   const handleDeleteAll = async () => {
     setDeleting(true);
     try {
       await deleteAll();
+      setRefreshing(refreshing + 1);
       Alert.alert("Success", "All products removed from wishlist");
     } catch (error) {
       Alert.alert("Error", "Failed to delete all products from wishlist");
@@ -37,7 +39,7 @@ const Wishlist = () => {
         {!guest && <Entypo name="eraser" size={21} color="black" onPress={() => handleDeleteAll()} />}
       </View>
       <View style={[styles.container, { justifyContent: "center" }]}>
-      {guest ? <Empty text="Guest User" subText="Login to see your wishlist"/>:<Wishlistitems/>}
+      {guest ? <Empty text="Guest User" subText="Login to see your wishlist"/>:<Wishlistitems refreshstate={refreshing}/>}
       </View>
     </View>
   );

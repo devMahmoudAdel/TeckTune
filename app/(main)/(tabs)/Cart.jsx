@@ -9,11 +9,13 @@ import { useAuth } from "../../../context/useAuth";
 import Empty from "../../../Components/Empty";
 export default function Cart() {
   const [deleting, setDeleting] = useState(false);
+  const [refreshing, setRefreshing] = useState(0);
   const { guest } = useAuth();
   const handleDeleteAll = async () => {
     setDeleting(true);
     try {
       await deleteAll();
+      setRefreshing(refreshing + 1);
       Alert.alert("Success", "All products removed from cart");
     } catch (error) {
       Alert.alert("Error", "Failed to delete all products from cart");
@@ -38,7 +40,7 @@ export default function Cart() {
         { !guest && <Entypo name="eraser" size={21} color="black" onPress={() => handleDeleteAll()} />}
       </View>
       <View style={[styles.container,{justifyContent:"center"}]}>
-      {guest ? <Empty text="Guest User" subText="Login to see your cart"/> : <CartItems/>}
+      {guest ? <Empty text="Guest User" subText="Login to see your cart"/> : <CartItems refreshstate={refreshing}/>}
       </View>
     </View>
   );
