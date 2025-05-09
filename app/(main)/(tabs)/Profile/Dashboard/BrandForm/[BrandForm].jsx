@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Alert, StatusBar, ActivityIndicator, ToastAndroid, Platform, Image, FlatList, Modal, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Alert, StatusBar, ActivityIndicator, ToastAndroid, Platform, Image, FlatList, Modal, TouchableOpacity, Dimensions } from 'react-native';
 import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,6 +7,8 @@ import { getBrand, addBrand, updateBrand } from "../../../../../../firebase/Bran
 import Toast from 'react-native-toast-message';
 import Loading from '../../../../../../Components/Loading';
 import { takePhoto, selectImage, uploadImage } from '../../../../../../supabase/loadImage';
+
+const { width, height } = Dimensions.get('window');
 
 export default function BrandForm() {
   const router = useRouter();
@@ -262,24 +264,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: StatusBar.currentHeight + 10,
+    paddingHorizontal: width * 0.05, // Adjust padding based on screen width
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
+    paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
   title: {
-    fontSize: 20,
+    fontSize: width > 400 ? 20 : 18, // Adjust font size for smaller screens
     fontWeight: 'bold',
   },
   form: {
-    padding: 15,
+    paddingVertical: 15,
   },
   label: {
-    fontSize: 16,
+    fontSize: width > 400 ? 16 : 14,
     marginBottom: 5,
     color: '#666',
   },
@@ -289,7 +292,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 10,
     marginBottom: 15,
-    fontSize: 16,
+    fontSize: width > 400 ? 16 : 14,
   },
   textArea: {
     height: 100,
@@ -308,7 +311,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: width > 400 ? 16 : 14,
     fontWeight: 'bold',
   },
   imagesContainer: {
@@ -317,8 +320,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   addImg: {
-    width: 60,
-    height: 60,
+    width: width * 0.15, // Adjust size based on screen width
+    height: width * 0.15,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#e2e2e2',
@@ -330,12 +333,12 @@ const styles = StyleSheet.create({
   },
   uploadText: {
     color: '#919191',
-    fontSize: 25,
+    fontSize: width > 400 ? 25 : 20,
     padding: 5,
   },
   image: {
-    width: 60,
-    height: 60,
+    width: width * 0.15,
+    height: width * 0.15,
     borderRadius: 8,
   },
   deleteIcon: {
@@ -385,7 +388,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: width > 400 ? 20 : 18,
     fontWeight: 'bold',
     color: '#333',
     marginBottom: 20,
@@ -400,7 +403,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
   },
   modalOptionText: {
-    fontSize: 16,
+    fontSize: width > 400 ? 16 : 14,
     color: '#2f2baa',
     marginLeft: 12,
     fontWeight: '500',

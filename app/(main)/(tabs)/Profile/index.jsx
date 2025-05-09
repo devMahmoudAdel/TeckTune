@@ -70,21 +70,21 @@ export default function Profile() {
         <TouchableOpacity
           onPress={() => router.navigate("/(tabs)/Profile/Settings")}
         >
-          <ProfileTags name="Settings" image={"settings-sharp"} />
+          <ProfileTags name="My Orders" image={"cart"} />
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => router.navigate("/(tabs)/Profile/About")}
         >
           <ProfileTags name="About" image={"information-circle-sharp"} />
         </TouchableOpacity>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <ProfileTags name="Share App" image={"share-social-sharp"} />
-        </TouchableOpacity>
-        <TouchableOpacity
+        </TouchableOpacity> */}
+        {/* <TouchableOpacity
           onPress={() => router.navigate("/(tabs)/Profile/Help")}
         >
           <ProfileTags name="Help" image={"help-circle-sharp"} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <LogoutButton />
       </View>
     </ScrollView>

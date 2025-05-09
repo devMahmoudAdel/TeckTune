@@ -1,13 +1,13 @@
-import { Text, View, FlatList, RefreshControl, Platform, StatusBar, StyleSheet } from "react-native";
+import { Text, View, FlatList, RefreshControl, Platform, StatusBar, StyleSheet, Dimensions } from "react-native";
 import Product from "../../../../Components/Product";
 import Entypo from "@expo/vector-icons/Entypo";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, Link } from "expo-router";
 import Search from "../../../../Components/Search";
 import Loading from "../../../../Components/Loading";
 import { getAllProducts } from "../../../../firebase/Product";
 
+const { width, height } = Dimensions.get("window");
 
 export default function ProductList() {
   const navigation = useRouter();
@@ -17,7 +17,7 @@ export default function ProductList() {
   const [searchQuery, setSearchQuery] = useState("");
   const [allProducts, setAllProducts] = useState([]);
   const router = useRouter();
-  
+
   const fetchProducts = async () => {
     try {
       const productsData = await getAllProducts();
@@ -37,44 +37,35 @@ export default function ProductList() {
         productPics: product.productPics || [],
       }));
       setAllProducts(validatedProducts);
-      console.log("Products:", productsData);
-      console.log("All Products:", allProducts);
-      console.log("Filtered Products:", filteredProducts);
     } catch (err) {
       setError("Failed to load products. Please try again.");
-      console.error(err);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  useEffect(() => {    
+  useEffect(() => {
     setLoading(true);
     fetchProducts();
   }, []);
 
   const getKeywords = (query) => {
     if (Array.isArray(query)) {
-      return query
-        .flatMap(pred => pred.toLowerCase().split(/\s+/))
-        .filter(Boolean);
+      return query.flatMap((pred) => pred.toLowerCase().split(/\s+/)).filter(Boolean);
     }
-    return query
-      .toLowerCase()
-      .split(/\s+/)
-      .filter(Boolean);
+    return query.toLowerCase().split(/\s+/).filter(Boolean);
   };
 
   const filteredProducts = useMemo(() => {
     const keywords = getKeywords(searchQuery);
     if (!keywords.length) return allProducts;
-  
+
     return allProducts.filter((product) => {
       const title = product.title?.toLowerCase() || "";
       const description = product.description?.toLowerCase() || "";
       const category = product.category?.toLowerCase() || "";
-  
+
       return keywords.some(
         (keyword) =>
           title.includes(keyword) ||
@@ -85,17 +76,16 @@ export default function ProductList() {
   }, [searchQuery, allProducts]);
 
   const onRefresh = () => {
-    console.log(allProducts[0].id)
     setRefreshing(true);
     fetchProducts();
   };
-  const containerStyle = Platform.OS === 'web'
-    ? { height: '100vh', overflowY: 'auto' }
-    : {};
-  // ---------------------------------------
+
+  const containerStyle = Platform.OS === "web" ? { height: "100vh", overflowY: "auto" } : {};
+
   if (loading) {
-    return (<Loading/>)
+    return <Loading />;
   }
+
   return (
     <View
       style={[
@@ -103,7 +93,7 @@ export default function ProductList() {
         {
           paddingTop: StatusBar.currentHeight + 20,
           flex: 1,
-          paddingBottom: 55,
+          paddingBottom: height * 0.1,
         },
       ]}
     >
@@ -121,7 +111,7 @@ export default function ProductList() {
       <FlatList
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        numColumns={2}
+        numColumns={width > 400 ? 2 : 1}
         contentContainerStyle={{
           justifyContent: "center",
           alignItems: "center",
@@ -137,32 +127,32 @@ export default function ProductList() {
         }
         data={filteredProducts}
         renderItem={({ item }) => (
-        <View style={{ margin: 5 }}>
-          <Link
-            href={{
-              pathname: `/app/(main)/${item.id}`,
-              params: {
-                title: item.title,
-                price: item.price,
-                imagess: JSON.stringify(item.images),
-                rating: item.rating,
-                colorss: JSON.stringify(item.colors),
-                description: item.description,
-                reviews: item.reviews,
-                id: item.id,
-              },
-            }}
-          >
-            <Product
-              id={item.id}
-              title={item.title}
-              price={item.price}
-              images={item.images}
-              rating={item.rating}
-              colors={item.colors}
-            />
-          </Link>
-        </View>
+          <View style={{ margin: 5 }}>
+            <Link
+              href={{
+                pathname: `/app/(main)/${item.id}`,
+                params: {
+                  title: item.title,
+                  price: item.price,
+                  imagess: JSON.stringify(item.images),
+                  rating: item.rating,
+                  colorss: JSON.stringify(item.colors),
+                  description: item.description,
+                  reviews: item.reviews,
+                  id: item.id,
+                },
+              }}
+            >
+              <Product
+                id={item.id}
+                title={item.title}
+                price={item.price}
+                images={item.images}
+                rating={item.rating}
+                colors={item.colors}
+              />
+            </Link>
+          </View>
         )}
       />
     </View>
@@ -176,10 +166,11 @@ const styles = StyleSheet.create({
     width: "92%",
     alignItems: "center",
     marginBottom: 18,
-    paddingHorizontal: 15,
+    paddingHorizontal: width * 0.04,
   },
   textHeader: {
     fontWeight: "bold",
-    fontSize: 22,
+    fontSize: width > 400 ? 22 : 18,
   },
+  
 });
