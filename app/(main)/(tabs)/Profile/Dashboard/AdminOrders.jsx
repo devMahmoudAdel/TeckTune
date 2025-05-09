@@ -1,61 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, Pressable, Alert, Modal, TouchableOpacity, RefreshControl } from "react-native";
-import { getAllUsers } from "../../../../../firebase/User";
+import { View, Text, FlatList, StyleSheet, Pressable, Alert, Modal, TouchableOpacity, TextInput } from "react-native";
 import { getAllOrders, deleteOrder, updateOrder } from "../../../../../firebase/Order";
-import Loading from "../../../../../Components/Loading";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [productsModalVisible, setProductsModalVisible] = useState(false);
   const [statusFilter, setStatusFilter] = useState(null);
-
-  const fetchOrders = async () => {
-    try {
-      setLoading(true);
-      const [users, allOrders] = await Promise.all([
-        getAllUsers(),
-        Promise.all(
-          (await getAllUsers()).map((user) =>
-            getAllOrders(user.id).then((orders) =>
-              orders.map((order) => ({
-                ...order,
-                userId: user.id,
-                userName: `${user.firstName} ${user.lastName}`,
-              }))
-            )
-          )
-        ),
-      ]);
-
-      const flattenedOrders = allOrders.flat();
-
-      const sortedOrders = flattenedOrders.sort((a, b) => {
-        if (a.status === "preparing" && b.status !== "preparing") return -1;
-        if (a.status !== "preparing" && b.status === "preparing") return 1;
-        return new Date(a.order_date) - new Date(b.order_date);
-      });
-
-      setOrders(sortedOrders);
-    } catch (error) {
-      Alert.alert("Error", "Failed to fetch orders.");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+  const [editingDeliveryDate, setEditingDeliveryDate] = useState(""); 
 
   useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const allOrders = await getAllOrders();
+
+        const sortedOrders = allOrders.sort((a, b) => {
+          if (a.status === "pending" && b.status !== "pending") return -1;
+          if (a.status !== "pending" && b.status === "pending") return 1;
+          return new Date(a.order_date) - new Date(b.order_date);
+        });
+
+        setOrders(sortedOrders);
+      } catch (error) {
+        Alert.alert("Error", "Failed to fetch orders.");
+      }
+    };
+
     fetchOrders();
   }, []);
-
-  const onRefresh = () => {
-    setRefreshing(true);
-    fetchOrders();
-  };
 
   const openStatusModal = (order) => {
     setSelectedOrder(order);
@@ -64,13 +37,35 @@ export default function AdminOrders() {
 
   const openProductsModal = (order) => {
     setSelectedOrder(order);
+    setEditingDeliveryDate(order.expected_delivery_date);
     setProductsModalVisible(true);
+  };
+
+  const saveExpectedDeliveryDate = async () => {
+    if (selectedOrder) {
+      try {
+        await updateOrder(selectedOrder.user_id, selectedOrder.id, {
+          expected_delivery_date: editingDeliveryDate,
+        });
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.id === selectedOrder.id
+              ? { ...order, expected_delivery_date: editingDeliveryDate }
+              : order
+          )
+        );
+        Alert.alert("Success", "Expected delivery date updated successfully.");
+        setProductsModalVisible(false);
+      } catch (error) {
+        Alert.alert("Error", "Failed to update expected delivery date.");
+      }
+    }
   };
 
   const changeStatus = async (newStatus) => {
     if (selectedOrder) {
       try {
-        await updateOrder(selectedOrder.userId, selectedOrder.id, { status: newStatus });
+        await updateOrder(selectedOrder.user_id, selectedOrder.id, { status: newStatus });
         setOrders((prevOrders) =>
           prevOrders.map((order) =>
             order.id === selectedOrder.id ? { ...order, status: newStatus } : order
@@ -84,14 +79,14 @@ export default function AdminOrders() {
     }
   };
 
-  const removeOrder = (userId, orderId) => {
+  const removeOrder = (orderId) => {
     Alert.alert("Confirm Action", "Are you sure you want to delete this order?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Yes",
         onPress: async () => {
           try {
-            await deleteOrder(userId, orderId);
+            await deleteOrder(orderId);
             setOrders((prevOrders) => prevOrders.filter((order) => order.id !== orderId));
           } catch (error) {
             Alert.alert("Error", "Failed to delete order.");
@@ -111,17 +106,12 @@ export default function AdminOrders() {
     return true;
   });
 
-  if (loading && !refreshing) {
-    return <Loading />;
-  }
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Admin Orders</Text>
 
-      {/* Status Filter */}
       <View style={styles.filterContainer}>
-        {["canceled", "completed", "shipped", "preparing"].map((status) => (
+        {["canceled", "out for delivery", "shipped", "pending"].map((status) => (
           <Pressable
             key={status}
             style={[
@@ -138,14 +128,11 @@ export default function AdminOrders() {
       <FlatList
         data={filteredOrders}
         keyExtractor={(item) => item.id}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
         renderItem={({ item }) => (
           <Pressable onPress={() => openProductsModal(item)}>
             <View style={styles.orderCard}>
               <View style={styles.orderInfo}>
-                <Text style={styles.text}>User Name: {item.userName}</Text>
+                <Text style={styles.text}>User Name: {item.user_name}</Text>
                 <Text style={styles.text}>Order Date: {item.order_date}</Text>
                 <Text style={styles.text}>
                   Total Price: ${calculateTotalPrice(item.products, item.shipping_price)}
@@ -161,7 +148,7 @@ export default function AdminOrders() {
               </Pressable>
               <Pressable
                 style={[styles.actionButton, styles.deleteButton]}
-                onPress={() => removeOrder(item.userId, item.id)}
+                onPress={() => removeOrder(item.id)}
               >
                 <Text style={styles.actionButtonText}>Delete</Text>
               </Pressable>
@@ -169,40 +156,7 @@ export default function AdminOrders() {
           </Pressable>
         )}
       />
-      {productsModalVisible && selectedOrder && (
-        <Modal
-          transparent={true}
-          animationType="slide"
-          visible={productsModalVisible}
-          onRequestClose={() => setProductsModalVisible(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Details</Text>
-              <FlatList
-                data={selectedOrder.products}
-                keyExtractor={(item, index) => `${item.name}-${index}`}
-                renderItem={({ item }) => (
-                  <View style={styles.productItem}>
-                    <Text style={styles.text}>Product Name: {item.name}</Text>
-                    <Text style={styles.text}>Quantity: {item.quantity}</Text>
-                    <Text style={styles.text}>Price of one: ${item.price}</Text>
-                  </View>
-                )}
-              />
-              <View style={styles.shippingInfo}>
-                <Text style={styles.text}>Shipping Price: ${selectedOrder.shipping_price}</Text>
-              </View>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setProductsModalVisible(false)}
-              >
-                <Text style={styles.modalButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
-      )}
+
       {modalVisible && (
         <Modal
           transparent={true}
@@ -213,7 +167,7 @@ export default function AdminOrders() {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Select New Status</Text>
-              {["canceled", "completed", "shipped", "preparing"].map((status) => (
+              {["canceled", "out for delivery", "shipped", "pending"].map((status) => (
                 <TouchableOpacity
                   key={status}
                   style={styles.modalButton}
@@ -232,9 +186,60 @@ export default function AdminOrders() {
           </View>
         </Modal>
       )}
+
+      {productsModalVisible && selectedOrder && (
+        <Modal
+          transparent={true}
+          animationType="slide"
+          visible={productsModalVisible}
+          onRequestClose={() => setProductsModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Order Details</Text>
+              <FlatList
+                data={selectedOrder.products}
+                keyExtractor={(item, index) => `${item.name}-${index}`}
+                renderItem={({ item }) => (
+                  <View style={styles.productItem}>
+                    <Text style={styles.text}>Product Name: {item.name}</Text>
+                    <Text style={styles.text}>Quantity: {item.quantity}</Text>
+                    <Text style={styles.text}>Price of one: ${item.price}</Text>
+                  </View>
+                )}
+              />
+              <View style={styles.shippingInfo}>
+                <Text style={styles.text}>Shipping Price: ${selectedOrder.shipping_price}</Text>
+              </View>
+              <View style={styles.deliveryDateContainer}>
+                <Text style={styles.text}>Expected Delivery Date:</Text>
+                <TextInput
+                  style={styles.input}
+                  value={editingDeliveryDate}
+                  onChangeText={setEditingDeliveryDate}
+                  placeholder="YYYY-MM-DD"
+                />
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.saveButton]}
+                  onPress={saveExpectedDeliveryDate}
+                >
+                  <Text style={styles.modalButtonText}>Save</Text>
+                </TouchableOpacity>
+              </View>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setProductsModalVisible(false)}
+              >
+                <Text style={styles.modalButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      )}
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -364,5 +369,26 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 14,
+  },
+  deliveryDateContainer: {
+    marginTop: 20,
+    padding: 10,
+    backgroundColor: "#f9f9f9",
+    borderRadius: 5,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    padding: 10,
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  saveButton: {
+    backgroundColor: "#4CAF50",
+    alignSelf: "center",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
   },
 });
