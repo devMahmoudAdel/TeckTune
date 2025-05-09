@@ -76,4 +76,31 @@ const isEmailExists = async (email) => {
   }
 };
 
-export { getUser, createUser, isEmailExists, isUsernameExists, getAllUsers };
+const isUserExists = async (email, password) => {
+  try {
+    const usersRef = collection(db, "users");
+
+    const userQuery = query(
+      usersRef,
+      where("email", "==", email),
+      where("password", "==", password)
+    );
+
+    const querySnapshot = await getDocs(userQuery);
+
+    return !querySnapshot.empty;
+
+  } catch (error) {
+    console.error("Error checking user existence:", error);
+    return false;
+  }
+};
+
+export {
+  getUser,
+  createUser,
+  isEmailExists,
+  isUserExists,
+  isUsernameExists,
+  getAllUsers,
+};
