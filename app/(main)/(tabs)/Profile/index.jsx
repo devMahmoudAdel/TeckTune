@@ -7,13 +7,16 @@ import {
   ScrollView,
   Platform,
   StatusBar,
+  Dimensions,
 } from "react-native";
 import ProfileTags from "../../../../Components/ProfileTags";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import LogoutButton from "../../../../Components/Auth/LogoutButton";
-import DashboardStack from "../../../../navigation/DashboardStack";
 import { useAuth } from "../../../../context/useAuth";
+
+const screen = Dimensions.get("window");
+
 export default function Profile() {
   const router = useRouter();
   const { user, guest } = useAuth();
@@ -21,30 +24,32 @@ export default function Profile() {
     Platform.OS === "web"
       ? { style: { maxHeight: "100vh", overflowY: "auto" } }
       : {};
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
-      contentContainerStyle={{ paddingBottom: 40 }}
-      {...scrollViewProps} // also for web scrolling problem
+      contentContainerStyle={{ paddingBottom: screen.height * 0.05 }}
+      {...scrollViewProps}
     >
       <View style={styles.container}>
-        <View style={{ alignItems: "center", marginVertical: 20 }}>
-          { user.profilePic ?
-          (<Image
-            source={{ uri: user.profilePic }}
-            style={styles.imageProfile}
-          />) :(
+        <View style={styles.profileContainer}>
+          {user.profilePic ? (
+            <Image
+              source={{ uri: user.profilePic }}
+              style={styles.imageProfile}
+            />
+          ) : (
             <Ionicons
-            name="person"
-            size={40}
-            color="black"
-            style={styles.imageProfile}
-          />
+              name="person"
+              size={screen.width * 0.2}
+              color="black"
+              style={styles.imageProfile}
+            />
           )}
           <Text style={styles.userText}>
             {user.firstName} {user.lastName}
           </Text>
-          <Text style={styles.emailText}>{useAuth().user.email}</Text>
+          <Text style={styles.emailText}>{user.email}</Text>
         </View>
         <TouchableOpacity
           onPress={() =>
@@ -85,26 +90,32 @@ export default function Profile() {
     </ScrollView>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     paddingTop: StatusBar.currentHeight + 10,
+    paddingHorizontal: screen.width * 0.05,
+  },
+  profileContainer: {
+    alignItems: "center",
+    marginVertical: screen.height * 0.03,
   },
   imageProfile: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: screen.width * 0.25,
+    height: screen.width * 0.25,
+    borderRadius: screen.width * 0.125,
   },
   userText: {
-    fontSize: 24,
+    fontSize: screen.width * 0.06,
     fontWeight: "bold",
-    marginTop: 10,
+    marginTop: screen.height * 0.01,
   },
   emailText: {
-    fontSize: 18,
+    fontSize: screen.width * 0.045,
     color: "gray",
-    marginTop: 5,
+    marginTop: screen.height * 0.005,
   },
 });

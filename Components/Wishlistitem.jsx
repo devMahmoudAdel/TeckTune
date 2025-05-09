@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, Pressable, Dimensions, Alert } from 'react-native';
 import { AntDesign } from "@expo/vector-icons"; 
 import { inWishlist, removeFromWishlist } from '../firebase/Wishlist';
+
 const screen = Dimensions.get('window');
+
 const Wishlistitem = (prodcutInof) => {
-  const [ isWishList, setIsWishList ] = useState(true);
+  const [isWishList, setIsWishList] = useState(true);
 
   const handleDeleteFromWishlist = async () => {
     try {
       await removeFromWishlist(prodcutInof.id);
       setIsWishList(false);
       prodcutInof.setRefreshing2((prev) => prev + 1);
-      // Alert.alert("Success", "Product removed from wishlist");
     } catch (error) {
       Alert.alert("Error", "Failed to remove product from wishlist");
     }
@@ -30,18 +31,19 @@ const Wishlistitem = (prodcutInof) => {
       checkWishListStatus();
     }
   }, []);
+
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={{uri: prodcutInof.image}} />
+      <Image style={styles.image} source={{ uri: prodcutInof.image }} />
 
       <View style={styles.detailsContainer}>
-        <Text style={styles.title}>{prodcutInof.title}</Text>
+        <Text style={styles.title} numberOfLines={1}>{prodcutInof.title}</Text>
         <Text style={styles.price}>${prodcutInof.price}</Text>
       </View>
 
       <View style={styles.loveContainer}>
         <Pressable onPress={() => handleDeleteFromWishlist()} style={styles.button}>
-          <AntDesign name={isWishList ? "heart" : "hearto"} size={21} color="#2e2a9d" />
+          <AntDesign name={isWishList ? "heart" : "hearto"} size={screen.width * 0.06} color="#2e2a9d" />
         </Pressable>
       </View>
     </View>
@@ -53,32 +55,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#f2f2f2",
-    borderRadius: 5,
-    padding: 0,
-    width: screen.width - 20,
+    borderRadius: screen.width * 0.02,
+    padding: screen.width * 0.03,
+    width: screen.width * 0.95,
     alignSelf: "center",
+    marginVertical: screen.height * 0.01,
   },
   image: {
-    width: 65,
-    height: "100%",
-    borderRadius: 5,
+    width: screen.width * 0.2,
+    height: screen.width * 0.2, 
+    borderRadius: screen.width * 0.02, 
   },
   detailsContainer: {
     flex: 1,
-    paddingHorizontal: 15,
+    paddingHorizontal: screen.width * 0.03,
     justifyContent: "center",
-    paddingTop: 10,
-    paddingBottom: 10
-
   },
   title: {
-    // fontWeight: "bold",
+    fontSize: screen.width * 0.04,
     color: "#4e5774",
-    fontSize: 14,
-    marginBottom: 15,
+    marginBottom: screen.height * 0.005,
   },
   price: {
-    fontSize: 15,
+    fontSize: screen.width * 0.045,
     fontWeight: "bold",
     color: "#1f388d",
   },
@@ -86,9 +85,8 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    paddingRight: 12,
+    paddingRight: screen.width * 0.03,
   },
-  
 });
 
 export default Wishlistitem;
