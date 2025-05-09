@@ -139,5 +139,6 @@ export {
   isUserExists,
   isPasswordExists,
   isUsernameExists,
+  updateUser,
   getAllUsers,
 };

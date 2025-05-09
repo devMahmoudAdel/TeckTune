@@ -1,16 +1,50 @@
-import { StyleSheet, Text, View, StatusBar, TouchableOpacity, Alert  } from 'react-native'
-import React, { useState } from 'react';
+import { StyleSheet, Text, View, StatusBar,Pressable ,TouchableOpacity, Alert  } from 'react-native'
+import React, { use, useState } from 'react';
 import Order_Summary from '../../Components/OrderSummary'
 import { MaterialIcons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import Entypo from "@expo/vector-icons/Entypo";
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/useAuth';
+import { getCart } from '../../firebase/Cart';
+import { addOrder } from '../../firebase/Order';
+
 const Checkout = () => {
     const router = useRouter();
     const { user } = useAuth();
     const [isChecked, setIsChecked] = useState(false);
     const { subtotal, discount, delivery, count, total } = useLocalSearchParams();
+    const [selectedPayment, setSelectedPayment] = useState("");
+    const handleConfirm = async() => {
+        const cart = await getCart();
+        if (cart.length === 0) {
+            Alert.alert("Your cart is empty");
+            return;
+        }
+        const orderData = {
+            products: cart,
+            address: "325 12th Essadat, October",
+            payment_method: selectedPayment,
+            user_name: user.userName,
+            user_id: user.id,
+        };
+        const orderId = await addOrder(orderData);
+        if (orderId) {
+            Alert.alert("Order placed successfully", `Your order ID is ${orderId}`);
+            router.push("../(main)/(tabs)/Home");
+        } else {
+            Alert.alert("Error placing order", "Please try again later");
+        }
+    }
+    const handleCheckBox = (value) => {
+        if (isChecked && selectedPayment === value) {
+            setIsChecked(false);
+            setSelectedPayment("");
+        } else {
+            setIsChecked(true);
+            setSelectedPayment(value);
+        }
+    }
   return (
     <View style={{flex:1, backgroundColor:"#fff", padding:10}}>
         <View
@@ -25,15 +59,26 @@ const Checkout = () => {
                 <Text style={styles.textHeader}>Checkout</Text>
               </View>
         <View style={{marginTop:25}}>
-            <View style={styles.info_delivery_container}>
+            {user.address ? (
+                <View style={styles.info_delivery_container}>
                 <View style={styles.info_delivery_icon}>
                     <MaterialIcons name="location-on" size={24} color="#5f55da" />
                 </View>
-                <View>
-                    <Text style={styles.info_delivery_text1}>325 12th Essadat, October</Text>
-                    <Text style={styles.info_delivery_text2}>Cairo University in Test</Text>
-                </View>
+            <Text style={styles.info_delivery_text1}>{user.address}</Text>
             </View>
+           ) : (
+               <View style={styles.info_delivery_container}>
+                <View style={styles.info_delivery_icon}>
+                    <MaterialIcons name="location-on" size={24} color="#5f55da" />
+                </View>
+            <View style={{flexDirection:"row",gap:15,alignItems:"center"}}>
+                <Text style={styles.info_delivery_text1}>No address found</Text>
+            <Pressable style={{width:120,height:40,backgroundColor:"#5f55da",alignItems:"center",justifyContent:"center",borderRadius:5}} onPress={() => router.push("../(main)/(tabs)/Profile/MyProfile")}>
+                <Text style={{color: 'white'}}>Add address</Text>
+            </Pressable>
+            </View>
+            </View>
+           )}
             <View style={styles.info_delivery_container}>
                 <View style={styles.info_delivery_icon}>
                     <MaterialIcons name="access-time" size={24} color="#5f55da" />
@@ -58,19 +103,30 @@ const Checkout = () => {
             <Text style={styles.payment_head}>Choose payment method</Text>
             <TouchableOpacity
                 style={styles.checkboxContainer}
-                onPress={() => setIsChecked(!isChecked)}
+                onPress={() => handleCheckBox("cash")}
             >
                 <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
                     <MaterialIcons name="local-shipping" size={18} color="#5f55da" />
                     <Text style={styles.label}>Cash on delivery</Text>
                 </View>
-                <View style={[styles.checkbox, isChecked && styles.checkedBox]} />
+                <View style={[styles.checkbox, isChecked && selectedPayment === "cash" && styles.checkedBox]} />
+            </TouchableOpacity>
+            <TouchableOpacity
+                style={styles.checkboxContainer}
+                onPress={() => handleCheckBox("mastercard")}
+            >
+                <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+                    <MaterialIcons name="credit-card" size={18} color="#5f55da" />
+                    <Text style={styles.label}>MasterCard</Text>
+                </View>
+                <View style={[styles.checkbox, isChecked && selectedPayment === "mastercard" && styles.checkedBox]} />
             </TouchableOpacity>
         </View>
 
         <TouchableOpacity
-            style = {[styles.btn_confirm, isChecked && styles.btn_confirmed ]}
-            onPress={() =>{ if(isChecked) Alert.alert("🎉 Congratulations")}}
+            style = {[styles.btn_confirm, (isChecked && user.address) && styles.btn_confirmed ]}
+            onPress={handleConfirm}
+            disabled={!isChecked || !user.address}
         >
             <Text style={{color:'white', fontSize:16}}>Confirm</Text>
 
@@ -87,6 +143,7 @@ const styles = StyleSheet.create({
     info_delivery_container: {
         flexDirection: 'row',
         justifyContent: 'flex-start',
+        alignItems: 'center',
         marginHorizontal: 5,
         marginBottom:15,
     },
@@ -119,6 +176,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginTop: 7,
         marginHorizontal:5,
+        marginVertical: 10,
         alignItems: 'center'
     },
 

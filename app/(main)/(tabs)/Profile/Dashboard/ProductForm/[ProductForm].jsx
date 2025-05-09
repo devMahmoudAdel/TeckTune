@@ -109,8 +109,8 @@ export default function ProductForm() {
         images: product.images || [],
         price: product.price?.toString() || '',
         stock: product.stock?.toString() || '',
-        category: category || '',
-        brand: brand || '',
+        category: category.id || '',
+        brand: brand.id || '',
         colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
         rating: product.rating?.toString() || '0',
       });
@@ -142,11 +142,11 @@ export default function ProductForm() {
       errors.push('Rating must be between 0 and 5');
     }
 
-    if (!formData.category.id.trim()) {
+    if (!formData.category.trim()) {
       errors.push('Category is required');
     }
 
-    if (!formData.brand.id.trim()) {
+    if (!formData.brand.trim()) {
       errors.push('Brand is required');
     }
 
