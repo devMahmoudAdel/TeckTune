@@ -27,6 +27,7 @@ export default function ProductForm() {
   const [brands, setBrands] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedBrand, setSelectedBrand] = useState(null);
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',

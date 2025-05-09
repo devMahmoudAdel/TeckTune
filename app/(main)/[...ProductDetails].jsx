@@ -23,17 +23,15 @@ import {
   removeFromWishlist,
   inWishlist,
 } from "../../firebase/Wishlist";
-import { getRecommendation } from "../../firebase/Product";
 import fallbackImage from "../../assets/icon.png";
 import CheckAlert from "../../Components/CheckAlert";
 import { useAuth } from "../../context/useAuth";
 const { width, height } = Dimensions.get("window");
 
+
 export default function ProductDetails() {
+
   const router = useRouter();
-  const { id } = useLocalSearchParams(); // Only take the `id` from params
-  const [recommendedProducts, setRecommendedProducts] = useState([]);
-  const [loadingRecommendations, setLoadingRecommendations] = useState(true);
   const [selectedColor, setSelectedColor] = useState(null);
   const [dynamicReviews, setDynamicReviews] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -49,6 +47,7 @@ export default function ProductDetails() {
   const rating = params.rating || "0";
   const description = params.description || "No description available";
   const reviews = params.reviews || "0";
+  const id = params.id || "";
   const category = params.category || "null";
 
   useEffect(() => {
@@ -85,6 +84,7 @@ export default function ProductDetails() {
     }
   }, [id]);
 
+
   useEffect(() => {
     if (!guest) {
       const checkCartStatus = async () => {
@@ -101,6 +101,7 @@ export default function ProductDetails() {
       }
     }
   }, [id]);
+
 
   const [refreshing, setRefreshing] = useState(false);
 
@@ -119,31 +120,15 @@ export default function ProductDetails() {
       setRefreshing(false);
     }
   };
-
+  
   useEffect(() => {
     fetchDynamicReviews();
   }, [id]);
-
+  
   const onRefresh = () => {
     setRefreshing(true);
     fetchDynamicReviews();
   };
-
-  const fetchRecommendations = async () => {
-    try {
-      const recommendations = await getRecommendation(id); // Fetch recommendation IDs
-      setRecommendedProducts(recommendations);
-    } catch (error) {
-      console.error("Error fetching recommendations:", error);
-    } finally {
-      setLoadingRecommendations(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchRecommendations();
-  }, [id]);
-
   const handleScroll = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
     setActiveIndex(slideIndex);
@@ -151,27 +136,27 @@ export default function ProductDetails() {
 
   const handleAddToWishList = async () => {
     if (guest) {
-      router.push("/restricted-modal");
+      router.push("/restricted-modal")
     } else {
       try {
         if (isWishList) {
           await removeFromWishlist(id);
           setIsWishList(false);
-          <CheckAlert state="success" title="Product removed from wishlist" />;
+          <CheckAlert state="success" title="Product removed from wishlist" />
         } else {
           await addToWishlist(id);
           setIsWishList(true);
-          <CheckAlert state="success" title="Product added to wishlist" />;
+          <CheckAlert state="success" title="Product added to wishlist" />
         }
       } catch (error) {
-        <CheckAlert state="error" title="Failed to update wishlist" />;
+        <CheckAlert state="error" title="Failed to update wishlist" />
       }
     }
   };
 
   const handleAddToCart = async () => {
     if (guest) {
-      router.push("/restricted-modal");
+      router.push("/restricted-modal")
     } else {
       try {
         if (isCart) {
@@ -179,24 +164,17 @@ export default function ProductDetails() {
         } else {
           await addToCart(id);
           setIsCart(true);
-          <CheckAlert state="success" title="Product added to cart" />;
+          <CheckAlert state="success" title="Product added to cart" />
         }
       } catch (error) {
-        <CheckAlert state="error" title="Failed to update cart" />;
+        <CheckAlert state="error" title="Failed to update cart" />
       }
     }
   };
 
   const handleBuyNow = () => {
-    return <CheckAlert state="error" title="Not now" />;
-  };
-
-  const navigateToProductDetails = (productId) => {
-    router.push({
-      pathname: "/(main)/[...ProductDetails]",
-      params: { id: productId },
-    });
-  };
+    return (<CheckAlert state="error" title="Not now" />)
+  }
 
   // Helper to navigate to review list
   const goToReviewList = () => {
@@ -407,42 +385,6 @@ export default function ProductDetails() {
                   <Text style={styles.buyButtonText}>Buy Now</Text>
                 </Pressable>
               </View>
-
-              <View style={styles.divider} />
-
-              <Text style={styles.sectionTitle}>Product Recommendations</Text>
-              {loadingRecommendations ? (
-                <ActivityIndicator size="large" color="#5A31F4" />
-              ) : recommendedProducts.length > 0 ? (
-                <FlatList
-                  data={recommendedProducts}
-                  horizontal
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity
-                      style={styles.recommendationItem}
-                      onPress={() => navigateToProductDetails(item.id)}
-                    >
-                      <Image
-                        source={
-                          item.images && item.images.length > 0 && item.images[0]
-                            ? { uri: item.images[0] }
-                            : fallbackImage
-                        }
-                        style={styles.recommendationImage}
-                      />
-                      <Text style={styles.recommendationText}>
-                        {item.name || "Product"}
-                      </Text>
-                    </TouchableOpacity>
-                  )}
-                  showsHorizontalScrollIndicator={false}
-                />
-              ) : (
-                <Text style={styles.noRecommendationsText}>
-                  No recommendations available.
-                </Text>
-              )}
             </View>
           </>
         )}
@@ -680,26 +622,5 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#eee",
     marginVertical: 12,
-  },
-  recommendationItem: {
-    marginRight: 15,
-    alignItems: "center",
-  },
-  recommendationImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  recommendationText: {
-    fontSize: 14,
-    color: "#555",
-    textAlign: "center",
-  },
-  noRecommendationsText: {
-    fontSize: 14,
-    color: "#999",
-    textAlign: "center",
-    marginTop: 10,
   },
 });
