@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#eeeeee",
+    // backgroundColor: "#eeeeee",
   },
   userContainer: {
     flexDirection: "row",
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
   },
   notificationIcon: {
     padding: 10,
-    backgroundColor: "#e5e5e5",
+    // backgroundColor: "#e5e5e5",
     borderRadius: 25,
   },
   imageProfile: {
