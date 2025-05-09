@@ -237,13 +237,13 @@ export default function SignIn() {
         </Text>
       </View>
 
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.googleButton}
         onPress={() => Alert.alert("Google Sign In", "Google sign-in is not implemented yet.")}
       >
         <Ionicons name="logo-google" color="#fff" size={20} />
         <Text style={styles.googleButtonText}>Sign in with Google</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </ScrollView>
   );
 }
