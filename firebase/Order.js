@@ -67,12 +67,11 @@ const getAllOrders = async () => {
   }
 };
 const getAllOrdersByUserId = async (userId) => {
-  console.log("userId", userId);
   try {
     const ordersCollectionRef = collection(db, "orders");
     const ordersSnapshot = await getDocs(ordersCollectionRef);
     const userOrders = ordersSnapshot.docs
-      .map((doc) => ({ ...doc.data() }))
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
       .filter((order) => order.user_id === userId);
     return userOrders;
   } catch (error) {
@@ -118,4 +117,4 @@ const createOrder = async (userId, orderData) => {
   }
 };
 
-export { addOrder, deleteOrder, getOrder, getAllOrders, updateOrder, createOrder,getAllOrdersByUserId };
+export { addOrder, deleteOrder, getOrder, getAllOrders, updateOrder, createOrder };
