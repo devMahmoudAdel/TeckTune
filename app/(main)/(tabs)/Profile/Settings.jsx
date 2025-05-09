@@ -1,78 +1,31 @@
-import React, { useState } from 'react';
+import React, { useContext,useState, useEffect  } from 'react';
 import { View, Text, TouchableOpacity, FlatList } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-
-const orders = [
-  {
-    address: "456 Elm St, Los Angeles, CA",
-    expected_delivery_date: "2025-05-10",
-    id: "product2",
-    order_date: "2025-05-05",
-    payment_method: "visa",
-    shipping_price: 50,
-    status: "shipped",
-    products: [
-      {
-        name: "Laptop",
-        price: 1500,
-        quantity: 1
-      }
-    ],
-    user_id: "user12345",
-    user_name: "john_doe"
-  },
-  {
-    address: "890 River St, Denver, CO",
-    expected_delivery_date: "2025-05-22",
-    id: "product9",
-    order_date: "2025-05-18",
-    payment_method: "paypal",
-    shipping_price: 10,
-    status: "OutForDelivery",
-    products: [
-      {
-        name: "Bluetooth Speaker",
-        price: 75,
-        quantity: 1
-      },
-      {
-        name: "USB Cable",
-        price: 10,
-        quantity: 3
-      }
-    ],
-    user_id: "user10002",
-    user_name: "mason_clark"
-  },
-  {
-    address: "66 Pine St, Austin, TX",
-    expected_delivery_date: "2025-05-28",
-    id: "product10",
-    order_date: "2025-05-21",
-    payment_method: "cash on delivery",
-    shipping_price: 25,
-    status: "pending",
-    products: [
-      {
-        name: "Coffee Maker",
-        price: 90,
-        quantity: 1
-      },
-      {
-        name: "Coffee Beans",
-        price: 20,
-        quantity: 2
-      }
-    ],
-    user_id: "user10003",
-    user_name: "ella_martin"
-  }
-];
+import { useAuth } from "../../../../context/useAuth"; 
+import { getAllOrdersByUserId } from "../../../../firebase/Order";
 
 export default function MyOrders() {
   const [selectedStatus, setSelectedStatus] = useState('shipped');
   const router = useRouter();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth(); 
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const userOrders = await getAllOrdersByUserId(user.id);
+        setOrders(userOrders);
+      } catch (error) {
+        console.error("Error fetching orders:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
   const filteredOrders = orders
     .filter(order => order.status === selectedStatus)
     .sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
@@ -92,7 +45,7 @@ export default function MyOrders() {
       </View>
 
       <View style={{ flexDirection: 'row', marginBottom: 20, justifyContent: 'space-around' }}>
-        {['shipped', 'OutForDelivery', 'pending', 'Canceled'].map((status) => (
+        {['shipped', 'out for delivery', 'pending', 'canceled'].map((status) => (
           <TouchableOpacity
             key={status}
             onPress={() => setSelectedStatus(status)}
@@ -117,7 +70,7 @@ export default function MyOrders() {
               onPress={() => {
     router.push({
       pathname: './OrderDetails',
-      params: { id: item.id }, 
+      params: { status: item.status,address: item.address, order_date: item.order_date, expected_delivery_date: item.expected_delivery_date, payment_method: item.payment_method, products: item.products,shipping_price: item.shipping_price,user_name: item.user_name}, 
     }) }  
   }
               style={{ marginTop: 10, backgroundColor: '#6200EE', padding: 10, borderRadius: 6 }}>
