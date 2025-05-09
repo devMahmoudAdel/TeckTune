@@ -21,7 +21,7 @@ import {takePhoto,
   uploadImage} from "../../../../supabase/loadImage";
 const MyProfile = () => {
   const router = useRouter();
-  const { user, deleteAccount } = useAuth();
+  const { user, deleteAccount, updateUserData } = useAuth();
   const [userData, setUserData] = useState({});
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -131,8 +131,10 @@ const MyProfile = () => {
         address,
         profilePic,
       });
+      await updateUserData(userData);
       Alert.alert("Success", "Profile updated successfully");
       setChanged(false);
+      router.back();
     } catch (error) {
       console.error("Error updating profile:", error);
       Alert.alert("Error", "Failed to update profile");

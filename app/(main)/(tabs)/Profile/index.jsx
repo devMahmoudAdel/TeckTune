@@ -29,19 +29,20 @@ export default function Profile() {
     >
       <View style={styles.container}>
         <View style={{ alignItems: "center", marginVertical: 20 }}>
-          {/* <Ionicons
+          { user.profilePic ?
+          (<Image
+            source={{ uri: user.profilePic }}
+            style={styles.imageProfile}
+          />) :(
+            <Ionicons
             name="person"
-            size={100}
+            size={40}
             color="black"
             style={styles.imageProfile}
-          /> */}
-          <Image
-            source={useAuth().user.avatarUri}
-            defaultSource={require("../../../../assets/avatars/avatar2.png")}
-            style={styles.imageProfile}
           />
+          )}
           <Text style={styles.userText}>
-            {useAuth().user.firstName} {useAuth().user.lastName}
+            {user.firstName} {user.lastName}
           </Text>
           <Text style={styles.emailText}>{useAuth().user.email}</Text>
         </View>
