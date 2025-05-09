@@ -91,6 +91,7 @@ export const AuthProvider = ({ children }) => {
         status: "active",
         role: "user",
         id : firebaseUser.uid, 
+        password: pass,  
         createdAt: new Date().toISOString(),
       });
 

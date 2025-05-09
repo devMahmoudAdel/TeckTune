@@ -17,6 +17,30 @@ const getUser = async (userId) => {
   }
 };
 
+const updateUser = async (userId, userData) => {
+  try {
+    const userDocRef = doc(collection(db, "users"), userId);
+    await setDoc(
+      userDocRef,
+      {
+        firstName: userData.firstName || "",
+        lastName: userData.lastName || "",
+        username: userData.username || "",
+        email: userData.email || "",
+        phoneNumber: userData.phoneNumber || "",
+        address: userData.address || "",
+        profilePic: userData.profilePic || "",
+      },
+      { merge: true }
+    );
+    return true;
+  } catch (error) {
+    <CheckAlert state="error" title={error.message} />;
+    console.error("Error updating user:", error);
+    return false;
+  }
+};
+
 const createUser = async (userId, userData) => {
   try {
     const userDocRef = doc(collection(db, "users"), userId);
@@ -76,4 +100,45 @@ const isEmailExists = async (email) => {
   }
 };
 
-export { getUser, createUser, isEmailExists, isUsernameExists, getAllUsers };
+const isPasswordExists = async (password) => {
+  try {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("password", "==", password));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+  } catch (error) {
+    console.error("Error checking password:", error);
+    return false;
+  }
+};
+
+const isUserExists = async (email, password) => {
+  try {
+    const usersRef = collection(db, "users");
+
+    const userQuery = query(
+      usersRef,
+      where("email", "==", email),
+      where("password", "==", password)
+    );
+
+    const querySnapshot = await getDocs(userQuery);
+
+    return !querySnapshot.empty;
+
+  } catch (error) {
+    console.error("Error checking user existence:", error);
+    return false;
+  }
+};
+
+export {
+  getUser,
+  createUser,
+  isEmailExists,
+  isUserExists,
+  isPasswordExists,
+  isUsernameExists,
+  updateUser,
+  getAllUsers,
+};
