@@ -1,7 +1,8 @@
 import { collection, addDoc, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./config";
 import CheckAlert from "../Components/CheckAlert";
-
+import {getCategory} from "./Category";
+import {getBrand} from "./Brand";
 // Function to add a product to Firestore
 async function addProduct(productData) {
   try {
@@ -29,7 +30,10 @@ const getProduct = async (id) => {
   const productDocRef = doc(collection(db, 'products'), id);
   const productDoc = await getDoc(productDocRef);
   if (productDoc.exists()) {
-    return productDoc.data();
+    const productData = productDoc.data();
+    const category = await getCategory(productData.category);
+    const brand = await getBrand(productData.brand);
+    return { ...productData, ...category, ...brand };
   } else {
     <CheckAlert state="error" title="product does not exist"/>
   }
@@ -39,7 +43,12 @@ const getAllProducts = async () => {
   try{
   const productsCollectionRef = collection(db, 'products');
   const productsSnapshot = await getDocs(productsCollectionRef);
-  const products = productsSnapshot.docs.map((doc) => doc.data());
+  const products = await Promise.all(productsSnapshot.docs.map(async (doc) => {
+    const productData = doc.data();
+    const category = await getCategory(productData.category);
+    const brand = await getBrand(productData.brand);
+    return { ...productData, ...category, ...brand };
+  }));
   return products;
   }catch (error) {
     <CheckAlert state="error" title={error.message}/>
