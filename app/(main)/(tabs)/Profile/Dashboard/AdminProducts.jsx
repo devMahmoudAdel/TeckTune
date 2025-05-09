@@ -226,7 +226,7 @@ export default function AdminProducts() {
                 <Text style={styles.productPrice}>${(item.price || 0).toFixed(2)}</Text>
                 <Text style={styles.productStock}>Stock: {item.stock || 0}</Text>
                 {item.category.name && (
-                  <Text style={styles.productCategory}>{item.category.name}</Text>
+                  <Text style={styles.productCategory}>Category: {item.category.name}</Text>
                 )}
               </View>
               

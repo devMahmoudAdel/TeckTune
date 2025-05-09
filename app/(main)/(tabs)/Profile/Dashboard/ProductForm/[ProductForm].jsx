@@ -142,11 +142,11 @@ export default function ProductForm() {
       errors.push('Rating must be between 0 and 5');
     }
 
-    if (!formData.category.trim()) {
+    if (!formData.category.id.trim()) {
       errors.push('Category is required');
     }
 
-    if (!formData.brand.trim()) {
+    if (!formData.brand.id.trim()) {
       errors.push('Brand is required');
     }
 
