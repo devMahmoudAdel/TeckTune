@@ -2,10 +2,29 @@ import { collection, addDoc, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc 
 import { db } from "./config";
 import CheckAlert from "../Components/CheckAlert";
 
-async function addOrder(userId, orderData) {
+async function addOrder(orderData) {
   try {
     const userOrdersRef = collection(db, `users/${userId}/orders`);
-    const docRef = await addDoc(userOrdersRef, { ...orderData, id: docRef.id });
+    const orderDate = new Date();
+    const expectedDeliveryDate = new Date(orderDate);
+    expectedDeliveryDate.setDate(orderDate.getDate() + 5);
+
+    const docRef = await addDoc(userOrdersRef, {
+      order_date: orderDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
+      expected_delivery_date: expectedDeliveryDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
+      products: orderData.products.map((product) => ({
+        name: product.name,
+        price: product.price,
+        quantity: product.quantity,
+      })),
+      shipping_price: orderData.shipping_price||50,
+      status: "pending", 
+      address: orderData.address,
+      payment_method: orderData.payment_method,
+      user_name: orderData.user_name,
+      user_id: orderData.user_id,
+    });
+
     <CheckAlert state="success" title="Order added successfully" />;
     return docRef.id;
   } catch (error) {
@@ -13,9 +32,9 @@ async function addOrder(userId, orderData) {
   }
 }
 
-async function deleteOrder(userId, orderId) {
+async function deleteOrder(orderId) {
   try {
-    const orderRef = doc(db, `users/${userId}/orders`, orderId);
+    const orderRef = doc(db, "orders", orderId);
     await deleteDoc(orderRef);
     <CheckAlert state="success" title="Order deleted successfully" />;
   } catch (error) {
@@ -23,9 +42,9 @@ async function deleteOrder(userId, orderId) {
   }
 }
 
-const getOrder = async (userId, orderId) => {
+const getOrder = async (orderId) => {
   try {
-    const orderDocRef = doc(db, `users/${userId}/orders`, orderId);
+    const orderDocRef = doc(db, "orders", orderId);
     const orderDoc = await getDoc(orderDocRef);
     if (orderDoc.exists()) {
       return orderDoc.data();
@@ -37,9 +56,9 @@ const getOrder = async (userId, orderId) => {
   }
 };
 
-const getAllOrders = async (userId) => {
+const getAllOrders = async () => {
   try {
-    const ordersCollectionRef = collection(db, `users/${userId}/orders`);
+    const ordersCollectionRef = collection(db, "orders");
     const ordersSnapshot = await getDocs(ordersCollectionRef);
     const orders = ordersSnapshot.docs.map((doc) => doc.data());
     return orders;
@@ -47,11 +66,22 @@ const getAllOrders = async (userId) => {
     <CheckAlert state="error" title={error.message} />;
   }
 };
-
+const getAllOrdersByUserId = async (userId) => {
+  try {
+    const ordersCollectionRef = collection(db, "orders");
+    const ordersSnapshot = await getDocs(ordersCollectionRef);
+    const userOrders = ordersSnapshot.docs
+      .map((doc) => ({ id: doc.id, ...doc.data() }))
+      .filter((order) => order.user_id === userId);
+    return userOrders;
+  } catch (error) {
+    <CheckAlert state="error" title={error.message} />;
+  }
+};
 const updateOrder = async (userId, orderId, orderData) => {
   try {
     console.log(userId, orderId, orderData);
-    const orderDocRef = doc(db, `users/${userId}/orders`, orderId);
+    const orderDocRef = doc(db,"orders", orderId);
     console.log("2");
     await updateDoc(orderDocRef, orderData); 
     console.log("3");

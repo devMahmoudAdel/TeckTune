@@ -99,4 +99,45 @@ const isEmailExists = async (email) => {
     return false;
   }
 };
-export { getUser, createUser, isEmailExists, isUsernameExists, getAllUsers, updateUser };
+
+const isPasswordExists = async (password) => {
+  try {
+    const usersRef = collection(db, "users");
+    const q = query(usersRef, where("password", "==", password));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+  } catch (error) {
+    console.error("Error checking password:", error);
+    return false;
+  }
+};
+
+const isUserExists = async (email, password) => {
+  try {
+    const usersRef = collection(db, "users");
+
+    const userQuery = query(
+      usersRef,
+      where("email", "==", email),
+      where("password", "==", password)
+    );
+
+    const querySnapshot = await getDocs(userQuery);
+
+    return !querySnapshot.empty;
+
+  } catch (error) {
+    console.error("Error checking user existence:", error);
+    return false;
+  }
+};
+
+export {
+  getUser,
+  createUser,
+  isEmailExists,
+  isUserExists,
+  isPasswordExists,
+  isUsernameExists,
+  getAllUsers,
+};
