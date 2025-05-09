@@ -99,9 +99,9 @@ export default function ProductForm() {
       }
 
       console.log('Fetched product:', product);
-      const category = await getCategory(product.category);
+      const category = product.category;
       setSelectedCategory({label: category.name, value: category.id});
-      const brand = await getBrand(product.brand);
+      const brand = product.brand;
       setSelectedBrand({label: brand.name, value: brand.id});
       setFormData({
         title: product.title || '',
@@ -109,8 +109,8 @@ export default function ProductForm() {
         images: product.images || [],
         price: product.price?.toString() || '',
         stock: product.stock?.toString() || '',
-        category: product.category || '',
-        brand: product.brand || '',
+        category: category || '',
+        brand: brand || '',
         colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
         rating: product.rating?.toString() || '0',
       });

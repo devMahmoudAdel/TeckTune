@@ -33,7 +33,7 @@ const getProduct = async (id) => {
     const productData = productDoc.data();
     const category = await getCategory(productData.category);
     const brand = await getBrand(productData.brand);
-    return { ...productData, ...category, ...brand };
+    return { ...productData, category, brand };
   } else {
     <CheckAlert state="error" title="product does not exist"/>
   }
@@ -47,7 +47,7 @@ const getAllProducts = async () => {
     const productData = doc.data();
     const category = await getCategory(productData.category);
     const brand = await getBrand(productData.brand);
-    return { ...productData, ...category, ...brand };
+    return { ...productData, category, brand };
   }));
   return products;
   }catch (error) {

@@ -70,7 +70,7 @@ export default function AdminProducts() {
       } else {
         console.log(`Fetched ${productsData.length} products`);
       }
-      
+      console.log('Products data:', productsData);
       setProducts(productsData || []);
       // Don't show success toast for initial load, it's distracting
       // showFeedback('success', 'Products loaded successfully');
@@ -225,8 +225,8 @@ export default function AdminProducts() {
                 <Text style={styles.productTitle}>{item.title || 'Untitled Product'}</Text>
                 <Text style={styles.productPrice}>${(item.price || 0).toFixed(2)}</Text>
                 <Text style={styles.productStock}>Stock: {item.stock || 0}</Text>
-                {item.category && (
-                  <Text style={styles.productCategory}>{item.category}</Text>
+                {item.category.name && (
+                  <Text style={styles.productCategory}>{item.category.name}</Text>
                 )}
               </View>
               
