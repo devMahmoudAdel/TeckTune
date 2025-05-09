@@ -88,7 +88,7 @@ const Step3 = () => {
 
 
   const handleSignup = async () => {
-    if (!selectedAvatar) {
+    if (!avatar) {
       Alert.alert(
         "Profile Picture Required",
         "Please select a profile picture or choose a default avatar."
@@ -184,13 +184,13 @@ const Step3 = () => {
                 <ActivityIndicator size="large" color="#6055D8" />
                 <Text style={styles.uploadingText}>Uploading...</Text>
               </View>
-            ) : selectedAvatar ? (
+            ) : avatar ? (
               <>
                 <Image
                   source={
-                    typeof selectedAvatar === "string"
-                      ? { uri: selectedAvatar }
-                      : selectedAvatar
+                    typeof avatar === "string"
+                      ? { uri: avatar }
+                      : avatar
                   }
                   style={styles.avatar}
                 />
@@ -233,10 +233,10 @@ const Step3 = () => {
           <TouchableOpacity
             style={[
               styles.finishButton,
-              !selectedAvatar && styles.disabledButton,
+              !avatar && styles.disabledButton,
             ]}
             onPress={handleSignup}
-            disabled={!selectedAvatar || isProcessing}
+            disabled={!avatar || isProcessing}
           >
             {isProcessing ? (
               <ActivityIndicator color="#fff" size="small" />
