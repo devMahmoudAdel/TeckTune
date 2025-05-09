@@ -28,7 +28,7 @@ function Swiperr (){
 const styles = StyleSheet.create({
   container: {
     height: 150,
-    width:"85%",
+    // width:"85%",
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',

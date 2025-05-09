@@ -137,11 +137,11 @@ export default function ProductList() {
         }
         data={filteredProducts}
         renderItem={({ item }) => (
+        <View style={{ margin: 5 }}>
           <Link
             href={{
-              pathname: `/${item.id}`,
+              pathname: `/app/(main)/${item.id}`,
               params: {
-                id: item.id,
                 title: item.title,
                 price: item.price,
                 imagess: JSON.stringify(item.images),
@@ -149,19 +149,20 @@ export default function ProductList() {
                 colorss: JSON.stringify(item.colors),
                 description: item.description,
                 reviews: item.reviews,
+                id: item.id,
               },
             }}
           >
             <Product
+              id={item.id}
               title={item.title}
               price={item.price}
               images={item.images}
               rating={item.rating}
               colors={item.colors}
-              description={item.description}
-              id={item.id}
             />
           </Link>
+        </View>
         )}
       />
     </View>
