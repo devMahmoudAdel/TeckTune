@@ -21,13 +21,23 @@ const Checkout = () => {
             Alert.alert("Your cart is empty");
             return;
         }
+        console.log("Cart:", cart);
+        const products = cart.map((item) => ({
+            id: item.id,
+            name: item.title,
+            image: item.images[0],
+            price: item.price,
+            quantity: item.quantity,
+        }));
+        console.log("Products:", products);
         const orderData = {
-            products: cart,
-            address: "325 12th Essadat, October",
+            products: products,
+            address: user.address,
             payment_method: selectedPayment,
-            user_name: user.userName,
+            user_name: user.username,
             user_id: user.id,
         };
+        console.log("Order Data:", orderData);
         const orderId = await addOrder(orderData);
         if (orderId) {
             Alert.alert("Order placed successfully", `Your order ID is ${orderId}`);

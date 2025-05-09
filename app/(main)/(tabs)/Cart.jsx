@@ -16,7 +16,7 @@ export default function Cart() {
     try {
       await deleteAll();
       setRefreshing(refreshing + 1);
-      Alert.alert("Success", "All products removed from cart");
+      // Alert.alert("Success", "All products removed from cart");
     } catch (error) {
       Alert.alert("Error", "Failed to delete all products from cart");
     }

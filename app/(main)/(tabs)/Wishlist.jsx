@@ -16,7 +16,7 @@ const Wishlist = () => {
     try {
       await deleteAll();
       setRefreshing(refreshing + 1);
-      Alert.alert("Success", "All products removed from wishlist");
+      // Alert.alert("Success", "All products removed from wishlist");
     } catch (error) {
       Alert.alert("Error", "Failed to delete all products from wishlist");
     }
