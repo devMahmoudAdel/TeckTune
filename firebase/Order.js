@@ -17,7 +17,7 @@ async function addOrder(orderData) {
         price: product.price,
         quantity: product.quantity,
       })),
-      shipping_price: orderData.shipping_price,
+      shipping_price: orderData.shipping_price||50,
       status: "pending", 
       address: orderData.address,
       payment_method: orderData.payment_method,
