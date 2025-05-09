@@ -12,6 +12,7 @@ const CartItem = (prodcutInof) => {
     try{
       await addToCart(prodcutInof.id, counter + 1);
       setCounter(counter + 1);
+      prodcutInof.setRefreshing2((prev) => prev + 1);
     }catch (e){
       console.error("Faild add product", e);
       Alert.alert("Faild add product" + e);
@@ -22,6 +23,7 @@ const CartItem = (prodcutInof) => {
         if (counter > 1){
           await addToCart(prodcutInof.id, counter - 1);
           setCounter(counter - 1);
+          prodcutInof.setRefreshing2((prev) => prev + 1);
         } 
     }catch{
       Alert.alert("Faild del product")

@@ -6,10 +6,11 @@ import {addToWishlist, getWishlist, removeFromWishlist, inWishlist, deleteAll} f
 import Empty from './Empty';
 import Loading from './Loading';
 const screen = Dimensions.get('window');
-const Wishlistitems = () => {
+const Wishlistitems = ({refreshstate}) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshing2, setRefreshing2] = useState(0);
   const fetchProducts = async () => {
     try {
       const wishlistItems = await getWishlist();
@@ -24,7 +25,7 @@ const Wishlistitems = () => {
       useCallback(() => {
         setLoading(true);
         fetchProducts();
-      }, [])
+      }, [refreshstate,refreshing2])
     );
   const onRefresh = () => {
     setRefreshing(true);
@@ -71,8 +72,7 @@ const Wishlistitems = () => {
             image={item.images[0]}
             rating={item.rating}
             quantity={item.quantity}
-
-            
+            setRefreshing2={setRefreshing2}
 
           />
         </Pressable>
