@@ -62,4 +62,29 @@ const updateOrder = async (userId, orderId, orderData) => {
   }
 };
 
-export { addOrder, deleteOrder, getOrder, getAllOrders, updateOrder };
+const createOrder = async (userId, orderData) => {
+  try {
+    const orderDocRef = doc(collection(db, `users/${userId}/orders`));
+    const orderDate = new Date();
+    const expectedDeliveryDate = new Date(orderDate);
+    expectedDeliveryDate.setDate(orderDate.getDate() + 5);
+
+    await setDoc(orderDocRef, {
+      products: orderData.products,
+      order_date: orderDate,
+      expected_delivery_date: expectedDeliveryDate,
+      shipping_price: orderData.shipping_price || 0,
+      status: orderData.status || "preparing",
+      address: orderData.address,
+      payment_method: orderData.payment_method,
+      id: orderDocRef.id,
+    }, { merge: true });
+
+    <CheckAlert state="success" title="Order created successfully" />;
+    return true;
+  } catch (error) {
+    <CheckAlert state="error" title={error.message} />;
+  }
+};
+
+export { addOrder, deleteOrder, getOrder, getAllOrders, updateOrder, createOrder };

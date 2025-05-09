@@ -1,53 +1,61 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, Pressable, Alert, Modal, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, StyleSheet, Pressable, Alert, Modal, TouchableOpacity, RefreshControl } from "react-native";
 import { getAllUsers } from "../../../../../firebase/User";
 import { getAllOrders, deleteOrder, updateOrder } from "../../../../../firebase/Order";
+import Loading from "../../../../../Components/Loading";
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [productsModalVisible, setProductsModalVisible] = useState(false);
-  const [statusFilter, setStatusFilter] = useState(null); // Added status filter
+  const [statusFilter, setStatusFilter] = useState(null);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const [users, allOrders] = await Promise.all([
+        getAllUsers(),
+        Promise.all(
+          (await getAllUsers()).map((user) =>
+            getAllOrders(user.id).then((orders) =>
+              orders.map((order) => ({
+                ...order,
+                userId: user.id,
+                userName: `${user.firstName} ${user.lastName}`,
+              }))
+            )
+          )
+        ),
+      ]);
+
+      const flattenedOrders = allOrders.flat();
+
+      const sortedOrders = flattenedOrders.sort((a, b) => {
+        if (a.status === "preparing" && b.status !== "preparing") return -1;
+        if (a.status !== "preparing" && b.status === "preparing") return 1;
+        return new Date(a.order_date) - new Date(b.order_date);
+      });
+
+      setOrders(sortedOrders);
+    } catch (error) {
+      Alert.alert("Error", "Failed to fetch orders.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const users = await getAllUsers();
-
-        // Create a map of userId to user details for quick lookup
-        const userMap = users.reduce((map, user) => {
-          map[user.id] = { firstName: user.firstName, lastName: user.lastName };
-          return map;
-        }, {});
-
-        // Fetch all orders in parallel
-        const allOrdersPromises = users.map((user) =>
-          getAllOrders(user.id).then((orders) =>
-            orders.map((order) => ({
-              ...order,
-              userId: user.id,
-              userName: `${userMap[user.id].firstName} ${userMap[user.id].lastName}`,
-            }))
-          )
-        );
-
-        const allOrders = (await Promise.all(allOrdersPromises)).flat();
-
-        const sortedOrders = allOrders.sort((a, b) => {
-          if (a.status === "preparing" && b.status !== "preparing") return -1;
-          if (a.status !== "preparing" && b.status === "preparing") return 1;
-          return new Date(a.order_date) - new Date(b.order_date);
-        });
-
-        setOrders(sortedOrders);
-      } catch (error) {
-        Alert.alert("Error", "Failed to fetch orders.");
-      }
-    };
-
     fetchOrders();
   }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchOrders();
+  };
 
   const openStatusModal = (order) => {
     setSelectedOrder(order);
@@ -103,6 +111,10 @@ export default function AdminOrders() {
     return true;
   });
 
+  if (loading && !refreshing) {
+    return <Loading />;
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Admin Orders</Text>
@@ -126,6 +138,9 @@ export default function AdminOrders() {
       <FlatList
         data={filteredOrders}
         keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         renderItem={({ item }) => (
           <Pressable onPress={() => openProductsModal(item)}>
             <View style={styles.orderCard}>
