@@ -1,6 +1,7 @@
-import React, { useState,useCallback } from 'react';
-import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Alert, StatusBar, ActivityIndicator, ToastAndroid, Platform, Image, FlatList,Modal, TouchableOpacity } from 'react-native';
-import { useRouter, useLocalSearchParams,useFocusEffect } from 'expo-router';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, Text, TextInput, StyleSheet, ScrollView, Pressable, Alert, StatusBar, ActivityIndicator, ToastAndroid, Platform, Image, FlatList, Modal, TouchableOpacity } from 'react-native';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
+import { Dropdown } from 'react-native-element-dropdown';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Ionicons } from '@expo/vector-icons';
 // import { addProduct, getProduct, updateProduct } from '@firebase/Product';
@@ -11,14 +12,21 @@ import {
   addProduct,
   deleteProduct,
 } from "../../../../../../firebase/Product";
+import { getAllCategories, getCategory } from "../../../../../../firebase/Category";
+import { getAllBrands, getBrand } from "../../../../../../firebase/Brand";
 import Toast from 'react-native-toast-message';
-import {takePhoto, selectImage,uploadImage,} from '../../../../../../supabase/loadImage';
+import { takePhoto, selectImage, uploadImage } from '../../../../../../supabase/loadImage';
+
 export default function ProductForm() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const isEditing = !!params.id;
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [percent, setPercent] = useState(0);
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedBrand, setSelectedBrand] = useState(null);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -27,6 +35,7 @@ export default function ProductForm() {
     price: '',
     stock: '',
     category: '',
+    brand: '',
     colors: '',
     rating: '0',
   });
@@ -39,18 +48,61 @@ export default function ProductForm() {
         fetchProduct();
       }
     }, [params.id])
-  );  
+  );
+
+  useEffect(() => {
+    fetchCategories();
+    fetchBrands();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const categoriesData = await getAllCategories();
+      const formattedCategories = categoriesData.map((category) => ({
+        label: category.name,
+        value: category.id,
+      }));
+      setCategories(formattedCategories);
+    } catch (err) {
+      console.error('Failed to load categories:', err);
+      showFeedback('error', 'Failed to load categories', err.message || 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchBrands = async () => {
+    try {
+      setLoading(true);
+      const brandsData = await getAllBrands();
+      const formattedBrands = brandsData.map((brand) => ({
+        label: brand.name,
+        value: brand.id,
+      }));
+      setBrands(formattedBrands);
+    } catch (err) {
+      console.error('Failed to load brands:', err);
+      showFeedback('error', 'Failed to load brands', err.message || 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchProduct = async () => {
     try {
       setLoading(true);
       const product = await getProduct(params.id);
-      
+
       if (!product) {
         throw new Error('Product not found');
       }
-      
+
       console.log('Fetched product:', product);
-      
+      const category = await getCategory(product.category);
+      setSelectedCategory({label: category.name, value: category.id});
+      const brand = await getBrand(product.brand);
+      setSelectedBrand({label: brand.name, value: brand.id});
       setFormData({
         title: product.title || '',
         description: product.description || '',
@@ -58,6 +110,7 @@ export default function ProductForm() {
         price: product.price?.toString() || '',
         stock: product.stock?.toString() || '',
         category: product.category || '',
+        brand: product.brand || '',
         colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
         rating: product.rating?.toString() || '0',
       });
@@ -70,11 +123,11 @@ export default function ProductForm() {
 
   const validateForm = () => {
     const errors = [];
-    
+
     if (!formData.title.trim()) {
       errors.push('Title is required');
     }
-    
+
     if (!formData.price.trim()) {
       errors.push('Price is required');
     } else if (isNaN(parseFloat(formData.price)) || parseFloat(formData.price) < 0) {
@@ -93,16 +146,21 @@ export default function ProductForm() {
       errors.push('Category is required');
     }
 
+    if (!formData.brand.trim()) {
+      errors.push('Brand is required');
+    }
+
     if (!formData.colors.trim()) {
       errors.push('Colors are required');
     }
 
-    if(formData.images.length === 0) {
+    if (formData.images.length === 0) {
       errors.push('At least one image is required');
     }
 
     return errors;
   };
+
   const showFeedback = (type, title, message) => {
     if (Platform.OS === 'android') {
       ToastAndroid.showWithGravity(
@@ -120,19 +178,20 @@ export default function ProductForm() {
       });
     }
   };
+
   const handleTakePhoto = async () => {
     setShowImagePicker(true);
     const image = await takePhoto();
     if (image.success) {
       setShowImagePicker(false);
-      const uploadedImage = await uploadImage(image, null, (percent) => {setPercent(percent)});
+      const uploadedImage = await uploadImage(image, null, (percent) => { setPercent(percent) });
       if (uploadedImage.success) {
         setFormData({ ...formData, images: [...formData.images, uploadedImage.url] });
         setPercent(0);
       }
     }
+  };
 
-  }
   const handleSelectImage = async () => {
     setShowImagePicker(true);
     const image = await selectImage();
@@ -142,15 +201,16 @@ export default function ProductForm() {
         setPercent(percent);
       });
       if (uploadedImage.success) {
-      setFormData({ ...formData, images: [...formData.images, uploadedImage.url] });
-      setPercent(0);
+        setFormData({ ...formData, images: [...formData.images, uploadedImage.url] });
+        setPercent(0);
       }
     }
-  }
+  };
+
   const handleDeleteImage = (image) => {
     setFormData({ ...formData, images: formData.images.filter((img) => img !== image) })
-  }
-  
+  };
+
   const handleSubmit = async () => {
     try {
       const errors = validateForm();
@@ -158,14 +218,10 @@ export default function ProductForm() {
         showFeedback('error', 'Validation Error', errors.join(', '));
         return;
       }
-  
+
       setSaving(true);
       setLoading(true);
-  
-      // Destructure form data for cleaner assignment
       const { price, stock, rating, colors, images } = formData;
-  
-      // Prepare transformed product data
       const productData = {
         ...formData,
         price: parseFloat(price),
@@ -179,10 +235,10 @@ export default function ProductForm() {
         id: isEditing ? params.id : undefined,
         updatedAt: new Date(),
       };
-  
+
       const actionLabel = isEditing ? 'Updating product...' : 'Adding product...';
       showFeedback('info', actionLabel, 'Please wait');
-  
+
       let result;
       if (isEditing) {
         result = await updateProduct(params.id, productData);
@@ -191,7 +247,7 @@ export default function ProductForm() {
         result = await addProduct(productData);
         showFeedback('success', 'Product Added', `Product "${productData.title}" has been added successfully`);
       }
-  
+
       setTimeout(() => router.back(), 2000);
     } catch (error) {
       console.error("Operation failed:", error);
@@ -201,6 +257,7 @@ export default function ProductForm() {
       setLoading(false);
     }
   };
+
   if (loading && !saving) {
     return (
       <View style={styles.loadingContainer}>
@@ -211,6 +268,7 @@ export default function ProductForm() {
       </View>
     );
   }
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -244,24 +302,24 @@ export default function ProductForm() {
 
         <Text style={styles.label}>Images (up to 5 images)</Text>
         <View style={styles.imagesContainer}>
-        {formData.images.length < 5 && <Pressable style={styles.addImg} onPress={() => setShowImagePicker(true)}>
-          <Text style={styles.uploadText}>+</Text>
-        </Pressable>}
-        <FlatList
-          data={formData.images}
-          renderItem={({ item }) => (
-            <View style={{ margin: 5 }}>
-              <Image
-                source={{ uri: item }}
-                style={styles.image}
-              />
-              <MaterialIcons name="delete" size={24} color="red" style={styles.deleteIcon} onPress={() => handleDeleteImage(item)}/>
-            </View>
-          )}
-          keyExtractor={item => item}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-        />
+          {formData.images.length < 5 && <Pressable style={styles.addImg} onPress={() => setShowImagePicker(true)}>
+            <Text style={styles.uploadText}>+</Text>
+          </Pressable>}
+          <FlatList
+            data={formData.images}
+            renderItem={({ item }) => (
+              <View style={{ margin: 5 }}>
+                <Image
+                  source={{ uri: item }}
+                  style={styles.image}
+                />
+                <MaterialIcons name="delete" size={24} color="red" style={styles.deleteIcon} onPress={() => handleDeleteImage(item)} />
+              </View>
+            )}
+            keyExtractor={item => item}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          />
 
         </View>
         {percent > 0 && percent < 100 && (
@@ -290,15 +348,38 @@ export default function ProductForm() {
           editable={!saving}
         />
 
-        <Text style={styles.label}>Category</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.category}
-          onChangeText={(text) => setFormData({ ...formData, category: text })}
-          placeholder="Product category"
-          editable={!saving}
-        />
-
+        <Text style={styles.label}>Category *</Text>
+        <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                data={categories}
+                labelField="label"
+                valueField="value"
+                placeholder="Select category..."
+                maxHeight={300}
+                value={selectedCategory}
+                onChange={(item) => {
+                  setSelectedCategory(item.value);
+                setFormData({ ...formData, category: item.value });
+                }}
+              />
+              <Text style={styles.label}>Brand *</Text>
+              <Dropdown
+                      style={styles.dropdown}
+                      placeholderStyle={styles.placeholderStyle}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      data={brands}
+                      labelField="label"
+                      valueField="value"
+                      placeholder="Select Brand..."
+                      maxHeight={300}
+                      value={selectedBrand}
+                      onChange={(item) => {
+                        setSelectedBrand(item.value);
+                        setFormData({ ...formData, brand: item.value });
+                      }}
+                    />
         <Text style={styles.label}>Colors (comma-separated)</Text>
         <TextInput
           style={styles.input}
@@ -318,8 +399,8 @@ export default function ProductForm() {
           editable={!saving}
         />
 
-        <Pressable 
-          style={[styles.submitButton, saving && styles.disabledButton]} 
+        <Pressable
+          style={[styles.submitButton, saving && styles.disabledButton]}
           onPress={handleSubmit}
           disabled={saving}
         >
@@ -343,28 +424,26 @@ export default function ProductForm() {
         animationType="fade"
         onRequestClose={() => setShowImagePicker(false)}
       >
-        <Pressable 
+        <Pressable
           style={styles.modalOverlay}
           onPress={() => setShowImagePicker(false)}
         >
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Choose Image Source</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.modalOption}
               onPress={() => handleTakePhoto()}
             >
               <MaterialIcons name="camera-alt" size={24} color="#2f2baa" />
               <Text style={styles.modalOptionText}>Take a Photo</Text>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.modalOption}
               onPress={() => handleSelectImage()}
             >
               <MaterialIcons name="photo-library" size={24} color="#2f2baa" />
               <Text style={styles.modalOptionText}>Choose from Gallery</Text>
             </TouchableOpacity>
-            
-            
           </View>
         </Pressable>
       </Modal>
@@ -519,7 +598,7 @@ const styles = StyleSheet.create({
     right: 0,
     padding: 2,
     borderRadius: 50,
-    backgroundColor: 'white' 
+    backgroundColor: 'white'
   },
   savingContainer: {
     flexDirection: 'row',
@@ -551,5 +630,22 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 12,
     fontWeight: 'bold',
+  },
+  dropdown: {
+    height: 50,
+    borderColor: "gray",
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    width: "100%",
+  },
+  placeholderStyle: {
+    fontSize: 16,
+    color: "gray",
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+    color: "black",
   },
 });

@@ -26,6 +26,8 @@ export default function DashboardStack() {
       <Stack.Screen name="AdminBrands" options={{ headerShown: false }} />
       <Stack.Screen name="Notificationn" options={{ headerShown: false }} />
       <Stack.Screen name="ProductForm" options={{ headerShown: false }} />
+      <Stack.Screen name="CategoryForm" options={{ headerShown: false }} />
+      <Stack.Screen name="BrandForm" options={{ headerShown: false }} />
     </Stack>
   );
 }
