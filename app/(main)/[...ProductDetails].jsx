@@ -12,35 +12,34 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from "react-native";
-import Icon from "@expo/vector-icons/AntDesign";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { AddToWishList } from "../../Components/AddToWishList";
-// import { AddToCart } from "../../Components/AddToCart";
-import { addToCart, removeFromCart, getCart , inCart, deleteAll } from "../../firebase/Cart";
+import { addToCart, inCart } from "../../firebase/Cart";
 import { useRouter, useLocalSearchParams, Link } from "expo-router";
 import { getReviews } from "../../firebase/reviews";
 import {
   addToWishlist,
-  getWishlist,
   removeFromWishlist,
   inWishlist,
 } from "../../firebase/Wishlist";
+import { getRecommendation } from "../../firebase/Product";
 import fallbackImage from "../../assets/icon.png";
 import CheckAlert from "../../Components/CheckAlert";
 import { useAuth } from "../../context/useAuth";
 const { width, height } = Dimensions.get("window");
 
-
 export default function ProductDetails() {
   const router = useRouter();
+  const { id } = useLocalSearchParams(); // Only take the `id` from params
+  const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(true);
   const [selectedColor, setSelectedColor] = useState(null);
   const [dynamicReviews, setDynamicReviews] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isWishList, setIsWishList] = useState(false);
   const [isCart, setIsCart] = useState(false);
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   const [images, setImages] = useState([]);
   const [colors, setColors] = useState([]);
   const { user, guest } = useAuth();
@@ -50,10 +49,11 @@ export default function ProductDetails() {
   const rating = params.rating || "0";
   const description = params.description || "No description available";
   const reviews = params.reviews || "0";
-  const id = params.id || "";
+  const category = params.category || "null";
 
   useEffect(() => {
     try {
+      console.log(category);
       const parsedImages = params.imagess ? JSON.parse(params.imagess) : [];
       const validatedImages = parsedImages.map((img) =>
         typeof img === "string" && img.trim() !== "" ? { uri: img } : fallbackImage
@@ -62,71 +62,87 @@ export default function ProductDetails() {
       setColors(params.colorss ? JSON.parse(params.colorss) : []);
     } catch (error) {
       console.error("Error parsing data:", error);
-      setImages([fallbackImage]); 
+      setImages([fallbackImage]);
       setColors([]);
     }
   }, [params.imagess, params.colorss]);
 
   useEffect(() => {
-    if(!guest){
-    const checkWishListStatus = async () => {
-      try {
-        const inList = await inWishlist(id);
-        setIsWishList(inList);
-      } catch (error) {
-        console.error("Error checking wishlist:", error);
-      }
-    };
-
-    if (id) {
-      checkWishListStatus();
-    }}
-  }, [id]);
-
-
-  useEffect(() => {
-    if(!guest){
-    const checkCartStatus = async () => {
-      try {
-        const inList = await inCart(id);
-        setIsCart(inList);
-      } catch (error) {
-        console.error("Error checking cart:", error);
-      }
-    };
-
-    if (id) {
-      checkCartStatus();
-    }}
-  }, [id]);
-
-
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const reviews = await getReviews(id);
-        if (Array.isArray(reviews)) {
-          setDynamicReviews(reviews.sort((a, b) => b.rating - a.rating).slice(0, 5));
-        } else {
-          setDynamicReviews([]);
+    console.log(id);
+    if (!guest) {
+      const checkWishListStatus = async () => {
+        try {
+          const inList = await inWishlist(id);
+          setIsWishList(inList);
+        } catch (error) {
+          console.error("Error checking wishlist:", error);
         }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false); 
-      }
-    };
+      };
 
-    fetchReviews();
+      if (id) {
+        checkWishListStatus();
+      }
+    }
   }, [id]);
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#5A31F4" />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (!guest) {
+      const checkCartStatus = async () => {
+        try {
+          const inList = await inCart(id);
+          setIsCart(inList);
+        } catch (error) {
+          console.error("Error checking cart:", error);
+        }
+      };
+
+      if (id) {
+        checkCartStatus();
+      }
+    }
+  }, [id]);
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchDynamicReviews = async () => {
+    try {
+      const reviews = await getReviews(id);
+      if (Array.isArray(reviews)) {
+        setDynamicReviews(reviews.sort((a, b) => b.rating - a.rating).slice(0, 5));
+      } else {
+        setDynamicReviews([]);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDynamicReviews();
+  }, [id]);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchDynamicReviews();
+  };
+
+  const fetchRecommendations = async () => {
+    try {
+      const recommendations = await getRecommendation(id); // Fetch recommendation IDs
+      setRecommendedProducts(recommendations);
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+    } finally {
+      setLoadingRecommendations(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [id]);
 
   const handleScroll = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -134,50 +150,77 @@ export default function ProductDetails() {
   };
 
   const handleAddToWishList = async () => {
-    if(guest){
-      router.push("/restricted-modal")
-    }else{
+    if (guest) {
+      router.push("/restricted-modal");
+    } else {
       try {
         if (isWishList) {
           await removeFromWishlist(id);
           setIsWishList(false);
-          <CheckAlert state="success" title="Product removed from wishlist"/>
+          <CheckAlert state="success" title="Product removed from wishlist" />;
         } else {
           await addToWishlist(id);
           setIsWishList(true);
-          <CheckAlert state="success" title="Product added to wishlist"/>
+          <CheckAlert state="success" title="Product added to wishlist" />;
         }
       } catch (error) {
-        <CheckAlert state="error" title="Failed to update wishlist"/>
+        <CheckAlert state="error" title="Failed to update wishlist" />;
       }
     }
   };
 
   const handleAddToCart = async () => {
-    if(guest){
-      router.push("/restricted-modal")
-    }else{
+    if (guest) {
+      router.push("/restricted-modal");
+    } else {
       try {
         if (isCart) {
           router.push("/(main)/(tabs)/Cart");
         } else {
           await addToCart(id);
           setIsCart(true);
-          <CheckAlert state="success" title="Product added to cart"/>
+          <CheckAlert state="success" title="Product added to cart" />;
         }
       } catch (error) {
-        <CheckAlert state="error" title="Failed to update cart"/>
+        <CheckAlert state="error" title="Failed to update cart" />;
       }
     }
   };
 
-  const handleBuyNow = ()=>{
-    return(<CheckAlert state="error" title="Not now"/>)
-  }
+  const handleBuyNow = () => {
+    return <CheckAlert state="error" title="Not now" />;
+  };
+
+  const navigateToProductDetails = (productId) => {
+    router.push({
+      pathname: "/(main)/[...ProductDetails]",
+      params: { id: productId },
+    });
+  };
+
+  // Helper to navigate to review list
+  const goToReviewList = () => {
+    router.push({
+      pathname: "/(main)/(tabs)/Home/reviewList/[...reviewList]",
+      params: {
+        productId: id,
+        productImage:
+          typeof images[0] === "string"
+            ? images[0]
+            : images[0]?.uri || "",
+        totalReviews: dynamicReviews.length,
+        productName: title,
+        productPrice: price,
+      },
+    });
+  };
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: "#f5f5f5" }]}>
       <FlatList
         data={[{ key: "main" }]}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
         renderItem={() => (
           <>
             <View style={styles.topsection}>
@@ -221,13 +264,24 @@ export default function ProductDetails() {
                 <Text style={styles.price}>${Number(price).toFixed(2)}</Text>
               </View>
 
-              <View style={styles.ratingContainer}>
-                <Icon name="star" size={18} color="#FFD700" />
-                <Text style={styles.rating}>{rating} </Text>
-                <Text style={styles.reviews}>({reviews} Reviews)</Text>
+              <View style={styles.ratingRow}>
+                <AntDesign name="star" size={22} color="#FFD700" />
+                <Text style={styles.ratingValue}>
+                  {dynamicReviews.length > 0
+                    ? (
+                      dynamicReviews.reduce((sum, r) => sum + (r.rating || 0), 0) /
+                      dynamicReviews.length
+                    ).toFixed(1)
+                    : "0.0"}
+                </Text>
+                <Text style={styles.reviewsCount}>
+                  ({dynamicReviews.length} {dynamicReviews.length === 1 ? "Review" : "Reviews"})
+                </Text>
               </View>
+              <View style={styles.divider} />
 
               <Text style={styles.description}>{description}</Text>
+              <View style={styles.divider} />
 
               <Text style={styles.sectionTitle}>Colors</Text>
               <FlatList
@@ -250,6 +304,8 @@ export default function ProductDetails() {
                 }
               />
 
+              <View style={styles.divider} />
+
               <Text style={styles.sectionTitle}>Customer Reviews</Text>
 
               {dynamicReviews.length > 0 ? (
@@ -262,42 +318,38 @@ export default function ProductDetails() {
                   renderItem={({ item }) => (
                     <View style={styles.reviewItem}>
                       <View style={styles.reviewHeader}>
-                        <View style={{ flexDirection: "row" }}>
-                          {Array.from({ length: 5 }).map((_, index) => (
-                            <Icon
-                              key={index}
-                              name={index < item.rating ? "star" : "staro"}
-                              size={16}
-                              color="#FFD700"
-                            />
-                          ))}
+                        <Text style={styles.reviewerName}>
+                          {item.firstName
+                            ? `${item.firstName}${item.lastName ? " " + item.lastName : ""}`
+                            : "Guest"}
+                        </Text>
+                        <View style={styles.reviewRating}>
+                          <View style={styles.starsContainer}>
+                            {Array.from({ length: 5 }).map((_, index) => (
+                              <AntDesign
+                                key={index}
+                                name={index < item.rating ? "star" : "staro"}
+                                size={18}
+                                color="#FFD700"
+                                style={styles.starIcon}
+                              />
+                            ))}
+                          </View>
                         </View>
                       </View>
                       <Text style={styles.reviewComment}>{item.comment}</Text>
+                      {item.createdAt && (
+                        <Text style={styles.reviewDate}>
+                          {new Date(item.createdAt).toLocaleDateString()}
+                        </Text>
+                      )}
                     </View>
                   )}
                   ListFooterComponent={
-                    <Link
-                      href={{
-                        pathname: `/(main)/(tabs)/Home/reviewList/[...reviewList]`,
-                        params: {
-                          productId: id,
-                          productImage:
-                            typeof images[0] === "string"
-                              ? images[0]
-                              : images[0]?.uri || "",
-                          totalReviews: reviews,
-                          productName: title,
-                          productPrice: price,
-                        },
-                      }}
-                      asChild
-                    >
-                      <Pressable style={styles.viewAllButton}>
-                        <Text style={styles.viewAllText}>View All Reviews</Text>
-                        <AntDesign name="arrowright" size={20} color="#5A31F4" />
-                      </Pressable>
-                    </Link>
+                    <Pressable style={styles.viewAllButton} onPress={goToReviewList}>
+                      <Text style={styles.viewAllText}>View All Reviews</Text>
+                      <AntDesign name="arrowright" size={20} color="#5A31F4" />
+                    </Pressable>
                   }
                 />
               ) : (
@@ -308,29 +360,29 @@ export default function ProductDetails() {
                       Be the first to review this product!
                     </Text>
                   </View>
-                  <Link
-                    href={{
-                      pathname: `/(main)/(tabs)/Home/reviewList/[...reviewList]`,
-                      params: {
-                        productId: id,
-                        productImage:
-                          typeof images[0] === "string"
-                            ? images[0]
-                            : images[0]?.uri || "",
-                        totalReviews: reviews,
-                        productName: title,
-                        productPrice: price,
-                      },
-                    }}
-                    asChild
-                  >
-                    <Pressable style={styles.viewAllButton}>
-                      <Text style={styles.viewAllText}>Add Your Review</Text>
-                      <AntDesign name="arrowright" size={20} color="#5A31F4" />
-                    </Pressable>
-                  </Link>
+                  <Pressable style={styles.viewAllButton} onPress={goToReviewList}>
+                    <Text style={styles.viewAllText}>Add Your Review</Text>
+                    <AntDesign name="arrowright" size={20} color="#5A31F4" />
+                  </Pressable>
                 </View>
               )}
+              <Link
+                href={{
+                  pathname: `/(main)/(tabs)/Home/reviewList/[...reviewList]`,
+                  params: {
+                    productId: id,
+                    productImage:
+                      typeof images[0] === "string"
+                        ? images[0]
+                        : images[0]?.uri || "",
+                    totalReviews: dynamicReviews.length,
+                    productName: title,
+                    productPrice: price,
+                  },
+                }}
+                asChild
+              >
+              </Link>
               <View style={styles.buttonContainer}>
                 <Pressable
                   onPress={handleAddToCart}
@@ -355,6 +407,42 @@ export default function ProductDetails() {
                   <Text style={styles.buyButtonText}>Buy Now</Text>
                 </Pressable>
               </View>
+
+              <View style={styles.divider} />
+
+              <Text style={styles.sectionTitle}>Product Recommendations</Text>
+              {loadingRecommendations ? (
+                <ActivityIndicator size="large" color="#5A31F4" />
+              ) : recommendedProducts.length > 0 ? (
+                <FlatList
+                  data={recommendedProducts}
+                  horizontal
+                  keyExtractor={(item) => item.id}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.recommendationItem}
+                      onPress={() => navigateToProductDetails(item.id)}
+                    >
+                      <Image
+                        source={
+                          item.images && item.images.length > 0 && item.images[0]
+                            ? { uri: item.images[0] }
+                            : fallbackImage
+                        }
+                        style={styles.recommendationImage}
+                      />
+                      <Text style={styles.recommendationText}>
+                        {item.name || "Product"}
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  showsHorizontalScrollIndicator={false}
+                />
+              ) : (
+                <Text style={styles.noRecommendationsText}>
+                  No recommendations available.
+                </Text>
+              )}
             </View>
           </>
         )}
@@ -373,7 +461,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#f5f5f5",
     paddingTop: StatusBar.currentHeight || 0,
   },
   topsection: {
@@ -407,13 +495,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingBottom: 30,
-    backgroundColor: "#fff",
+    // backgroundColor: "#fff",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    marginVertical: 10,
   },
   title: {
     fontSize: 24,
@@ -468,18 +556,34 @@ const styles = StyleSheet.create({
     borderColor: "#5A31F4",
   },
   reviewItem: {
-    backgroundColor: "#f8f9fa",
-    borderRadius: 10,
+    marginVertical: 8,
     padding: 16,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: "#eee",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  starsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   reviewHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 8,
+  },
+  reviewerName: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#444",
+  },
+  reviewRating: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   reviewComment: {
     fontSize: 14,
@@ -555,5 +659,47 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  ratingValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#333",
+    marginLeft: 6,
+  },
+  reviewsCount: {
+    fontSize: 15,
+    color: "#777",
+    marginLeft: 6,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#eee",
+    marginVertical: 12,
+  },
+  recommendationItem: {
+    marginRight: 15,
+    alignItems: "center",
+  },
+  recommendationImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  recommendationText: {
+    fontSize: 14,
+    color: "#555",
+    textAlign: "center",
+  },
+  noRecommendationsText: {
+    fontSize: 14,
+    color: "#999",
+    textAlign: "center",
+    marginTop: 10,
   },
 });

@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../context/useAuth';
 import { getCart } from '../../firebase/Cart';
 import { addOrder } from '../../firebase/Order';
+import { updateProductRecommendation } from '../../firebase/Product';
 
 const Checkout = () => {
     const router = useRouter();
@@ -29,6 +30,8 @@ const Checkout = () => {
             price: item.price,
             quantity: item.quantity,
         }));
+        const productIds = products.map(p => p.id);
+        await updateProductRecommendation(productIds);
         console.log("Products:", products);
         const orderData = {
             products: products,
