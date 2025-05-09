@@ -231,11 +231,11 @@ export default function SignIn() {
         <Text style={styles.textButtonSignup}>Create new account</Text>
       </TouchableOpacity>
 
-      <View style={{ marginVertical: 20 }}>
+      {/* <View style={{ marginVertical: 20 }}>
         <Text style={{ color: "#2f2baa", fontSize: 17, textAlign: "center" }}>
           Or continue with
         </Text>
-      </View>
+      </View> */}
 
       {/* <TouchableOpacity
         style={styles.googleButton}
