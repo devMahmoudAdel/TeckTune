@@ -240,6 +240,51 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+
+  const updateUserData = async(updatedData) => {
+    // if(guest)
+    if (guest || (user && user.role === "guest")) {
+      const updatedGuestData = { ...user, ...updatedData };
+      
+      await AsyncStorage.setItem("guest", JSON.stringify(updatedGuestData));
+      setUser(updatedGuestData);
+      setGuest(updatedGuestData);
+      return updatedGuestData;
+    }
+    // if (Not guest nor user)
+    if (!user) return false;
+    
+    // if (user)
+
+    // If avatar is being updated
+    if (updatedData.avatarUri && !updatedData.avatarInfo) {
+      const avatarResult = await processAndUploadAvatar(
+        updatedData.avatarUri,
+        user.id
+      );
+      
+      if (avatarResult.success) {
+        updatedData.avatarInfo = avatarResult.avatarInfo;
+      }
+    }
+    
+
+    // Update Firestore
+    await setDoc(
+      doc(db, "users", user.id), 
+      updatedData, 
+      { merge: true }
+    );
+    
+    const updatedUserData = { ...user, ...updatedData };
+    
+    await AsyncStorage.setItem("user", JSON.stringify(updatedUserData));
+    setUser(updatedUserData);
+    
+    return updatedUserData;
+  }
+
+
   return (
     <AuthContext.Provider
       value={{
@@ -251,6 +296,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         enterGuestMode,
         deleteAccount,
+        updateUserData,
       }}
     >
       {children}

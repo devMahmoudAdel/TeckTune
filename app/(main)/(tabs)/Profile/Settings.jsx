@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, FlatList } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { router, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 const orders = [
@@ -44,7 +44,7 @@ const orders = [
 
 export default function Settings() {
   const [selectedStatus, setSelectedStatus] = useState('Active');
-  const navigation = useNavigation();
+  const route = useRouter();
 
   const filteredOrders = orders.filter(order => order.status === selectedStatus);
 
@@ -64,7 +64,7 @@ export default function Settings() {
   return (
     <View style={{ flex: 1, paddingTop: 70, paddingHorizontal: 20, backgroundColor: '#fff' }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>
-        <TouchableOpacity style={{ position: 'absolute', left: 0 }} onPress={() => navigation.navigate('MyProfile', { screen: 'MyProfile' })}>
+        <TouchableOpacity style={{ position: 'absolute', left: 0 }} onPress={() => router.back()}>
           <Ionicons name='arrow-back' size={28} color='#000' />
         </TouchableOpacity>
         <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center' }}>Orders</Text>

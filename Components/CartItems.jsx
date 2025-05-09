@@ -17,7 +17,7 @@ import OrderSummary from './OrderSummary';
 
 const screen = Dimensions.get('window');
 
-const CartItems = ({ navigation }) => {
+const CartItems = ({refreshstate}) => {
   const router = useRouter();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -27,6 +27,7 @@ const CartItems = ({ navigation }) => {
   const [total, setTotal] = useState(0);
   const [deliveryCharges, setDeliveryCharges] = useState(0);
   const [discount, setDiscount] = useState(0);
+  const [refreshing2, setRefreshing2] = useState(0);
 
   const handleDeleteAll = async () => {
     try {
@@ -82,7 +83,7 @@ const CartItems = ({ navigation }) => {
     useCallback(() => {
       setLoading(true);
       fetchProducts();
-    }, [])
+    }, [refreshstate,refreshing2])
   );
 
   const onRefresh = () => {
@@ -148,6 +149,7 @@ const CartItems = ({ navigation }) => {
             rating={item.rating}
             quantity={item.quantity}
             onUpdateQuantity={handleUpdateQuantity}
+            setRefreshing2={setRefreshing2}
           />
         )}
         renderHiddenItem={({ item }) => (
@@ -179,7 +181,7 @@ const CartItems = ({ navigation }) => {
             />
             <TouchableOpacity
               style={styles.checkoutButton}
-              onPress={() => router.replace({
+              onPress={() => router.push({
                 pathname: "../../(checkout)/Checkout",
                 params: {
                   subtotal: subtotal,

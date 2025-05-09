@@ -3,6 +3,7 @@ import React, { useState, useEffect,useCallback } from 'react'
 import { useFocusEffect } from 'expo-router';
 import { getNotifications, addNotification, deleteNotification, getNotification } from "../firebase/notification";
 import notifications from './notifictionsdata';
+import Ionicons from "react-native-vector-icons/Ionicons";
 export default function Notifications({modalVisible,setModalVisible}) {
     const [notifications, setNotifications] = useState([]);
     const fetchNotifications = async () => {
@@ -42,7 +43,7 @@ export default function Notifications({modalVisible,setModalVisible}) {
                   style={styles.closeButton}
                   onPress={() => setModalVisible(false)}
                 >
-                  <Text style={styles.closeButtonText}>Close</Text>
+                  <Ionicons name="close" size={24} color="white" />
                 </TouchableOpacity>
               </View>
             </View>
@@ -135,10 +136,17 @@ const styles = StyleSheet.create({
     color: "#555",
   },
   closeButton: {
+    position: "absolute",
+    top: -10,
+    right: 10,
     marginTop: 20,
     backgroundColor: "#2f2baa",
-    padding: 10,
-    borderRadius: 5,
+    padding: 8,
+    borderRadius: 25,
+    alignItems: "center",
+    justifyContent: "center",
+    width: 40,
+    height: 40,
   },
   closeButtonText: {
     color: "#fff",

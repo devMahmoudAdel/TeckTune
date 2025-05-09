@@ -4,13 +4,14 @@ import { AntDesign } from "@expo/vector-icons";
 import { inWishlist, removeFromWishlist } from '../firebase/Wishlist';
 const screen = Dimensions.get('window');
 const Wishlistitem = (prodcutInof) => {
-  const [ isWishList, setIsWishList ] = useState(false);
+  const [ isWishList, setIsWishList ] = useState(true);
 
   const handleDeleteFromWishlist = async () => {
     try {
       await removeFromWishlist(prodcutInof.id);
       setIsWishList(false);
-      Alert.alert("Success", "Product removed from wishlist");
+      prodcutInof.setRefreshing2((prev) => prev + 1);
+      // Alert.alert("Success", "Product removed from wishlist");
     } catch (error) {
       Alert.alert("Error", "Failed to remove product from wishlist");
     }

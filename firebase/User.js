@@ -17,6 +17,30 @@ const getUser = async (userId) => {
   }
 };
 
+const updateUser = async (userId, userData) => {
+  try {
+    const userDocRef = doc(collection(db, "users"), userId);
+    await setDoc(
+      userDocRef,
+      {
+        firstName: userData.firstName || "",
+        lastName: userData.lastName || "",
+        username: userData.username || "",
+        email: userData.email || "",
+        phoneNumber: userData.phoneNumber || "",
+        address: userData.address || "",
+        profilePic: userData.profilePic || "",
+      },
+      { merge: true }
+    );
+    return true;
+  } catch (error) {
+    <CheckAlert state="error" title={error.message} />;
+    console.error("Error updating user:", error);
+    return false;
+  }
+};
+
 const createUser = async (userId, userData) => {
   try {
     const userDocRef = doc(collection(db, "users"), userId);
@@ -115,5 +139,6 @@ export {
   isUserExists,
   isPasswordExists,
   isUsernameExists,
+  updateUser,
   getAllUsers,
 };
