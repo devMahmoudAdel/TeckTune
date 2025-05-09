@@ -27,6 +27,7 @@ import { getRecommendation } from "../../firebase/Product";
 import fallbackImage from "../../assets/icon.png";
 import CheckAlert from "../../Components/CheckAlert";
 import { useAuth } from "../../context/useAuth";
+import { getProduct } from "../../firebase/Product";
 const { width, height } = Dimensions.get("window");
 
 export default function ProductDetails() {
@@ -383,31 +384,6 @@ export default function ProductDetails() {
                 asChild
               >
               </Link>
-              <View style={styles.buttonContainer}>
-                <Pressable
-                  onPress={handleAddToCart}
-                  style={({ pressed }) => [
-                    styles.actionButton,
-                    styles.cartButton,
-                    pressed && { opacity: 0.8 },
-                  ]}
-                >
-                  <AntDesign name="shoppingcart" size={20} color="#5A31F4" />
-                  <Text style={styles.cartButtonText}>{isCart ? "Go to Cart" : "Add to Cart"}</Text>
-                </Pressable>
-
-                <Pressable
-                  onPress={() => handleBuyNow}
-                  style={({ pressed }) => [
-                    styles.actionButton,
-                    { backgroundColor: "#5A31F4" },
-                    pressed && { opacity: 0.8 },
-                  ]}
-                >
-                  <Text style={styles.buyButtonText}>Buy Now</Text>
-                </Pressable>
-              </View>
-
               <View style={styles.divider} />
 
               <Text style={styles.sectionTitle}>Product Recommendations</Text>
@@ -448,6 +424,24 @@ export default function ProductDetails() {
         )}
         keyExtractor={(item) => item.key}
       />
+
+      {/* Fixed Buttons at the Bottom */}
+      <View style={styles.fixedButtonContainer}>
+        <Pressable
+          onPress={handleAddToCart}
+          style={[styles.actionButton, styles.cartButton]}
+        >
+          <AntDesign name="shoppingcart" size={20} color="#5A31F4" />
+          <Text style={styles.cartButtonText}>{isCart ? "Go to Cart" : "Add to Cart"}</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={handleBuyNow}
+          style={[styles.actionButton, styles.buyButton]}
+        >
+          <Text style={styles.buyButtonText}>Buy Now</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
@@ -655,6 +649,9 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 8,
   },
+  buyButton: {
+    backgroundColor: "#5A31F4",
+  },
   buyButtonText: {
     color: "#fff",
     fontSize: 16,
@@ -701,5 +698,17 @@ const styles = StyleSheet.create({
     color: "#999",
     textAlign: "center",
     marginTop: 10,
+  },
+  fixedButtonContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 10,
+    backgroundColor: "#fff",
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
   },
 });
