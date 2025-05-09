@@ -69,4 +69,63 @@ const updateProduct = async (id, product) => {
   }
 }
 
-export { getProduct, getAllProducts, updateProduct, addProduct, deleteProduct };
+const updateProductRecommendation = async (newRecommendations) => {
+  try {
+    console.log("updateProductRecommendation");
+    const recommendedProducts = await Promise.all(
+      newRecommendations.map(async (productId) => {
+        const productDocRef = doc(db, "products", productId);
+        const productDoc = await getDoc(productDocRef);
+
+        if (productDoc.exists()) {
+          return { id: productId, ...productDoc.data() };
+        } else {
+          console.warn(`Product with ID ${productId} does not exist.`);
+          return null; 
+        }
+      })
+    );
+
+    //array of products that its id exists in the newRecommendations
+    // الوقت هو عدد المنتجات الاشتراها تربيع في عدد المنتجات المتوصله بالفعل
+    const validRecommendations = recommendedProducts.filter((product) => product !== null);
+
+    console.log("Fetched Recommended Products:", validRecommendations);
+
+    for (const product of validRecommendations) {
+      const recommendationOfThisProduct = product.recommendation || [];
+      for (const product2 of validRecommendations) {
+          if(product.id !== product2.id){
+            const existingPair = recommendationOfThisProduct.find(
+              (pair) => pair.productId === product2.id
+            );
+            if (!existingPair) {
+              recommendationOfThisProduct.push({
+                productId: product2.id,
+                coPurchaseCount: 1,
+              });
+            }
+            else {
+              existingPair.coPurchaseCount += 1;
+            }
+          }
+      }
+    }
+    const batch = db.batch();
+    validRecommendations.forEach((product) => {
+      const productDocRef = doc(db, "products", product.id);
+      batch.set(productDocRef, { recommendation: product.recommendation }, { merge: true });
+    });
+    await batch.commit();
+
+
+
+
+    console.log("Updated Recommendations for Products");
+  } catch (error) {
+    console.error("Error updating product recommendations:", error);
+    <CheckAlert state="error" title="Error updating product recommendations" />;
+    return [];
+  }
+};
+export { getProduct, getAllProducts, updateProduct, addProduct, deleteProduct ,updateProductRecommendation};
