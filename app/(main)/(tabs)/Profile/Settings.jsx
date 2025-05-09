@@ -1,16 +1,30 @@
-import React, { useContext,useState, useEffect  } from 'react';
-import { View, Text, TouchableOpacity, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from "../../../../context/useAuth"; 
 import { getAllOrdersByUserId } from "../../../../firebase/Order";
+
+const ensureStringifiableProducts = (products) => {
+  if (!products) return '[]';
+  if (typeof products === 'string') {
+    try {
+      JSON.parse(products);
+      return products;
+    } catch {
+      return '[]';
+    }
+  }
+  return JSON.stringify(products);
+};
 
 export default function MyOrders() {
   const [selectedStatus, setSelectedStatus] = useState('shipped');
   const router = useRouter();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth(); 
+  const { user } = useAuth();
+
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -25,15 +39,41 @@ export default function MyOrders() {
     };
 
     fetchOrders();
-  }, []);
+  }, [user.id]);
+
   const filteredOrders = orders
     .filter(order => order.status === selectedStatus)
     .sort((a, b) => new Date(b.order_date) - new Date(a.order_date));
 
   const calculateTotal = (products, shipping) => {
-    const productTotal = products.reduce((sum, p) => sum + p.price * p.quantity, 0);
-    return productTotal + shipping;
+    if (!Array.isArray(products)) return shipping || 0;
+    return products.reduce((sum, p) => sum + (p.price || 0) * (p.quantity || 0), 0) + (shipping || 0);
   };
+
+  const handleTrackOrder = (order) => {
+    router.push({
+      pathname: './OrderDetails',
+      params: {
+        id: order.id || '',
+        status: order.status || 'unknown',
+        address: order.address || 'Not specified',
+        order_date: order.order_date || 'Unknown date',
+        expected_delivery_date: order.expected_delivery_date || 'Not specified',
+        payment_method: order.payment_method || 'Unknown',
+        products: ensureStringifiableProducts(order.products),
+        shipping_price: order.shipping_price?.toString() || '0',
+        user_name: order.user_name || 'Customer'
+      }
+    });
+  };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, paddingTop: 70, paddingHorizontal: 20, backgroundColor: '#fff' }}>
@@ -54,31 +94,34 @@ export default function MyOrders() {
               borderBottomWidth: 2,
               borderBottomColor: selectedStatus === status ? '#6200EE' : '#ddd'
             }}>
-            <Text style={{ color: selectedStatus === status ? '#6200EE' : '#000' }}>{status}</Text>
+            <Text style={{ color: selectedStatus === status ? '#6200EE' : '#000' }}>
+              {status}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
 
-      <FlatList
-        data={filteredOrders}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={{ marginBottom: 15, backgroundColor: '#f1f1f1', padding: 15, borderRadius: 10 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.user_name}</Text>
-            <Text style={{ fontSize: 16 }}>Total: ${calculateTotal(item.products, item.shipping_price)}</Text>
-            <TouchableOpacity
-              onPress={() => {
-    router.push({
-      pathname: './OrderDetails',
-      params: { status: item.status,address: item.address, order_date: item.order_date, expected_delivery_date: item.expected_delivery_date, payment_method: item.payment_method, products: item.products,shipping_price: item.shipping_price,user_name: item.user_name}, 
-    }) }  
-  }
-              style={{ marginTop: 10, backgroundColor: '#6200EE', padding: 10, borderRadius: 6 }}>
-              <Text style={{ color: '#fff', textAlign: 'center' }}>Track Order</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      />
+      {filteredOrders.length === 0 ? (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>No orders found with status: {selectedStatus}</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredOrders}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={{ marginBottom: 15, backgroundColor: '#f1f1f1', padding: 15, borderRadius: 10 }}>
+              <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.user_name}</Text>
+              <Text style={{ fontSize: 16 }}>Total: ${calculateTotal(item.products, item.shipping_price).toFixed(2)}</Text>
+              <TouchableOpacity
+                onPress={() => handleTrackOrder(item)}
+                style={{ marginTop: 10, backgroundColor: '#6200EE', padding: 10, borderRadius: 6 }}>
+                <Text style={{ color: '#fff', textAlign: 'center' }}>Track Order</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 }
