@@ -97,13 +97,19 @@ export default function Home() {
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.userContainer}>
-          {/* <Image source={} /> */}
-          <Ionicons
+          {user.profilePic ? (
+            <Image
+              source={{ uri: user.profilePic }}
+              style={styles.profilePic}
+            />
+          ) : (
+            <Ionicons
             name="person"
             size={40}
             color="black"
             style={styles.imageProfile}
           />
+          )}
           <View>
             <Text style={styles.helloText}>Hello!</Text>
 
@@ -311,5 +317,11 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  profilePic: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginHorizontal: 10,
   },
 });

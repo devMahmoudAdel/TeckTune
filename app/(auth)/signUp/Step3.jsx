@@ -17,27 +17,16 @@ import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { processAndUploadAvatar } from "../../../supabase/loadImage";
+import { takePhoto,selectImage,uploadImage } from "../../../supabase/loadImage";
+
 
 const { width } = Dimensions.get("window");
 const AVATAR_SIZE = width / 3 - 20;
 
-const defaultAvatars = [
-  require("../../../assets/avatars/avatar1.png"),
-  require("../../../assets/avatars/avatar2.png"),
-  require("../../../assets/avatars/avatar3.png"),
-  require("../../../assets/avatars/avatar4.png"),
-  require("../../../assets/avatars/avatar5.png"),
-  require("../../../assets/avatars/avatar6.png"),
-  require("../../../assets/avatars/avatar7.png"),
-];
 
 const Step3 = () => {
   const router = useRouter();
   const { signup } = useAuth();
-  const randomDefaultAvatarIndex = useRef(
-    Math.floor(Math.random() * defaultAvatars.length)
-  );
 
   // Get passed parameters from previous steps
   const params = useLocalSearchParams();
@@ -52,8 +41,6 @@ const Step3 = () => {
   } = params;
 
   const [avatar, setAvatar] = useState(null);
-  const [selectedDefaultAvatar, setSelectedDefaultAvatar] = useState(null);
-  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const progressValue = useRef(new Animated.Value(0)).current;
@@ -66,75 +53,45 @@ const Step3 = () => {
       useNativeDriver: false,
     }).start();
   }, []);
+  
 
-  const requestPermissions = async () => {
-    const { status: cameraStatus } =
-      await ImagePicker.requestCameraPermissionsAsync();
-    const { status: libraryStatus } =
-      await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (cameraStatus !== "granted" || libraryStatus !== "granted") {
-      Alert.alert(
-        "Permissions Required",
-        "Please grant camera and photo library permissions to upload a profile picture.",
-        [{ text: "OK" }]
-      );
-      return false;
-    }
-    return true;
-  };
-
-  const pickImage = async () => {
-    const hasPermissions = await requestPermissions();
-    if (!hasPermissions) return;
-
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) {
-      handleImageSelection(result.assets[0].uri);
-    }
-  };
-
-  const takePhoto = async () => {
-    const hasPermissions = await requestPermissions();
-    if (!hasPermissions) return;
-
-    let result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) {
-      handleImageSelection(result.assets[0].uri);
-    }
-  };
+  
 
   const handleImageSelection = (imageUri) => {
     setIsUploading(true);
 
     setTimeout(() => {
       setAvatar(imageUri);
-      setSelectedDefaultAvatar(null);
       setIsUploading(false);
     }, 1500);
   };
 
-  const selectDefaultAvatar = (index) => {
-    setSelectedDefaultAvatar(index);
-    setAvatar(defaultAvatars[index]);
-    setShowAvatarModal(false);
+  const handleTakePhoto = async () => {
+    const image = await takePhoto();
+    if (image.success) {
+      setIsUploading(true)
+      const uploadedImage = await uploadImage(image, null, (percent) => { });
+      if (uploadedImage.success) {
+        handleImageSelection(uploadedImage.url);
+        setIsUploading(false);
+      }
+    }
   };
 
-  const useRandomDefaultAvatar = () => {
-    // Use the pre-generated random index from useRef
-    selectDefaultAvatar(randomDefaultAvatarIndex.current);
+  const handlePickImage = async () => {
+    const image = await selectImage();
+    if (image.success) {
+      setIsUploading(true)
+      const uploadedImage = await uploadImage(image, null, (percent) => {});
+      if (uploadedImage.success) {
+        handleImageSelection(uploadedImage.url);
+        setIsUploading(false);
+        console.log("Image URL:",uploadedImage.url);
+      }
+    }
   };
+
+
 
   const handleSignup = async () => {
     if (!avatar) {
@@ -148,22 +105,6 @@ const Step3 = () => {
     setIsProcessing(true);
 
     try {
-      let avatarInfo = null;
-
-      if (selectedDefaultAvatar !== null) {
-        const avatarResult = await processAndUploadAvatar(
-          selectedDefaultAvatar
-        );
-        if (avatarResult.success) {
-          avatarInfo = avatarResult.avatarInfo;
-        }
-      } else if (typeof avatar === "string") {
-        const avatarResult = await processAndUploadAvatar(avatar);
-        if (avatarResult.success) {
-          avatarInfo = avatarResult.avatarInfo;
-        }
-      }
-
       const userData = {
         username,
         email,
@@ -172,10 +113,7 @@ const Step3 = () => {
         lastName,
         address: address || "",
         phoneNumber: phoneNumber || "",
-        avatarType: selectedDefaultAvatar !== null ? "default" : "custom",
-        avatarIndex: selectedDefaultAvatar,
-        avatarUri: typeof avatar === "string" ? avatar : null,
-        avatarInfo: avatarInfo,
+        profilePic: avatar,
       };
 
       console.log("Submitting user data:", {
@@ -257,12 +195,6 @@ const Step3 = () => {
                   source={typeof avatar === "string" ? { uri: avatar } : avatar}
                   style={styles.avatar}
                 />
-                <TouchableOpacity
-                  style={styles.changeAvatarButton}
-                  onPress={() => setShowAvatarModal(true)}
-                >
-                  <Ionicons name="camera" size={20} color="#fff" />
-                </TouchableOpacity>
               </>
             ) : (
               <View style={styles.placeholderContainer}>
@@ -276,7 +208,7 @@ const Step3 = () => {
         <View style={styles.optionsContainer}>
           <TouchableOpacity
             style={[styles.optionButton, styles.cameraButton]}
-            onPress={takePhoto}
+            onPress={handleTakePhoto}
           >
             <Ionicons name="camera" size={24} color="#6055D8" />
             <Text style={styles.optionText}>Take Photo</Text>
@@ -284,19 +216,13 @@ const Step3 = () => {
 
           <TouchableOpacity
             style={[styles.optionButton, styles.galleryButton]}
-            onPress={pickImage}
+            onPress={handlePickImage}
           >
             <Ionicons name="images" size={24} color="#6055D8" />
             <Text style={styles.optionText}>Choose from Gallery</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={[styles.optionButton, styles.defaultButton]}
-            onPress={useRandomDefaultAvatar}
-          >
-            <Ionicons name="person-circle" size={24} color="#6055D8" />
-            <Text style={styles.optionText}>Use Default Avatar</Text>
-          </TouchableOpacity>
+          
         </View>
 
         <View style={styles.navigationButtonsContainer}>
@@ -321,70 +247,6 @@ const Step3 = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* Default Avatars Modal */}
-      <Modal
-        visible={showAvatarModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowAvatarModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Choose Avatar</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowAvatarModal(false)}
-              >
-                <Ionicons name="close" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
-
-            <FlatList
-              data={defaultAvatars}
-              keyExtractor={(_, index) => index.toString()}
-              numColumns={3}
-              renderItem={({ item, index }) => (
-                <TouchableOpacity
-                  style={[
-                    styles.avatarOption,
-                    selectedDefaultAvatar === index &&
-                      styles.selectedAvatarOption,
-                  ]}
-                  onPress={() => selectDefaultAvatar(index)}
-                >
-                  <Image source={item} style={styles.avatarOptionImage} />
-                  {selectedDefaultAvatar === index && (
-                    <View style={styles.selectedOverlay}>
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={30}
-                        color="#fff"
-                      />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              )}
-              contentContainerStyle={styles.avatarGrid}
-            />
-
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={() => {
-                if (selectedDefaultAvatar !== null) {
-                  setAvatar(defaultAvatars[selectedDefaultAvatar]);
-                  setShowAvatarModal(false);
-                } else {
-                  Alert.alert("Selection Required", "Please select an avatar");
-                }
-              }}
-            >
-              <Text style={styles.selectButtonText}>Select Avatar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };

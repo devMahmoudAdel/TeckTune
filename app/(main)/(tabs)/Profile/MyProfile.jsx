@@ -133,6 +133,7 @@ const MyProfile = () => {
       });
       Alert.alert("Success", "Profile updated successfully");
       setChanged(false);
+      router.back();
     } catch (error) {
       console.error("Error updating profile:", error);
       Alert.alert("Error", "Failed to update profile");
