@@ -1,34 +1,20 @@
-import { Text, View, FlatList, Pressable, RefreshControl, Platform, StatusBar, StyleSheet } from "react-native";
+import { Text, View, FlatList, RefreshControl, Platform, StatusBar, StyleSheet } from "react-native";
 import Product from "../../../../Components/Product";
 import Entypo from "@expo/vector-icons/Entypo";
-// import products from "../../../../Components/data";
-import { useEffect, useState } from "react";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, Link } from "expo-router";
 import Search from "../../../../Components/Search";
 import Loading from "../../../../Components/Loading";
 import { getAllProducts } from "../../../../firebase/Product";
 
-// const fetchProducts = async () => {
-//   try {
-//     const productsData = await getAllProducts();
-//     setProducts(productsData);
-//     console.log("Products:", productsData);
-//   } catch (err) {
-//     setError("Failed to load products. Please try again.");
-//     console.error(err);
-//   } finally {
-//     setLoading(false);
-//   }
-// };
 
 export default function ProductList() {
   const navigation = useRouter();
-  // const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredProducts, setFilteredProducts] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const router = useRouter();
   
@@ -67,18 +53,39 @@ export default function ProductList() {
     setLoading(true);
     fetchProducts();
   }, []);
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      const filtered = allProducts.filter((product) =>
-        product.title.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredProducts(filtered);
-    } else {
-      setFilteredProducts(allProducts);
+
+  const getKeywords = (query) => {
+    if (Array.isArray(query)) {
+      return query
+        .flatMap(pred => pred.toLowerCase().split(/\s+/))
+        .filter(Boolean);
     }
+    return query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
+  };
+
+  const filteredProducts = useMemo(() => {
+    const keywords = getKeywords(searchQuery);
+    if (!keywords.length) return allProducts;
+  
+    return allProducts.filter((product) => {
+      const title = product.title?.toLowerCase() || "";
+      const description = product.description?.toLowerCase() || "";
+      const category = product.category?.toLowerCase() || "";
+  
+      return keywords.some(
+        (keyword) =>
+          title.includes(keyword) ||
+          description.includes(keyword) ||
+          category.includes(keyword)
+      );
+    });
   }, [searchQuery, allProducts]);
 
   const onRefresh = () => {
+    console.log(allProducts[0].id)
     setRefreshing(true);
     fetchProducts();
   };
@@ -100,9 +107,7 @@ export default function ProductList() {
         },
       ]}
     >
-      <View
-        style={styles.header}
-      >
+      <View style={styles.header}>
         <Entypo
           name="chevron-left"
           size={30}
@@ -126,8 +131,8 @@ export default function ProductList() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={["#2f2baa"]} // Customize refresh indicator color
-            tintColor="#2f2baa" // iOS only
+            colors={["#2f2baa"]}
+            tintColor="#2f2baa"
           />
         }
         data={filteredProducts}
@@ -144,7 +149,6 @@ export default function ProductList() {
                 colorss: JSON.stringify(item.colors),
                 description: item.description,
                 reviews: item.reviews,
-                id: item.id,
               },
             }}
           >
@@ -156,7 +160,6 @@ export default function ProductList() {
               colors={item.colors}
               description={item.description}
               id={item.id}
-
             />
           </Link>
         )}

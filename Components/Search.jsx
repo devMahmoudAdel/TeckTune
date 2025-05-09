@@ -1,18 +1,22 @@
 import React from 'react';
 import { View, TextInput, StyleSheet } from 'react-native';
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-const Search = ({setFilter}) => {
+import AIImageSearch from './AIImageSearch';
 
-  
+const Search = ({ setFilter }) => {
   return (
     <View style={styles.searchContainer}>
       <MaterialIcons name="search" size={24} color="grey" />
-      <TextInput placeholder="Search"
-       style={styles.inputSearch}
-       onChangeText={(value) => setFilter(value)} />
+      <TextInput
+        placeholder="Search"
+        style={styles.inputSearch}
+        onChangeText={setFilter}
+      />
+      <AIImageSearch onPrediction={setFilter} />
     </View>
   );
-}
+};
+
 const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
@@ -31,9 +35,9 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   inputSearch: {
+    flex: 1,
     fontSize: 16,
     marginLeft: 10,
-    width: "90%",
     color: "#212121",
     fontFamily: "Poppins",
     fontWeight: "500",
@@ -41,4 +45,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
 });
+
 export default Search;

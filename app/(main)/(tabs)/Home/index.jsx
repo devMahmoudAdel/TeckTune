@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import ProductList from "./ProductList";
 import Search from "../../../../Components/Search";
 import { useState, useEffect, useMemo } from "react";
@@ -31,7 +32,7 @@ import { StatusBar } from "react-native";
 
 
 export default function Home() {
-  const { user } = useAuth(); // Ensure useContext is called consistently
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
@@ -44,12 +45,36 @@ export default function Home() {
     return [...allProducts].sort((a, b) => b.rating - a.rating).slice(0, 10);
   }, [allProducts]);
 
+  const getKeywords = (query) => {
+    if (Array.isArray(query)) {
+      return query
+        .flatMap(pred => pred.toLowerCase().split(/\s+/))
+        .filter(Boolean);
+    }
+    return query
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(Boolean);
+  };
+
   const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return topProducts;
-    return allProducts.filter((product) =>
-      product.title.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const keywords = getKeywords(searchQuery);
+    if (!keywords.length) return topProducts;
+  
+    return allProducts.filter((product) => {
+      const title = product.title?.toLowerCase() || "";
+      const description = product.description?.toLowerCase() || "";
+      const category = product.category?.toLowerCase() || "";
+  
+      return keywords.some(
+        (keyword) =>
+          title.includes(keyword) ||
+          description.includes(keyword) ||
+          category.includes(keyword)
+      );
+    });
   }, [searchQuery, allProducts, topProducts]);
+
   const fetchProducts = async () => {
     try {
       const productsData = await getAllProducts();
@@ -134,7 +159,6 @@ export default function Home() {
       {/* Notification Modal */}
       <Notifications modalVisible={modalVisible} setModalVisible={setModalVisible}/>
 
-      {/* Search */}
       <Search setFilter={setSearchQuery} />
       <Swiper/>
       <View
@@ -223,7 +247,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: StatusBar.currentHeight + 5,
+    paddingTop: StatusBar.currentHeight + 30 || 0,
   },
   header: {
     width: "100%",

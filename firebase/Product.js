@@ -43,11 +43,16 @@ const getAllProducts = async () => {
   try{
   const productsCollectionRef = collection(db, 'products');
   const productsSnapshot = await getDocs(productsCollectionRef);
-  const products = await Promise.all(productsSnapshot.docs.map(async (doc) => {
-    const productData = doc.data();
+  const products = await Promise.all(productsSnapshot.docs.map(async (docSnap) => {
+    const productData = docSnap.data();
     const category = await getCategory(productData.category);
     const brand = await getBrand(productData.brand);
-    return { ...productData, category, brand };
+    return {
+      ...productData,
+      ...category,
+      ...brand,
+      id: docSnap.id, 
+    };
   }));
   return products;
   }catch (error) {
@@ -67,6 +72,8 @@ const updateProduct = async (id, product) => {
 }catch (error) {
   <CheckAlert state="error" title={error.message}/>
   }
-}
+};
+
+
 
 export { getProduct, getAllProducts, updateProduct, addProduct, deleteProduct };
