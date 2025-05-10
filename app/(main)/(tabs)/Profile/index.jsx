@@ -64,7 +64,7 @@ export default function Profile() {
           <TouchableOpacity
             onPress={() => router.navigate("/(tabs)/Profile/Dashboard")}
           >
-            <ProfileTags name="Dashboard" image={"person"} />
+            <ProfileTags name="Dashboard" image={"apps"} />
           </TouchableOpacity>
         )}
         <TouchableOpacity
