@@ -192,12 +192,20 @@ export default function ProductDetails() {
     return <CheckAlert state="error" title="Not now" />;
   };
 
-  const navigateToProductDetails = (productId) => {
-    router.push({
-      pathname: "/(main)/[...ProductDetails]",
-      params: { id: productId },
-    });
-  };
+   const navigateToProductDetails = (item) => {
+     router.push({
+         pathname: "/(main)/[...ProductDetails]",
+         params: {
+           id:            item.id,
+           title:         item.title,
+           price:         item.price.toString(),
+           description:   item.description,
+           rating:        item.rating.toString(),
+           imagess:       JSON.stringify(item.images || []),
+           colorss:       JSON.stringify(item.colors || []),
+         },
+       });
+    };
 
   // Helper to navigate to review list
   const goToReviewList = () => {
@@ -397,7 +405,7 @@ export default function ProductDetails() {
                   renderItem={({ item }) => (
                     <TouchableOpacity
                       style={styles.recommendationItem}
-                      onPress={() => navigateToProductDetails(item.id)}
+                      onPress={() => navigateToProductDetails(item)}
                     >
                       <Image
                         source={
@@ -408,7 +416,7 @@ export default function ProductDetails() {
                         style={styles.recommendationImage}
                       />
                       <Text style={styles.recommendationText}>
-                        {item.name || "Product"}
+                        {item.title || "Product"}
                       </Text>
                     </TouchableOpacity>
                   )}
