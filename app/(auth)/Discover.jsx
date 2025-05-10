@@ -3,7 +3,7 @@ import {
   StyleSheet,
   View,
   Text,
-  TouchableOpacity,
+  Pressable,
   Dimensions,
   ScrollView,
   ImageBackground,
@@ -26,9 +26,9 @@ export default function SignIn({ navigation }) {
     <>
       <StatusBar barStyle="dark-content" hidden={true} />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
+        <Pressable style={styles.skipButton} onPress={handleSkip}>
           <Text style={styles.skipText}>Skip</Text>
-        </TouchableOpacity>
+        </Pressable>
         <View style={styles.imageContainer}>
           <ImageBackground
             style={styles.image}
@@ -45,18 +45,18 @@ export default function SignIn({ navigation }) {
           </Text>
         </View>
         <View style={styles.containerButtons}>
-          <TouchableOpacity
+          <Pressable
             style={styles.buttonLogin}
             onPress={() => router.push("/(auth)/SignIn")}
           >
             <Text style={styles.textButtonLogin}>Login</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </Pressable>
+          <Pressable
             style={styles.buttonRegister}
             onPress={() => router.push("/(auth)/signUp/Step1")}
           >
             <Text style={styles.textButtonRegister}>Register</Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </ScrollView>
     </>
