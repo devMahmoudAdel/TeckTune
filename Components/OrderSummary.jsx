@@ -1,9 +1,14 @@
 import { StyleSheet, Text, View, Dimensions } from 'react-native';
 import React from 'react';
-
 const screen = Dimensions.get('window');
 
-const OrderSummary = ({ numOfItems, Subtotal, Discount, Delivery_Charges, total }) => {
+const OrderSummary = ({
+  numOfItems,
+  Subtotal,
+  Discount,
+  Delivery_Charges,
+  total,
+}) => {
   return (
     <View style={styles.summary_container}>
       <Text style={styles.head_summary}>Order Summary</Text>
@@ -11,22 +16,24 @@ const OrderSummary = ({ numOfItems, Subtotal, Discount, Delivery_Charges, total 
       <View style={styles.row_summary}>
         <Text style={styles.body_summary}>Items</Text>
         <Text style={styles.body_summary}>{numOfItems}</Text>
+
       </View>
 
       <View style={styles.row_summary}>
         <Text style={styles.body_summary}>Subtotal</Text>
-        <Text style={styles.body_summary}>{Subtotal}</Text>
+        <Text style={styles.body_summary}>{Subtotal} </Text>
       </View>
-
-      <View style={styles.row_summary}>
-        <Text style={styles.body_summary}>Discount</Text>
-        <Text style={styles.body_summary}>-{Discount}%</Text>
-      </View>
+      {Discount > 0 &&
+        <View style={styles.row_summary}>
+          <Text style={styles.body_summary}>Discount</Text>
+          <Text style={styles.body_summary}>-{Discount}%</Text>
+        </View>
+      }
 
       <View style={styles.row_summary}>
         <Text style={styles.body_summary}>Delivery Charges</Text>
         <Text style={styles.body_summary}>
-          {Delivery_Charges <= 0 ? 'Free' : Delivery_Charges}
+          {Delivery_Charges <= 0 ? "Free" : Delivery_Charges}
         </Text>
       </View>
 

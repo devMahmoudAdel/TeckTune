@@ -29,6 +29,6 @@ export default function Index() {
   if (user || guest) {
     return <Redirect href="./(main)/(tabs)/Home" />;
   } else {
-    return isConnected ? <Redirect href="./(auth)/SignIn" /> : <Redirect href="./NoInternet" />;
+    return isConnected ? <Redirect href="./(auth)/Discover" /> : <Redirect href="./NoInternet" />;
   }
 }

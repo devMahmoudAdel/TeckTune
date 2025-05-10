@@ -177,18 +177,19 @@ export default function Home() {
                 width: "95%",
               }}
             >
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+              <Text style={{ fontSize: 18, fontWeight: "bold", color:"#121212" }}>
                 Top Rated
               </Text>
               <Pressable
                 onPress={() => router.push("/(main)/(tabs)/Home/ProductList")}
                 style={{
                   backgroundColor: "#2f2baa",
-                  padding: 10,
+                  // padding: 10,
                   borderRadius: 20,
                   height: 40,
                   justifyContent: "center",
                   width: 80,
+                  margin:-5,
                   alignItems: "center",
                 }}
               >
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#eeeeee",
+    // backgroundColor: "#eeeeee",
   },
   userContainer: {
     flexDirection: "row",
@@ -265,13 +266,13 @@ const styles = StyleSheet.create({
     color: "gray",
   },
   userNameText: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "bold",
-    color: "black",
+    color: "#121212",
   },
   notificationIcon: {
     padding: 10,
-    backgroundColor: "#e5e5e5",
+    // backgroundColor: "#e5e5e5",
     borderRadius: 25,
   },
   imageProfile: {
