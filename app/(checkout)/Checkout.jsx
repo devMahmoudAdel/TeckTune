@@ -10,6 +10,7 @@ import { getCart } from '../../firebase/Cart';
 import { addOrder } from '../../firebase/Order';
 import { getUser } from '../../firebase/User';
 import Loading from '../../Components/Loading';
+import { updateProductRecommendation } from '../../firebase/Product';
 
 const screen = Dimensions.get('window');
 
@@ -53,6 +54,8 @@ const Checkout = () => {
       user_name: user.username,
       user_id: user.id,
     };
+    const productIds = products.map(p => p.id);
+    await updateProductRecommendation(productIds);
     const orderId = await addOrder(orderData);
     if (orderId) {
       Alert.alert("Order placed successfully", `Your order ID is ${orderId}`);
