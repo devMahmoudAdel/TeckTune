@@ -203,6 +203,7 @@ export default function Home() {
         contentContainerStyle={{
           paddingBottom: 50,
           paddingHorizontal: 10,
+          alignItems: "center",
         }}
         renderItem={({ item }) => (
           <View style={{ margin: 5 }}>
@@ -344,4 +345,5 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginHorizontal: 10,
   },
+
 });

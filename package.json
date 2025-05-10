@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@firebase/firestore": "^4.7.10",
-    "@react-native-async-storage/async-storage": "1.23.1",
+    "@react-native-async-storage/async-storage": "^1.23.1",
     "@supabase/supabase-js": "^2.49.4",
     "@tensorflow-models/mobilenet": "^2.1.1",
     "axios": "^1.9.0",
@@ -44,7 +44,8 @@
     "sweetalert2": "^11.19.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@react-native-community/cli": "^18.0.0"
   },
   "private": true
 }

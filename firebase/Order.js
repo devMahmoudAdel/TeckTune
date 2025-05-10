@@ -1,20 +1,22 @@
 import { collection, addDoc, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 import { db } from "./config";
 import CheckAlert from "../Components/CheckAlert";
-import { deleteAll } from "./Cart";
 
 async function addOrder(orderData) {
   try {
-    const orderRef = doc(collection(db, "orders"));
-    const userOrderRef = doc(collection(db, "users", orderData.user_id, "orders"));
+    const userOrdersRef = collection(db, `users/${userId}/orders`);
     const orderDate = new Date();
     const expectedDeliveryDate = new Date(orderDate);
     expectedDeliveryDate.setDate(orderDate.getDate() + 5);
 
-    await setDoc(orderRef, {
+    const docRef = await addDoc(userOrdersRef, {
       order_date: orderDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
       expected_delivery_date: expectedDeliveryDate.toISOString().split("T")[0], // Format as YYYY-MM-DD
-      products: orderData.products,
+      products: orderData.products.map((product) => ({
+        name: product.name,
+        price: product.price,
+        quantity: product.quantity,
+      })),
       shipping_price: orderData.shipping_price||50,
       status: "pending", 
       address: orderData.address,
@@ -24,16 +26,9 @@ async function addOrder(orderData) {
       id: orderRef.id
     });
 
-    await setDoc(userOrderRef, {
-      orderId: orderRef.id
-    })
-
-    await deleteAll();
-
     <CheckAlert state="success" title="Order added successfully" />;
-    return orderRef.id;
+    return docRef.id;
   } catch (error) {
-    console.error("Error adding order:", error);
     <CheckAlert state="error" title="Error adding order" />;
   }
 }
