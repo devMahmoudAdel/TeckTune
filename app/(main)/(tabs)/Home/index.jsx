@@ -29,8 +29,6 @@ import Notifications from "../../../../Components/Notifications";
 import Swiper from "../../../../Components/Swiper";
 import { StatusBar } from "react-native";
 
-
-
 export default function Home() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -48,24 +46,21 @@ export default function Home() {
   const getKeywords = (query) => {
     if (Array.isArray(query)) {
       return query
-        .flatMap(pred => pred.toLowerCase().split(/\s+/))
+        .flatMap((pred) => pred.toLowerCase().split(/\s+/))
         .filter(Boolean);
     }
-    return query
-      .toLowerCase()
-      .split(/\s+/)
-      .filter(Boolean);
+    return query.toLowerCase().split(/\s+/).filter(Boolean);
   };
 
   const filteredProducts = useMemo(() => {
     const keywords = getKeywords(searchQuery);
     if (!keywords.length) return topProducts;
-  
+
     return allProducts.filter((product) => {
       const title = product.title?.toLowerCase() || "";
       const description = product.description?.toLowerCase() || "";
       const category = product.category?.toLowerCase() || "";
-  
+
       return keywords.some(
         (keyword) =>
           title.includes(keyword) ||
@@ -103,7 +98,7 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {    
+  useEffect(() => {
     fetchProducts();
   }, []);
 
@@ -113,102 +108,103 @@ export default function Home() {
   };
 
   if (loading) {
-    return (
-      <Loading/>
-    );
+    return <Loading />;
   }
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.userContainer}>
-          {user.profilePic ? (
-            <Image
-              source={{ uri: user.profilePic }}
-              style={styles.profilePic}
+      <FlatList
+        keyExtractor={(item) => item.id}
+        data={filteredProducts}
+        numColumns={2}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={["#2f2baa"]}
+            tintColor="#2f2baa"
+          />
+        }
+        ListHeaderComponent={
+          <>
+            {/* Header */}
+            <View style={styles.header}>
+              <View style={styles.userContainer}>
+                {user.profilePic ? (
+                  <Image
+                    source={{ uri: user.profilePic }}
+                    style={styles.profilePic}
+                  />
+                ) : (
+                  <Ionicons
+                    name="person"
+                    size={40}
+                    color="black"
+                    style={styles.imageProfile}
+                  />
+                )}
+                <View>
+                  <Text style={styles.helloText}>Hello!</Text>
+                  <Text style={styles.userNameText}>
+                    {user.firstName ? user.firstName + "!" : "Guest!"}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity onPress={() => setModalVisible(true)}>
+                <MaterialIcons
+                  name="notifications-none"
+                  size={24}
+                  color="black"
+                  style={styles.notificationIcon}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <Notifications
+              modalVisible={modalVisible}
+              setModalVisible={setModalVisible}
             />
-          ) : (
-            <Ionicons
-            name="person"
-            size={40}
-            color="black"
-            style={styles.imageProfile}
-          />
-          )}
-          <View>
-            <Text style={styles.helloText}>Hello!</Text>
 
-            <Text style={styles.userNameText}>
-              {user.firstName
-                ? user.firstName + "!"
-                : "Guest!"}
-            </Text>
-
-          </View>
-        </View>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <MaterialIcons
-            name="notifications-none"
-            size={24}
-            color="black"
-            style={styles.notificationIcon}
-          />
-        </TouchableOpacity>
-      </View>
-
-      {/* Notification Modal */}
-      <Notifications modalVisible={modalVisible} setModalVisible={setModalVisible}/>
-
-      <Search setFilter={setSearchQuery} />
-      <Swiper/>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingHorizontal: 15,
-          marginVertical: 10,
-          width: "95%",
+            <Search setFilter={setSearchQuery} />
+            <Swiper />
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+                paddingHorizontal: 15,
+                marginVertical: 10,
+                width: "95%",
+              }}
+            >
+              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+                Top Rated
+              </Text>
+              <Pressable
+                onPress={() => router.push("/(main)/(tabs)/Home/ProductList")}
+                style={{
+                  backgroundColor: "#2f2baa",
+                  padding: 10,
+                  borderRadius: 20,
+                  height: 40,
+                  justifyContent: "center",
+                  width: 80,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "white", fontWeight: "bold" }}>
+                  View All
+                </Text>
+              </Pressable>
+            </View>
+          </>
+        }
+        contentContainerStyle={{
+          paddingBottom: 50,
+          paddingHorizontal: 10,
         }}
-      >
-        <Text style={{ fontSize: 20, fontWeight: "bold" }}>Top Rated</Text>
-        <Pressable
-          onPress={() => router.push("/(main)/(tabs)/Home/ProductList")}
-          style={{
-            backgroundColor: "#2f2baa",
-            padding: 10,
-            borderRadius: 20,
-            height: 40,
-            justifyContent: "center",
-            width: 80,
-            alignItems: "center",
-          }}
-        >
-          <Text style={{ color: "white", fontWeight: "bold" }}>View All</Text>
-        </Pressable>
-      </View>
-      {/* Top 10 Products */}
-      <View style={{ flex: 1 }}>
-        {/* <ProductList filterSearch={filterSearch} /> */}
-        <FlatList
-          keyExtractor={(item) => item.id}
-          showsVerticalScrollIndicator={false}
-          numColumns={2}
-          contentContainerStyle={{
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          scrollEnabled={true}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={onRefresh}
-              colors={["#2f2baa"]} // Customize refresh indicator color
-              tintColor="#2f2baa" // iOS only
-            />
-          }
-          data={filteredProducts}
-          renderItem={({ item }) => (
+        renderItem={({ item }) => (
+          <View style={{ margin: 5 }}>
             <Link
               href={{
                 pathname: `/app/(main)/${item.id}`,
@@ -233,15 +229,15 @@ export default function Home() {
                 colors={item.colors}
               />
             </Link>
-          )}
-        />
-      </View>
+          </View>
+        )}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container:{
+  container: {
     flex: 1,
     width: "100%",
     backgroundColor: "#fff",
@@ -251,7 +247,7 @@ const styles = StyleSheet.create({
   },
   header: {
     width: "100%",
-    
+
     paddingHorizontal: 15,
     paddingVertical: 20,
     flexDirection: "row",
@@ -285,7 +281,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   searchContainer: {
-    
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#e5e5e5",

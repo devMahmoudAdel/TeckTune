@@ -1,12 +1,8 @@
 import React from 'react';
-import { View, Text, Image,StyleSheet,Pressable, Alert } from 'react-native';
-import ProductDetails from '../app/(main)/[...ProductDetails]';
-import AntDesign from "@expo/vector-icons/AntDesign";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useState, useEffect } from 'react';
-import { addToWishlist,removeFromWishlist,inWishlist} from '../firebase/Wishlist';
+import { View, Text, Image, StyleSheet, Pressable } from 'react-native';
 import Stars from './Stars';
-const Product = ({id, title, images, rating, price }) => {
+
+const Product = ({ id, title, images, rating, price }) => {
   return (
     <View style={styles.container}>
       <Image
@@ -15,69 +11,60 @@ const Product = ({id, title, images, rating, price }) => {
         resizeMode="cover"
         defaultSource={require("../assets/icon.png")}
       />
-      <Text numberOfLines={1} style={styles.productTitle}>
-        {title}
-      </Text>
-      <View style={styles.secContainer}>
-        <View style={styles.stars}>
-          <Stars number={rating} />
-        </View>
-        <Text style={{ marginLeft: 4, color: "#FFD700", fontWeight: "bold" }}>
-          {Number(rating).toFixed(1)}
+      <View style={styles.infoContainer}>
+        <Text numberOfLines={2} style={styles.productTitle}>
+          {title}
         </Text>
+        <View style={styles.ratingContainer}>
+          <Stars number={rating} />
+          <Text style={styles.ratingText}>{Number(rating).toFixed(1)}</Text>
+        </View>
+        <Text style={styles.productPrice}>${Number(price).toFixed(2)}</Text>
       </View>
-      <Text style={styles.productPrice}>${Number(price).toFixed(2)}</Text>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
-    width: "160",
-    height: "240",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    backgroundColor: "#e5e5e5",
-    borderRadius: 6,
+    width: 160,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+    elevation: 4, 
+    shadowColor: "#000", 
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
     margin: 10,
     overflow: "hidden",
-    width: 160,
-  },
-  productTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginTop: 7,
-  },
-  productPrice: {
-    fontSize: 14,
-    color: "#2f2baa",
-    fontWeight: "bold",
-    alignSelf: "flex-start",
-    marginLeft: 10,
-    marginBottom: 10,
   },
   image: {
     width: "100%",
-    height: 150,
+    height: 160,
   },
-  stars: {
+  infoContainer: {
+    padding: 10,
+  },
+  productTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 6,
+  },
+  ratingContainer: {
     flexDirection: "row",
-  },
-  secContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 6,
   },
-  favProduct: {
-    position: "absolute",
-    top: 10,
-    right: 10,
-    backgroundColor: "#818181",
-    borderRadius: 20,
-    width: 35,
-    height: 35,
-    padding: 5,
-    justifyContent: "center",
-    alignItems: "center",
+  ratingText: {
+    marginLeft: 6,
+    color: "#f1c40f",
+    fontWeight: "bold",
+  },
+  productPrice: {
+    fontSize: 16,
+    color: "#2f2baa",
+    fontWeight: "700",
   },
 });
 

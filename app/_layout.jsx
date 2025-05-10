@@ -9,6 +9,7 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(main)" options={{ headerShown: false }} />
         <Stack.Screen name="(checkout)" options={{ headerShown: false }} />
+        <Stack.Screen name="NoInternet" options={{ headerShown: false }} />
         <Stack.Screen
           name="restricted-modal"
           options={{

@@ -1,8 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useFocusEffect } from 'expo-router';
-import {Dimensions, Text, Alert, StyleSheet, TouchableOpacity, View, RefreshControl,} from 'react-native';
+import {
+  Dimensions,
+  Text,
+  Alert,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  RefreshControl,
+} from 'react-native';
 import CartItem from './CartItem';
-import { useRouter } from "expo-router";
+import { useRouter } from 'expo-router';
 import { SwipeListView } from 'react-native-swipe-list-view';
 import {
   addToCart,
@@ -17,7 +25,7 @@ import OrderSummary from './OrderSummary';
 
 const screen = Dimensions.get('window');
 
-const CartItems = ({refreshstate}) => {
+const CartItems = ({ refreshstate }) => {
   const router = useRouter();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -83,7 +91,7 @@ const CartItems = ({refreshstate}) => {
     useCallback(() => {
       setLoading(true);
       fetchProducts();
-    }, [refreshstate,refreshing2])
+    }, [refreshstate, refreshing2])
   );
 
   const onRefresh = () => {
@@ -106,7 +114,8 @@ const CartItems = ({refreshstate}) => {
 
     const discountValue = subtotalAmount > 500 ? 20 : 0;
     const deliveryValue = subtotalAmount > 200 ? 0 : 30;
-    const totalValue = (subtotalAmount + deliveryValue) - (subtotalAmount + deliveryValue) * discountValue/100;
+    const totalValue =
+      subtotalAmount + deliveryValue - (subtotalAmount + deliveryValue) * (discountValue / 100);
 
     setCountItems(count);
     setSubtotal(subtotalAmount);
@@ -121,14 +130,14 @@ const CartItems = ({refreshstate}) => {
 
   if (products.length === 0) {
     return (
-      <View style={{ width: '100%', flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={styles.emptyContainer}>
         <Empty text="Cart is empty" subText="Add products and try again" />
       </View>
     );
   }
 
   return (
-    <View style={{ flex: 1, alignItems: 'center' }}>
+    <View style={styles.container}>
       <SwipeListView
         keyExtractor={(item) => item.id}
         refreshControl={
@@ -162,16 +171,13 @@ const CartItems = ({refreshstate}) => {
             </TouchableOpacity>
           </View>
         )}
-        leftOpenValue={100}
+        leftOpenValue={screen.width * 0.25}
         rightOpenValue={0}
         disableLeftSwipe={true}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          gap: 10,
-          paddingBottom: 100,
-        }}
+        contentContainerStyle={styles.listContent}
         ListFooterComponent={() => (
-          <View style={{ marginTop: 20 }}>
+          <View style={styles.footer}>
             <OrderSummary
               numOfItems={countItems}
               Subtotal={subtotal}
@@ -181,16 +187,18 @@ const CartItems = ({refreshstate}) => {
             />
             <TouchableOpacity
               style={styles.checkoutButton}
-              onPress={() => router.push({
-                pathname: "../../(checkout)/Checkout",
-                params: {
-                  subtotal: subtotal,
-                  discount: discount,
-                  delivery: deliveryCharges,
-                  count: countItems,
-                  total: total
-                }
-              })}
+              onPress={() =>
+                router.push({
+                  pathname: '../../(checkout)/Checkout',
+                  params: {
+                    subtotal: subtotal,
+                    discount: discount,
+                    delivery: deliveryCharges,
+                    count: countItems,
+                    total: total,
+                  },
+                })
+              }
             >
               <Text style={styles.textButtonCheckout}>Checkout</Text>
             </TouchableOpacity>
@@ -202,26 +210,45 @@ const CartItems = ({refreshstate}) => {
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  emptyContainer: {
+    width: '100%',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   hiddenContainer: {
     alignItems: 'flex-start',
     backgroundColor: 'red',
-    paddingHorizontal: 20,
+    paddingHorizontal: screen.width * 0.05,
     justifyContent: 'center',
     height: '100%',
     borderRadius: 5,
   },
   deleteButton: {
     backgroundColor: '#ff4444',
-    padding: 10,
+    padding: screen.width * 0.03,
     borderRadius: 10,
   },
   deleteText: {
     color: '#fff',
     fontWeight: 'bold',
   },
+  listContent: {
+    gap: 10,
+    paddingBottom: screen.height * 0.1,
+  },
+  footer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
   checkoutButton: {
     margin: 10,
-    padding: 10,
+    padding: screen.width * 0.03,
     backgroundColor: '#2e2a9d',
     borderRadius: 10,
     width: screen.width - 40,
@@ -234,7 +261,7 @@ const styles = StyleSheet.create({
   textButtonCheckout: {
     color: 'white',
     fontWeight: 'bold',
-    fontSize: 20,
+    fontSize: screen.width * 0.05,
     textAlign: 'center',
   },
 });

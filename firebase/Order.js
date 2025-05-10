@@ -23,6 +23,7 @@ async function addOrder(orderData) {
       payment_method: orderData.payment_method,
       user_name: orderData.user_name,
       user_id: orderData.user_id,
+      id: orderRef.id
     });
 
     <CheckAlert state="success" title="Order added successfully" />;

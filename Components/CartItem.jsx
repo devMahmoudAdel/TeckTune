@@ -1,41 +1,42 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, Pressable, Dimensions, Alert } from 'react-native';
 import { AntDesign } from "@expo/vector-icons"; 
-import {addToCart, removeFromCart, getCart , inCart, deleteAll} from '../firebase/Cart';
-import { getProduct } from '../firebase/Product';
+import { addToCart } from '../firebase/Cart';
+
 const screen = Dimensions.get('window');
 
 const CartItem = (prodcutInof) => {
   const [counter, setCounter] = useState(prodcutInof.quantity || 1);
 
-  const incCounter = async () =>{
-    try{
+  const incCounter = async () => {
+    try {
       await addToCart(prodcutInof.id, counter + 1);
       setCounter(counter + 1);
       prodcutInof.setRefreshing2((prev) => prev + 1);
-    }catch (e){
-      console.error("Faild add product", e);
-      Alert.alert("Faild add product" + e);
+    } catch (e) {
+      console.error("Failed to add product", e);
+      Alert.alert("Failed to add product: " + e);
     }
   };
+
   const decCounter = async () => {
-    try{
-        if (counter > 1){
-          await addToCart(prodcutInof.id, counter - 1);
-          setCounter(counter - 1);
-          prodcutInof.setRefreshing2((prev) => prev + 1);
-        } 
-    }catch{
-      Alert.alert("Faild del product")
+    try {
+      if (counter > 1) {
+        await addToCart(prodcutInof.id, counter - 1);
+        setCounter(counter - 1);
+        prodcutInof.setRefreshing2((prev) => prev + 1);
+      }
+    } catch {
+      Alert.alert("Failed to remove product");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={{uri: prodcutInof.image}} />
+      <Image style={styles.image} source={{ uri: prodcutInof.image }} />
 
       <View style={styles.detailsContainer}>
-        <Text style={styles.title}>{prodcutInof.title}</Text>
+        <Text style={styles.title} numberOfLines={1}>{prodcutInof.title}</Text>
         <Text style={styles.price}>${prodcutInof.price}</Text>
       </View>
 
@@ -60,28 +61,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#f2f2f2",
     borderRadius: 5,
-    padding: 0,
-    width: screen.width - 20,
+    padding: 10,
+    width: "95%",
     alignSelf: "center",
+    marginVertical: 8,
   },
   image: {
-    width: 90,
-    height: "100%",
+    width: screen.width * 0.2,
+    height: screen.width * 0.2,
     borderRadius: 5,
   },
   detailsContainer: {
     flex: 1,
-    paddingHorizontal: 15,
+    paddingHorizontal: 10,
     justifyContent: "center",
   },
   title: {
-    // fontWeight: "bold",
+    fontSize: screen.width * 0.04,
     color: "#4e5774",
-    fontSize: 14,
-    marginBottom: 15,
+    marginBottom: 5,
   },
   price: {
-    fontSize: 15,
+    fontSize: screen.width * 0.045,
     fontWeight: "bold",
     color: "#1f388d",
   },
@@ -89,18 +90,16 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    paddingRight: 12,
+    paddingRight: 10,
   },
   count: {
-    fontSize: 16,
+    fontSize: screen.width * 0.045,
     fontWeight: "bold",
     marginVertical: 3,
     color: "#333",
   },
   button: {
     paddingVertical: 2,
-    // margin:-3
-
   },
 });
 
