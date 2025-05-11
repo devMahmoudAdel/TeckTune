@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable, Alert, TextInput, StatusBar, ActivityIndicator, ToastAndroid, Platform, Modal,Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, AntDesign } from '@expo/vector-icons';
 import { getAllBrands, deleteBrand } from "../../../../../firebase/Brand";
 import Toast from 'react-native-toast-message';
@@ -15,9 +15,11 @@ export default function AdminBrands() {
   const [deleteStatus, setDeleteStatus] = useState({ visible: false, success: false, message: '' });
   const router = useRouter();
 
-  useEffect(() => {
-    fetchBrands();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchBrands();
+    }, [])
+  )
 
   const showFeedback = (type, message, details = '') => {
     Toast.show({
