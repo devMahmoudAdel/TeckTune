@@ -41,7 +41,7 @@ const NUM_COLUMNS = isLargeScreen ? 4 : isTablet ? 3 : 2;
 const ITEM_WIDTH = (width - ITEM_MARGIN * (NUM_COLUMNS + 1)) / NUM_COLUMNS;
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, guest } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
@@ -156,10 +156,19 @@ export default function Home() {
       <View style={styles.header}>
         <View style={styles.userContainer}>
           {user && user.profilePic ? (
+            <TouchableOpacity
+                      onPress={() =>
+                        guest
+                          ? router.push("/restricted-modal")
+                          : router.navigate("/(tabs)/Profile/MyProfile")
+                      }
+                    >
             <Image
               source={{ uri: user.profilePic }}
               style={styles.profilePic}
             />
+                    </TouchableOpacity>
+            
           ) : (
             <Ionicons
               name="person"

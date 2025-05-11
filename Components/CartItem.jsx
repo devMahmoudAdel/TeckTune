@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, Pressable, Dimensions, Alert } from 'react-native';
 import { AntDesign } from "@expo/vector-icons"; 
 import { addToCart } from '../firebase/Cart';
-
+import { useRouter } from 'expo-router';
 const screen = Dimensions.get('window');
 
 const CartItem = (prodcutInof) => {
   const [counter, setCounter] = useState(prodcutInof.quantity || 1);
-
+  const router = useRouter();
   const incCounter = async () => {
     try {
       await addToCart(prodcutInof.id, counter + 1);
@@ -32,7 +32,19 @@ const CartItem = (prodcutInof) => {
   };
 
   return (
-    <View style={styles.container}>
+    <Pressable onPress={() => router.push({pathname: `/(main)/Product/${prodcutInof.id}`,
+     params: {
+                  title: prodcutInof.title,
+                  price: prodcutInof.price,
+                  imagess: JSON.stringify(prodcutInof.images),
+                  rating: prodcutInof.rating,
+                  colorss: JSON.stringify(prodcutInof.colors),
+                  description: prodcutInof.description,
+                  reviews: prodcutInof.reviews,
+                  id: prodcutInof.id,
+                }
+     })}>
+      <View style={styles.container}>
       <Image style={styles.image} source={{ uri: prodcutInof.image }} />
 
       <View style={styles.detailsContainer}>
@@ -52,6 +64,7 @@ const CartItem = (prodcutInof) => {
         </Pressable>
       </View>
     </View>
+    </Pressable>
   );
 };
 
