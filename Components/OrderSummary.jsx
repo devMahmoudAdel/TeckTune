@@ -11,38 +11,42 @@ const OrderSummary = ({
 }) => {
   return (
     <View style={styles.summary_container}>
-      <Text style={styles.head_summary}>Order Summary</Text>
 
-      <View style={styles.row_summary}>
-        <Text style={styles.body_summary}>Items</Text>
-        <Text style={styles.body_summary}>{numOfItems}</Text>
+      {numOfItems > 0 && (
+        <>
+        <Text style={styles.head_summary}>Order Summary</Text>
+          <View style={styles.row_summary}>
+            <Text style={styles.body_summary}>Items</Text>
+            <Text style={styles.body_summary}>{numOfItems}</Text>
+          </View>
+          <View style={styles.row_summary}>
+            <Text style={styles.body_summary}>Subtotal</Text>
+            <Text style={styles.body_summary}>{Subtotal} </Text>
+          </View>
+          {Discount > 0 &&
+            <View style={styles.row_summary}>
+              <Text style={styles.body_summary}>Discount</Text>
+              <Text style={styles.body_summary}>-{Discount}%</Text>
+            </View>
+          }
+          <View style={styles.row_summary}>
+            <Text style={styles.body_summary}>Delivery Charges</Text>
+            <Text style={styles.body_summary}>
+              {Delivery_Charges <= 0 ? "Free" : Delivery_Charges}
+            </Text>
+          </View>
 
-      </View>
+          <View style={styles.separator}></View>
 
-      <View style={styles.row_summary}>
-        <Text style={styles.body_summary}>Subtotal</Text>
-        <Text style={styles.body_summary}>{Subtotal} </Text>
-      </View>
-      {Discount > 0 &&
-        <View style={styles.row_summary}>
-          <Text style={styles.body_summary}>Discount</Text>
-          <Text style={styles.body_summary}>-{Discount}%</Text>
-        </View>
-      }
+          <View style={styles.row_summary}>
+            <Text style={styles.tail_summary}>Total</Text>
+            <Text style={styles.tail_summary}>{total} $</Text>
+          </View>
+        </>
+      )}
 
-      <View style={styles.row_summary}>
-        <Text style={styles.body_summary}>Delivery Charges</Text>
-        <Text style={styles.body_summary}>
-          {Delivery_Charges <= 0 ? "Free" : Delivery_Charges}
-        </Text>
-      </View>
 
-      <View style={styles.separator}></View>
 
-      <View style={styles.row_summary}>
-        <Text style={styles.tail_summary}>Total</Text>
-        <Text style={styles.tail_summary}>{total} EGP</Text>
-      </View>
     </View>
   );
 };
