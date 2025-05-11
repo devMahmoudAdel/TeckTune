@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, StyleSheet, Pressable, Alert, Modal, TouchableOpacity, TextInput } from "react-native";
+import { View, Text, FlatList, StyleSheet, Pressable, Alert, Modal, TouchableOpacity, TextInput, Dimensions } from "react-native";
 import { getAllOrders, deleteOrder, updateOrder } from "../../../../../firebase/Order";
 
 export default function AdminOrders() {
@@ -140,18 +140,20 @@ export default function AdminOrders() {
                 <Text style={styles.text}>Address: {item.address}</Text>
                 <Text style={styles.text}>Status: {item.status}</Text>
               </View>
-              <Pressable
-                style={[styles.actionButton, styles.statusButton]}
-                onPress={() => openStatusModal(item)}
-              >
-                <Text style={styles.actionButtonText}>Change Status</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.actionButton, styles.deleteButton]}
-                onPress={() => removeOrder(item.id)}
-              >
-                <Text style={styles.actionButtonText}>Delete</Text>
-              </Pressable>
+              <View style={styles.buttonsContainer}>
+                <Pressable
+                  style={[styles.actionButton, styles.statusButton]}
+                  onPress={() => openStatusModal(item)}
+                >
+                  <Text style={styles.actionButtonText}>Change Status</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.actionButton, styles.deleteButton]}
+                  onPress={() => removeOrder(item.id)}
+                >
+                  <Text style={styles.actionButtonText}>Delete</Text>
+                </Pressable>
+              </View>
             </View>
           </Pressable>
         )}
@@ -195,7 +197,7 @@ export default function AdminOrders() {
           onRequestClose={() => setProductsModalVisible(false)}
         >
           <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
+            <View style={[styles.modalContent, styles.largeModalContent]}>
               <Text style={styles.modalTitle}>Order Details</Text>
               <FlatList
                 data={selectedOrder.products}
@@ -240,61 +242,69 @@ export default function AdminOrders() {
   );
 }
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
-    padding: 20,
+    paddingHorizontal: windowWidth * 0.05,
+    paddingVertical : windowHeight * 0.08
   },
   title: {
-    fontSize: 28,
+    fontSize: windowWidth * 0.07,
     fontWeight: "bold",
     color: "#2f2baa",
-    marginBottom: 20,
+    marginBottom: windowHeight * 0.02,
     textAlign: "center",
   },
   orderCard: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: windowWidth > 600 ? 'row' : 'column',
+    alignItems: 'flex-start',
     backgroundColor: "#fff",
-    padding: 15,
+    padding: windowWidth * 0.04,
     borderRadius: 10,
-    marginBottom: 15,
+    marginBottom: windowHeight * 0.02,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    position: "relative",
   },
   orderInfo: {
     flex: 1,
+    marginBottom: windowWidth > 600 ? 0 : windowHeight * 0.01,
   },
   text: {
-    fontSize: 14,
+    fontSize: windowWidth * 0.035,
     color: "#555",
-    marginBottom: 5,
+    marginBottom: windowHeight * 0.005,
+  },
+  buttonsContainer: {
+    flexDirection: windowWidth > 600 ? 'column' : 'row',
+    justifyContent: 'space-between',
+    width: windowWidth > 600 ? windowWidth * 0.25 : '100%',
+    marginTop: windowWidth > 600 ? 0 : windowHeight * 0.01,
   },
   actionButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: windowHeight * 0.01,
+    paddingHorizontal: windowWidth * 0.03,
     borderRadius: 6,
-    position: "absolute",
+    margin: windowWidth > 600 ? windowHeight * 0.005 : 0,
+    marginHorizontal: windowWidth > 600 ? 0 : windowWidth * 0.01,
+    minWidth: windowWidth > 600 ? '100%' : windowWidth * 0.35,
+    alignItems: 'center',
   },
   statusButton: {
     backgroundColor: "#2f2baa",
-    top: 10,
-    right: 80,
   },
   deleteButton: {
     backgroundColor: "#ff4444",
-    top: 10,
-    right: 10,
   },
   actionButtonText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: windowWidth * 0.03,
     fontWeight: "bold",
     textAlign: "center",
   },
@@ -305,38 +315,46 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContent: {
-    width: "80%",
+    width: windowWidth * 0.8,
+    maxHeight: windowHeight * 0.7,
     backgroundColor: "#fff",
     borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
+    padding: windowWidth * 0.05,
+  },
+  largeModalContent: {
+    maxHeight: windowHeight * 0.85,
+    width: windowWidth * 0.9,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: windowWidth * 0.05,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: windowHeight * 0.02,
+    textAlign: "center",
   },
   modalButton: {
     backgroundColor: "#2f2baa",
-    padding: 10,
+    padding: windowHeight * 0.015,
     borderRadius: 5,
-    marginVertical: 5,
+    marginVertical: windowHeight * 0.005,
     width: "100%",
     alignItems: "center",
   },
   cancelButton: {
     backgroundColor: "#ff4444",
   },
+  saveButton: {
+    backgroundColor: "#4CAF50",
+  },
   modalButtonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: windowWidth * 0.04,
     fontWeight: "bold",
   },
   productItem: {
-    padding: 10,
+    padding: windowWidth * 0.03,
     backgroundColor: "#f9f9f9",
     borderRadius: 5,
-    marginBottom: 10,
+    marginBottom: windowHeight * 0.01,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -344,35 +362,36 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   shippingInfo: {
-    marginTop: 20,
-    padding: 10,
+    marginTop: windowHeight * 0.02,
+    padding: windowWidth * 0.03,
     backgroundColor: "#f1f1f1",
     borderRadius: 5,
     alignItems: "center",
   },
   filterContainer: {
     flexDirection: "row",
+    flexWrap: 'wrap',
     justifyContent: "center",
-    marginBottom: 20,
+    marginBottom: windowHeight * 0.02,
   },
   filterButton: {
     backgroundColor: "#e0e0e0",
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingVertical: windowHeight * 0.01,
+    paddingHorizontal: windowWidth * 0.03,
     borderRadius: 8,
-    marginHorizontal: 5,
+    margin: windowWidth * 0.005,
   },
   activeFilter: {
     backgroundColor: "#2f2baa",
   },
   filterText: {
-    color: "#fff",
+    color: "#000",
     fontWeight: "bold",
-    fontSize: 14,
+    fontSize: windowWidth * 0.03,
   },
   deliveryDateContainer: {
-    marginTop: 20,
-    padding: 10,
+    marginTop: windowHeight * 0.02,
+    padding: windowWidth * 0.03,
     backgroundColor: "#f9f9f9",
     borderRadius: 5,
   },
@@ -380,15 +399,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 5,
-    padding: 10,
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  saveButton: {
-    backgroundColor: "#4CAF50",
-    alignSelf: "center",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
+    padding: windowWidth * 0.02,
+    marginTop: windowHeight * 0.01,
+    marginBottom: windowHeight * 0.01,
+    fontSize: windowWidth * 0.035,
   },
 });

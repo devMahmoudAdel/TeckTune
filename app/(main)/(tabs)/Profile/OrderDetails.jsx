@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 
 const parseProductsParam = (productsParam) => {
@@ -35,7 +35,6 @@ export default function OrderDetails() {
   const shippingCost = parseFloat(shipping_price) || 0;
 
   const calculateTotal = (products, shipping) => {
-    console.log(products)
     return products.reduce((sum, p) => {
       const price = parseFloat(p.price) || 0;
       const quantity = parseInt(p.quantity) || 0;
@@ -55,7 +54,10 @@ export default function OrderDetails() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView 
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+    >
       <Text style={styles.sectionTitle}>Order #{id || 'N/A'}</Text>
       
       <Text style={styles.sectionTitle}>Customer Information</Text>
@@ -97,35 +99,40 @@ export default function OrderDetails() {
   );
 }
 
+const windowWidth = Dimensions.get('window').width;
+const windowHeight = Dimensions.get('window').height;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 30,
-    paddingHorizontal: 20,
     backgroundColor: '#F3F4F6',
   },
+  contentContainer: {
+    paddingVertical: windowHeight * 0.02,
+    paddingHorizontal: windowWidth * 0.05,
+  },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: windowWidth * 0.06,
     fontWeight: 'bold',
-    marginTop: 25,
-    marginBottom: 10,
+    marginTop: windowHeight * 0.03,
+    marginBottom: windowHeight * 0.015,
     color: '#2563EB',
   },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    padding: 16,
+    padding: windowWidth * 0.04,
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 5,
     elevation: 3,
-    marginBottom: 20,
+    marginBottom: windowHeight * 0.02,
     borderWidth: 1,
     borderColor: '#E5E7EB',
   },
   label: {
-    fontSize: 16,
-    marginBottom: 8,
+    fontSize: windowWidth * 0.04,
+    marginBottom: windowHeight * 0.01,
     color: '#6B7280',
   },
   value: {
@@ -147,42 +154,45 @@ const styles = StyleSheet.create({
   productItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 8,
+    alignItems: 'center',
+    paddingVertical: windowHeight * 0.01,
     borderBottomWidth: 1,
     borderBottomColor: '#F3F4F6',
   },
   productName: {
-    fontSize: 16,
+    fontSize: windowWidth * 0.04,
     color: '#374151',
-    flexShrink: 1,
-    marginRight: 10,
+    flex: 1,
+    marginRight: windowWidth * 0.03,
   },
   productPrice: {
-    fontSize: 16,
+    fontSize: windowWidth * 0.04,
     fontWeight: '600',
     color: '#1F2937',
+    minWidth: windowWidth * 0.2,
+    textAlign: 'right',
   },
   summaryContainer: {
     backgroundColor: '#E0F2FE',
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 40,
+    padding: windowWidth * 0.04,
+    marginBottom: windowHeight * 0.05,
     borderColor: '#60A5FA',
     borderWidth: 1,
   },
   summaryText: {
-    fontSize: 16,
-    marginBottom: 10,
+    fontSize: windowWidth * 0.04,
+    marginBottom: windowHeight * 0.01,
     color: '#1D4ED8',
   },
   price: {
     fontWeight: '600',
   },
   totalText: {
-    fontSize: 18,
+    fontSize: windowWidth * 0.045,
     fontWeight: 'bold',
     color: '#1E3A8A',
-    marginTop: 5,
+    marginTop: windowHeight * 0.01,
   },
   totalPrice: {
     color: '#DC2626',
@@ -192,16 +202,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
-    padding: 20,
+    padding: windowWidth * 0.05,
   },
   notFoundText: {
-    fontSize: 18,
+    fontSize: windowWidth * 0.05,
     color: '#9CA3AF',
-    marginBottom: 10,
+    marginBottom: windowHeight * 0.02,
     textAlign: 'center',
   },
   smallText: {
-    fontSize: 14,
+    fontSize: windowWidth * 0.035,
     color: '#6B7280',
   },
 });

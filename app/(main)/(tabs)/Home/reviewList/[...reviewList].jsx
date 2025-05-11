@@ -102,7 +102,7 @@ function AnimatedReviewItem({ item, animatedRefs, user, handleDeleteReview, styl
                 />
               ))}
             </View>
-            {item.userId === user.id && (
+            {(item.userId === user.id || user.role === 'admin')&& (
               <TouchableOpacity
                 onPress={() => handleDeleteReview(item.id)}
                 style={styles.deleteButton}
@@ -137,30 +137,29 @@ export default function ReviewList() {
   const animatedRefs = useRef({});
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchReviews = async () => {
+  const fetchReviews = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
     setIsLoading(true);
     try {
       const fetchedReviews = await getReviews(productId);
       setReviews(fetchedReviews);
     } catch (error) {
       Alert.alert("Error", "Failed to fetch reviews. Please try again later.");
-    } finally {      containerScale.value = withTiming(1, { duration: 400 });
-
+    } finally {
       setIsLoading(false);
       setRefreshing(false);
     }
   };
-  
+
   useEffect(() => {
     fetchReviews();
   }, [productId]);
-  
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchReviews();
   };
 
-  // Reset highlighhighlightt after animation
   useEffect(() => {
     if (lastAddedId) {
       const timer = setTimeout(() => setLastAddedId(null), 900);
@@ -245,7 +244,6 @@ export default function ReviewList() {
 
     const { cracks, containerOpacity, containerScale } = animatedRefs.current[reviewId];
 
-    // 1. Initial wobble effect
     cracks.forEach((crack, index) => {
       crack.rotate.value = withSequence(
         withTiming(`${Math.random() * 20 - 10}deg`, { duration: 100 }),
@@ -253,7 +251,6 @@ export default function ReviewList() {
       );
     });
 
-    // 2. Shatter effect after wobble
     setTimeout(() => {
       cracks.forEach((crack, index) => {
         const angle = (index % 4) * 90 + 45;
@@ -303,7 +300,6 @@ export default function ReviewList() {
     deleteReview(productId, reviewId);
     updateProductRating(productId);
     setDeletingId(null);
-    // Clean up animated refs
     delete animatedRefs.current[reviewId];
   };
 

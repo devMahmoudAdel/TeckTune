@@ -132,7 +132,7 @@ export default function ProductDetails() {
 
   const fetchRecommendations = async () => {
     try {
-      const recommendations = await getRecommendation(id); // Fetch recommendation IDs
+      const recommendations = await getRecommendation(id); 
       setRecommendedProducts(recommendations);
     } catch (error) {
       console.error("Error fetching recommendations:", error);
@@ -207,7 +207,6 @@ export default function ProductDetails() {
        });
     };
 
-  // Helper to navigate to review list
   const goToReviewList = () => {
     router.push({
       pathname: "/(main)/(tabs)/Home/reviewList/[...reviewList]",
@@ -225,7 +224,7 @@ export default function ProductDetails() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: "#f5f5f5" }]}>
+    <SafeAreaView style={[styles.container, { paddingBottom: 100 }]}>
       <FlatList
         data={[{ key: "main" }]}
         refreshing={refreshing}
