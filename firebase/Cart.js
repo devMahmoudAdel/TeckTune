@@ -33,12 +33,15 @@ const getCart = async () => {
     const cart = await Promise.all(cartSnapshot.docs.map(async (doc) => {
       const data = doc.data();
       const product = await getProduct(data.productId);
-      return {
-        ...data,
-        ...product,
-      };
+      if(product){
+        return {
+          exists:true,
+          ...data,
+          ...product,
+        };
+      }else return{exists:false,id: doc.id};
     }));
-
+console.log("Cart",cart);
     return cart;
   } catch (error) {
     <CheckAlert state="error" title={error.message}/>
