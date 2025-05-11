@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet, Pressable, Alert, TextInput, StatusBar, ActivityIndicator, ToastAndroid, Platform } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons, MaterialIcons, AntDesign } from '@expo/vector-icons';
 // import { getAllProducts, deleteProduct } from '@firebase/Products';
 import {
@@ -21,9 +21,11 @@ export default function AdminProducts() {
   const [deleteStatus, setDeleteStatus] = useState({ visible: false, success: false, message: '' });
   const router = useRouter();
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProducts();
+    }, [])
+  )
 
   // Function to show visual feedback based on platform
   const showFeedback = (type, message, details = '') => {
