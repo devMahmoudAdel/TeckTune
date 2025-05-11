@@ -24,10 +24,20 @@ const Checkout = () => {
   const [loading, setLoading] = useState(false);
 
   const fetchUser = async () => {
-    setLoading(true);
-    const userData = await getUser(user.id);
-    setUserData(userData);
-    setLoading(false);
+    try {
+      setLoading(true);
+      if (user && user.id) {
+        const userData = await getUser(user.id);
+        setUserData(userData || { address: null });
+      } else {
+        setUserData({ address: null });
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      setUserData({ address: null });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -35,34 +45,50 @@ const Checkout = () => {
   }, []);
 
   const handleConfirm = async () => {
-    const cartt = await getCart();
-    const cart = cartt.filter((item)=> item.exists);
-    if (cart.length === 0) {
-      Alert.alert("Your cart is empty");
-      return;
-    }
-    const products = cart.map((item) => ({
-      id: item.id,
-      name: item.title,
-      image: item.images[0],
-      price: item.price,
-      quantity: item.quantity,
-    }));
-    const orderData = {
-      products: products,
-      address: userData.address,
-      payment_method: selectedPayment,
-      user_name: user.username,
-      user_id: user.id,
-    };
-    const productIds = products.map(p => p.id);
-    await updateProductRecommendation(productIds);
-    const orderId = await addOrder(orderData);
-    if (orderId) {
-      Alert.alert("Order placed successfully", `Your order ID is ${orderId}`);
-      router.push("../(main)/(tabs)/Home");
-    } else {
-      Alert.alert("Error placing order", "Please try again later");
+    try {
+      const cartt = await getCart();
+      const cart = cartt.filter((item) => item.exists);
+      if (cart.length === 0) {
+        Alert.alert("Your cart is empty");
+        return;
+      }
+
+      if (!userData || !userData.address) {
+        Alert.alert("No address found", "Please add your address before proceeding");
+        return;
+      }
+
+      if (!user) {
+        Alert.alert("User error", "Please log in again");
+        return;
+      }
+
+      const products = cart.map((item) => ({
+        id: item.id,
+        name: item.title,
+        image: item.images[0],
+        price: item.price,
+        quantity: item.quantity,
+      }));
+      const orderData = {
+        products: products,
+        address: userData.address,
+        payment_method: selectedPayment,
+        user_name: user.username || "Guest",
+        user_id: user.id,
+      };
+      const productIds = products.map(p => p.id);
+      await updateProductRecommendation(productIds);
+      const orderId = await addOrder(orderData);
+      if (orderId) {
+        Alert.alert("Order placed successfully", `Your order ID is ${orderId}`);
+        router.push("../(main)/(tabs)/Home");
+      } else {
+        Alert.alert("Error placing order", "Please try again later");
+      }
+    } catch (error) {
+      console.error('Error completing order:', error);
+      Alert.alert("Error", "An unexpected error occurred. Please try again.");
     }
   };
 
@@ -92,12 +118,12 @@ const Checkout = () => {
         <Text style={styles.textHeader}>Checkout</Text>
       </View>
       <View style={styles.deliverySection}>
-        {(user.address || userData.address) ? (
+        {(user?.address || (userData && userData.address)) ? (
           <View style={styles.infoDeliveryContainer}>
             <View style={styles.infoDeliveryIcon}>
               <MaterialIcons name="location-on" size={24} color="#5f55da" />
             </View>
-            <Text style={styles.infoDeliveryText1}>{user.address || userData.address}</Text>
+            <Text style={styles.infoDeliveryText1}>{user?.address || (userData && userData.address)}</Text>
           </View>
         ) : (
           <View style={styles.infoDeliveryContainer}>
@@ -159,9 +185,9 @@ const Checkout = () => {
       </View>
 
       <TouchableOpacity
-        style={[styles.btnConfirm, (isChecked && userData.address) && styles.btnConfirmed]}
+        style={[styles.btnConfirm, (isChecked && userData && userData.address) && styles.btnConfirmed]}
         onPress={handleConfirm}
-        disabled={!isChecked || !userData.address}
+        disabled={!isChecked || !userData || !userData.address}
       >
         <Text style={styles.btnConfirmText}>Confirm</Text>
       </TouchableOpacity>
