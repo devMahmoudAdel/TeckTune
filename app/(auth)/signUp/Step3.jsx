@@ -12,16 +12,19 @@ import {
   FlatList,
   Dimensions,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../../context/useAuth";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { takePhoto,selectImage,uploadImage } from "../../../supabase/loadImage";
+import { takePhoto, selectImage, uploadImage } from "../../../supabase/loadImage";
 
 const { width } = Dimensions.get("window");
 const AVATAR_SIZE = width / 3 - 20;
 
+// Default avatar URL
+const DEFAULT_AVATAR = "https://ui-avatars.com/api/?background=6055D8&color=fff&name=User&size=150";
 
 const Step3 = () => {
   const router = useRouter();
@@ -51,45 +54,78 @@ const Step3 = () => {
       useNativeDriver: false,
     }).start();
   }, []);
+
   const handleImageSelection = (imageUri) => {
     setIsUploading(true);
 
     setTimeout(() => {
       setAvatar(imageUri);
       setIsUploading(false);
-    }, 1500);
+    }, 1000);
   };
 
   const handleTakePhoto = async () => {
-    const image = await takePhoto();
-    if (image.success) {
-      setIsUploading(true)
-      const uploadedImage = await uploadImage(image, null, (percent) => { });
-      if (uploadedImage.success) {
-        handleImageSelection(uploadedImage.url);
-        setIsUploading(false);
+    try {
+      const image = await takePhoto();
+      if (image.success) {
+        setIsUploading(true);
+        const uploadedImage = await uploadImage(image, null, (percent) => { });
+        if (uploadedImage.success) {
+          handleImageSelection(uploadedImage.url);
+        } else {
+          throw new Error(uploadedImage.error || "Failed to upload image");
+        }
+      } else {
+        throw new Error(image.error || "Failed to take photo");
       }
+    } catch (error) {
+      console.error("Take photo error:", error);
+      showAlert("Error", error.message || "Could not take photo");
+      setIsUploading(false);
     }
   };
 
   const handlePickImage = async () => {
-    const image = await selectImage();
-    if (image.success) {
-      setIsUploading(true)
-      const uploadedImage = await uploadImage(image, null, (percent) => {});
-      if (uploadedImage.success) {
-        handleImageSelection(uploadedImage.url);
-        setIsUploading(false);
-        console.log("Image URL:",uploadedImage.url);
+    try {
+      const image = await selectImage();
+      if (image.success) {
+        setIsUploading(true);
+        const uploadedImage = await uploadImage(image, null, (percent) => { });
+        if (uploadedImage.success) {
+          handleImageSelection(uploadedImage.url);
+          console.log("Image URL:", uploadedImage.url);
+        } else {
+          throw new Error(uploadedImage.error || "Failed to upload image");
+        }
+      } else {
+        throw new Error(image.error || "Failed to select image");
       }
+    } catch (error) {
+      console.error("Pick image error:", error);
+      showAlert("Error", error.message || "Could not select or upload image");
+      setIsUploading(false);
     }
   };
 
+  const useDefaultAvatar = () => {
+    setIsUploading(true);
+    setTimeout(() => {
+      setAvatar(DEFAULT_AVATAR);
+      setIsUploading(false);
+    }, 800);
+  };
 
+  const showAlert = (title, message) => {
+    if (Platform.OS === "web") {
+      window.alert(`${title}\n${message}`);
+    } else {
+      Alert.alert(title, message);
+    }
+  };
 
   const handleSignup = async () => {
     if (!avatar) {
-      Alert.alert(
+      showAlert(
         "Profile Picture Required",
         "Please select a profile picture or choose a default avatar."
       );
@@ -99,6 +135,7 @@ const Step3 = () => {
     setIsProcessing(true);
 
     try {
+      // Prepare user data with profile picture
       const userData = {
         username,
         email,
@@ -109,7 +146,6 @@ const Step3 = () => {
         phoneNumber: phoneNumber || "",
         profilePic: avatar,
       };
-      
 
       console.log("Submitting user data:", {
         ...userData,
@@ -125,21 +161,30 @@ const Step3 = () => {
       console.error("Error during signup:", error);
 
       // Display appropriate error message based on the error code
-      let errorMessage =
-        "There was an error creating your account. Please try again.";
-      if (error.code === "auth/email-already-in-use") {
-        errorMessage =
-          "This email is already registered. Please use a different email or sign in.";
-      } else if (error.code === "auth/invalid-email") {
-        errorMessage = "The email address is invalid.";
-      } else if (error.code === "auth/weak-password") {
-        errorMessage =
-          "The password is too weak. Please use a stronger password.";
-      } else if (error.code === "auth/network-request-failed") {
-        errorMessage = "Network error. Please check your internet connection.";
+      let errorMessage = "There was an error creating your account. Please try again.";
+
+      if (error.code) {
+        switch (error.code) {
+          case "auth/email-already-in-use":
+            errorMessage = "This email is already registered. Please use a different email or sign in.";
+            break;
+          case "auth/invalid-email":
+            errorMessage = "The email address is invalid.";
+            break;
+          case "auth/weak-password":
+            errorMessage = "The password is too weak. Please use a stronger password.";
+            break;
+          case "auth/network-request-failed":
+            errorMessage = "Network error. Please check your internet connection.";
+            break;
+          default:
+            errorMessage = `Error: ${error.message || "Unknown error occurred"}`;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
-      Alert.alert("Signup Failed", errorMessage);
+      showAlert("Signup Failed", errorMessage);
     } finally {
       setIsProcessing(false);
     }
@@ -221,7 +266,13 @@ const Step3 = () => {
             <Text style={styles.optionText}>Choose from Gallery</Text>
           </TouchableOpacity>
 
-          
+          <TouchableOpacity
+            style={[styles.optionButton, styles.defaultButton]}
+            onPress={useDefaultAvatar}
+          >
+            <Ionicons name="person-circle-outline" size={24} color="#6055D8" />
+            <Text style={styles.optionText}>Use Default Avatar</Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.navigationButtonsContainer}>

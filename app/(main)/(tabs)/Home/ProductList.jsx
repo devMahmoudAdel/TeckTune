@@ -2,7 +2,7 @@ import { Text, View, FlatList, RefreshControl, Platform, StatusBar, StyleSheet, 
 import Product from "../../../../Components/Product";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, Link } from "expo-router";
+import { useRouter, Link, useLocalSearchParams } from "expo-router";
 import Search from "../../../../Components/Search";
 import Loading from "../../../../Components/Loading";
 import { getAllProducts } from "../../../../firebase/Product";
@@ -11,6 +11,8 @@ const { width, height } = Dimensions.get("window");
 
 export default function ProductList() {
   const navigation = useRouter();
+  const params = useLocalSearchParams();
+  const filterType = params.filter || "all"; // Get filter type from params (refreshed or all)
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
@@ -32,6 +34,7 @@ export default function ProductList() {
         reviews: product.reviews || [],
         stock: product.stock || 0,
         category: product.category || "Uncategorized",
+        refreshed: product.refreshed || false,
         createdAt: product.createdAt || new Date(),
         updatedAt: product.updatedAt || new Date(),
         productPics: product.productPics || [],
@@ -57,11 +60,21 @@ export default function ProductList() {
     return query.toLowerCase().split(/\s+/).filter(Boolean);
   };
 
+  // Filter products based on refreshed flag and search query
   const filteredProducts = useMemo(() => {
-    const keywords = getKeywords(searchQuery);
-    if (!keywords.length) return allProducts;
+    // First filter by refreshed status based on filter type
+    let productsToFilter = allProducts;
+    if (filterType === "refreshed") {
+      productsToFilter = allProducts.filter(product => product.refreshed);
+    } else if (filterType === "regular") {
+      productsToFilter = allProducts.filter(product => !product.refreshed);
+    }
 
-    return allProducts.filter((product) => {
+    // Then apply search filter
+    const keywords = getKeywords(searchQuery);
+    if (!keywords.length) return productsToFilter;
+
+    return productsToFilter.filter((product) => {
       const title = product.title?.toLowerCase() || "";
       const description = product.description?.toLowerCase() || "";
       const category = product.category?.toLowerCase() || "";
@@ -73,7 +86,7 @@ export default function ProductList() {
           category.includes(keyword)
       );
     });
-  }, [searchQuery, allProducts]);
+  }, [searchQuery, allProducts, filterType]);
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -94,7 +107,7 @@ export default function ProductList() {
           paddingTop: StatusBar.currentHeight + 20,
           flex: 1,
           paddingBottom: height * 0.1,
-          paddingHorizontal : width * 0.009
+          paddingHorizontal: width * 0.009
         },
       ]}
     >
@@ -105,7 +118,9 @@ export default function ProductList() {
           color="black"
           onPress={() => router.back()}
         />
-        <Text style={styles.textHeader}>All Products</Text>
+        <Text style={styles.textHeader}>
+          {filterType === "refreshed" ? "Refreshed Products" : "All Products"}
+        </Text>
       </View>
 
       <Search setFilter={setSearchQuery} />
@@ -127,6 +142,11 @@ export default function ProductList() {
           />
         }
         data={filteredProducts}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No products found</Text>
+          </View>
+        )}
         renderItem={({ item }) => (
           <View style={{ margin: 5 }}>
             <Link
@@ -172,6 +192,16 @@ const styles = StyleSheet.create({
   textHeader: {
     fontWeight: "bold",
     fontSize: width > 400 ? 22 : 18,
+    marginLeft: 12,
   },
-  
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+  },
 });

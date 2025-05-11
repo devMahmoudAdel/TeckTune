@@ -37,7 +37,7 @@ export default function AdminProducts() {
       position: 'bottom',
       visibilityTime: 1500,
     });
-    
+
     // Additional feedback for Android
     if (Platform.OS === 'android') {
       ToastAndroid.showWithGravity(
@@ -46,19 +46,19 @@ export default function AdminProducts() {
         ToastAndroid.CENTER
       );
     }
-    
+
     // Show status message in UI
     setDeleteStatus({
       visible: true,
       success: type === 'success',
       message: `${message}: ${details}`
     });
-    
+
     // Auto-hide status after 3 seconds
     setTimeout(() => {
       setDeleteStatus({ visible: false, success: false, message: '' });
     }, 3000);
-    
+
     console.log(`[${type.toUpperCase()}]: ${message} - ${details}`);
   };
 
@@ -90,7 +90,7 @@ export default function AdminProducts() {
     setRefreshing(true);
     fetchProducts();
   };
-  
+
   const filteredProducts = products.filter(product =>
     product.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -115,23 +115,23 @@ export default function AdminProducts() {
                 position: 'bottom',
                 visibilityTime: 1500,
               });
-              
+
               console.log(`Starting deletion of product ${productId}`);
               const result = await deleteProduct(productId);
-              
+
               if (result) {
                 Toast.hide(loadingId);
                 showFeedback(
-                  'success', 
-                  'Product deleted successfully', 
+                  'success',
+                  'Product deleted successfully',
                   `"${productTitle}" has been removed`
                 );
               }
             } catch (error) {
               console.error(`Failed to delete product ${productId}:`, error);
               showFeedback(
-                'error', 
-                'Failed to delete product', 
+                'error',
+                'Failed to delete product',
                 error.message || 'Unknown error occurred'
               );
             } finally {
@@ -174,7 +174,7 @@ export default function AdminProducts() {
       {/* Show delete status message */}
       {deleteStatus.visible && (
         <View style={[
-          styles.statusMessage, 
+          styles.statusMessage,
           deleteStatus.success ? styles.successMessage : styles.errorMessage
         ]}>
           <Text style={styles.statusText}>{deleteStatus.message}</Text>
@@ -230,18 +230,24 @@ export default function AdminProducts() {
                 {item.category.name && (
                   <Text style={styles.productCategory}>Category: {item.category.name}</Text>
                 )}
+                {item.refreshed && (
+                  <View style={styles.refreshedBadge}>
+                    <MaterialIcons name="autorenew" size={14} color="white" />
+                    <Text style={styles.refreshedText}>Refreshed</Text>
+                  </View>
+                )}
               </View>
-              
+
               <MaterialIcons name="chevron-right" size={24} color="#666" />
             </Pressable>
-            
+
             {item.description && (
               <Text numberOfLines={2} style={styles.productDescription}>
                 {item.description}
               </Text>
             )}
             {/* Individual delete button for each product */}
-            <Pressable 
+            <Pressable
               style={styles.productDeleteButton}
               onPress={() => handleDeleteProduct(item.id, item.title)}
             >
@@ -436,5 +442,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#ff4444',
     textAlign: 'center',
+  },
+  refreshedBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#2f2baa",
+    paddingVertical: 2,
+    paddingHorizontal: 6,
+    borderRadius: 10,
+    marginTop: 4,
+    alignSelf: "flex-start",
+  },
+  refreshedText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "white",
+    marginLeft: 4,
   },
 });

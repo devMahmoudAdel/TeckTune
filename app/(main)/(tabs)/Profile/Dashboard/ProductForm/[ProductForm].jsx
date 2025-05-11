@@ -37,6 +37,7 @@ export default function ProductForm() {
     brand: '',
     colors: '',
     rating: '0',
+    refreshed: false,
   });
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
@@ -99,9 +100,9 @@ export default function ProductForm() {
 
       console.log('Fetched product:', product);
       const category = product.category;
-      setSelectedCategory({label: category.name, value: category.id});
+      setSelectedCategory({ label: category.name, value: category.id });
       const brand = product.brand;
-      setSelectedBrand({label: brand.name, value: brand.id});
+      setSelectedBrand({ label: brand.name, value: brand.id });
       setFormData({
         title: product.title || '',
         description: product.description || '',
@@ -112,6 +113,7 @@ export default function ProductForm() {
         brand: brand.id || '',
         colors: Array.isArray(product.colors) ? product.colors.join(', ') : '',
         rating: product.rating?.toString() || '0',
+        refreshed: product.refreshed || false,
       });
     } catch (error) {
       console.error('Error fetching product:', error);
@@ -349,36 +351,36 @@ export default function ProductForm() {
 
         <Text style={styles.label}>Category *</Text>
         <Dropdown
-                style={styles.dropdown}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                data={categories}
-                labelField="label"
-                valueField="value"
-                placeholder="Select category..."
-                maxHeight={300}
-                value={selectedCategory}
-                onChange={(item) => {
-                  setSelectedCategory(item.value);
-                setFormData({ ...formData, category: item.value });
-                }}
-              />
-              <Text style={styles.label}>Brand *</Text>
-              <Dropdown
-                      style={styles.dropdown}
-                      placeholderStyle={styles.placeholderStyle}
-                      selectedTextStyle={styles.selectedTextStyle}
-                      data={brands}
-                      labelField="label"
-                      valueField="value"
-                      placeholder="Select Brand..."
-                      maxHeight={300}
-                      value={selectedBrand}
-                      onChange={(item) => {
-                        setSelectedBrand(item.value);
-                        setFormData({ ...formData, brand: item.value });
-                      }}
-                    />
+          style={styles.dropdown}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          data={categories}
+          labelField="label"
+          valueField="value"
+          placeholder="Select category..."
+          maxHeight={300}
+          value={selectedCategory}
+          onChange={(item) => {
+            setSelectedCategory(item.value);
+            setFormData({ ...formData, category: item.value });
+          }}
+        />
+        <Text style={styles.label}>Brand *</Text>
+        <Dropdown
+          style={styles.dropdown}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          data={brands}
+          labelField="label"
+          valueField="value"
+          placeholder="Select Brand..."
+          maxHeight={300}
+          value={selectedBrand}
+          onChange={(item) => {
+            setSelectedBrand(item.value);
+            setFormData({ ...formData, brand: item.value });
+          }}
+        />
         <Text style={styles.label}>Colors (comma-separated)</Text>
         <TextInput
           style={styles.input}
@@ -397,6 +399,25 @@ export default function ProductForm() {
           keyboardType="decimal-pad"
           editable={!saving}
         />
+
+        <View style={styles.switchContainer}>
+          <Text style={styles.label}>Refreshed Product</Text>
+          <TouchableOpacity
+            style={[
+              styles.toggleButton,
+              formData.refreshed ? styles.toggleActive : styles.toggleInactive
+            ]}
+            onPress={() => setFormData({ ...formData, refreshed: !formData.refreshed })}
+          >
+            <View style={[
+              styles.toggleCircle,
+              formData.refreshed ? styles.toggleCircleRight : styles.toggleCircleLeft
+            ]} />
+          </TouchableOpacity>
+          <Text style={styles.toggleLabel}>
+            {formData.refreshed ? 'Yes - Show in Refreshed Section' : 'No - Show in Main Section'}
+          </Text>
+        </View>
 
         <Pressable
           style={[styles.submitButton, saving && styles.disabledButton]}
@@ -646,5 +667,38 @@ const styles = StyleSheet.create({
   selectedTextStyle: {
     fontSize: 16,
     color: "black",
+  },
+  switchContainer: {
+    marginBottom: 20,
+  },
+  toggleButton: {
+    width: 50,
+    height: 28,
+    borderRadius: 14,
+    padding: 2,
+    marginVertical: 8,
+  },
+  toggleActive: {
+    backgroundColor: '#2f2baa',
+  },
+  toggleInactive: {
+    backgroundColor: '#ccc',
+  },
+  toggleCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'white',
+  },
+  toggleCircleLeft: {
+    alignSelf: 'flex-start',
+  },
+  toggleCircleRight: {
+    alignSelf: 'flex-end',
+  },
+  toggleLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
   },
 });

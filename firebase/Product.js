@@ -1,17 +1,22 @@
-import { collection, addDoc, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc,writeBatch } from "firebase/firestore";
+import { collection, addDoc, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc, writeBatch } from "firebase/firestore";
 import { db } from "./config";
 import CheckAlert from "../Components/CheckAlert";
-import {getCategory} from "./Category";
-import {getBrand} from "./Brand";
+import { getCategory } from "./Category";
+import { getBrand } from "./Brand";
 // Function to add a product to Firestore
 async function addProduct(productData) {
   try {
     const docRef = doc(collection(db, "products"));
-    await setDoc(docRef, {...productData, id: docRef.id,recommendation: []});
-    <CheckAlert state="success" title="Product added successfully"/>
+    await setDoc(docRef, {
+      ...productData,
+      id: docRef.id,
+      recommendation: [],
+      refreshed: productData.refreshed || false,
+    });
+    <CheckAlert state="success" title="Product added successfully" />
     return docRef.id;
   } catch (error) {
-    <CheckAlert state="error" title="error adding product"/>
+    <CheckAlert state="error" title="error adding product" />
   }
 }
 
@@ -20,9 +25,9 @@ async function deleteProduct(productId) {
   try {
     const productRef = doc(db, "products", productId);
     await deleteDoc(productRef);
-    <CheckAlert state="success" title="product deleted successfully"/>
+    <CheckAlert state="success" title="product deleted successfully" />
   } catch (error) {
-    <CheckAlert state="error" title="Error deleting product"/>
+    <CheckAlert state="error" title="Error deleting product" />
   }
 }
 
@@ -35,42 +40,42 @@ const getProduct = async (id) => {
     const brand = await getBrand(productData.brand);
     return { ...productData, category, brand };
   } else {
-    <CheckAlert state="error" title="product does not exist"/>
+    <CheckAlert state="error" title="product does not exist" />
   }
 }
 
 const getAllProducts = async () => {
-  try{
-  const productsCollectionRef = collection(db, 'products');
-  const productsSnapshot = await getDocs(productsCollectionRef);
-  const products = await Promise.all(productsSnapshot.docs.map(async (docSnap) => {
-    const productData = docSnap.data();
-    const category = await getCategory(productData.category);
-    const brand = await getBrand(productData.brand);
-    return {
-      ...productData,
-      ...category,
-      ...brand,
-      id: docSnap.id, 
-    };
-  }));
-  return products;
-  }catch (error) {
-    <CheckAlert state="error" title={error.message}/>
+  try {
+    const productsCollectionRef = collection(db, 'products');
+    const productsSnapshot = await getDocs(productsCollectionRef);
+    const products = await Promise.all(productsSnapshot.docs.map(async (docSnap) => {
+      const productData = docSnap.data();
+      const category = await getCategory(productData.category);
+      const brand = await getBrand(productData.brand);
+      return {
+        ...productData,
+        ...category,
+        ...brand,
+        id: docSnap.id,
+      };
+    }));
+    return products;
+  } catch (error) {
+    <CheckAlert state="error" title={error.message} />
   }
 }
 
 const updateProduct = async (id, product) => {
   try {
-  const productDocRef = doc(collection(db, 'products'), id);
-  await setDoc(
-    productDocRef,
-    product,
-    { merge: true }
-  );
-  return true;
-}catch (error) {
-  <CheckAlert state="error" title={error.message}/>
+    const productDocRef = doc(collection(db, 'products'), id);
+    await setDoc(
+      productDocRef,
+      product,
+      { merge: true }
+    );
+    return true;
+  } catch (error) {
+    <CheckAlert state="error" title={error.message} />
   }
 };
 
@@ -130,7 +135,7 @@ const updateProductRecommendation = async (newRecommendations) => {
           return { id: productId, ...productDoc.data() };
         } else {
           console.warn(`Product with ID ${productId} does not exist.`);
-          return null; 
+          return null;
         }
       })
     );
@@ -144,24 +149,24 @@ const updateProductRecommendation = async (newRecommendations) => {
     for (const product of validRecommendations) {
       const recommendationOfThisProduct = product.recommendation || [];
       for (const product2 of validRecommendations) {
-          if(product.id !== product2.id){
-            const existingPair = recommendationOfThisProduct.find(
-              (pair) => pair.productId === product2.id
-            );
-            if (!existingPair) {
-              recommendationOfThisProduct.push({
-                productId: product2.id,
-                coPurchaseCount: 1,
-              });
-            }
-            else {
-              existingPair.coPurchaseCount += 1;
-            }
+        if (product.id !== product2.id) {
+          const existingPair = recommendationOfThisProduct.find(
+            (pair) => pair.productId === product2.id
+          );
+          if (!existingPair) {
+            recommendationOfThisProduct.push({
+              productId: product2.id,
+              coPurchaseCount: 1,
+            });
           }
+          else {
+            existingPair.coPurchaseCount += 1;
+          }
+        }
       }
     }
-      const batch = writeBatch(db);
-      validRecommendations.forEach((product) => {
+    const batch = writeBatch(db);
+    validRecommendations.forEach((product) => {
       const productDocRef = doc(db, "products", product.id);
       batch.set(productDocRef, { recommendation: product.recommendation }, { merge: true });
     });
@@ -177,4 +182,4 @@ const updateProductRecommendation = async (newRecommendations) => {
     return [];
   }
 };
-export { getProduct, getAllProducts, updateProduct, addProduct, deleteProduct ,updateProductRecommendation,getRecommendation};
+export { getProduct, getAllProducts, updateProduct, addProduct, deleteProduct, updateProductRecommendation, getRecommendation };

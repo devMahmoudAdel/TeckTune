@@ -22,8 +22,8 @@ const takePhoto = async () => {
     }
 
     const img = result.assets[0];
-    const base64 = await FileSystem.readAsStringAsync(img.uri, { 
-      encoding: 'base64' 
+    const base64 = await FileSystem.readAsStringAsync(img.uri, {
+      encoding: 'base64'
     });
 
     return {
@@ -36,9 +36,9 @@ const takePhoto = async () => {
       height: img.height
     };
   } catch (error) {
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Unknown error occurred' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred'
     };
   }
 };
@@ -58,8 +58,8 @@ const selectImage = async () => {
     }
 
     const img = result.assets[0];
-    const base64 = await FileSystem.readAsStringAsync(img.uri, { 
-      encoding: 'base64' 
+    const base64 = await FileSystem.readAsStringAsync(img.uri, {
+      encoding: 'base64'
     });
 
     return {
@@ -106,7 +106,7 @@ const uploadImage = async (imageData, nameFile = null, onProgress = null) => {
     const { data, error: getUrlError } = await supabase.storage
       .from('files')
       .getPublicUrl(filePath);
-      
+
     if (getUrlError) throw getUrlError;
 
     return {
@@ -151,11 +151,11 @@ const getStoredAvatar = async () => {
 const processAndUploadAvatar = async (avatarData, userId = null) => {
   try {
     if (typeof avatarData === 'number' || avatarData?.startsWith && avatarData.startsWith('file:///')) {
-    
+
       let base64;
       try {
-        base64 = await FileSystem.readAsStringAsync(avatarData, { 
-          encoding: 'base64' 
+        base64 = await FileSystem.readAsStringAsync(avatarData, {
+          encoding: 'base64'
         });
       } catch (error) {
         console.error("Error reading file:", error);
@@ -165,7 +165,7 @@ const processAndUploadAvatar = async (avatarData, userId = null) => {
       const fileExt = avatarData.split('.').pop() || 'png';
       const userId_part = userId ? userId.substring(0, 8) : '';
       const fileName = `avatar_${userId_part}_${Date.now()}.${fileExt}`;
-      
+
       const imageData = {
         base64,
         uri: avatarData,
@@ -174,7 +174,7 @@ const processAndUploadAvatar = async (avatarData, userId = null) => {
       };
 
       const uploadResult = await uploadImage(imageData, fileName);
-      
+
       if (uploadResult.success) {
         const avatarInfo = {
           type: 'custom',
@@ -182,9 +182,9 @@ const processAndUploadAvatar = async (avatarData, userId = null) => {
           filePath: uploadResult.filePath,
           fileName: uploadResult.fileName
         };
-        
+
         await AsyncStorage.setItem('userAvatar', JSON.stringify(avatarInfo));
-        
+
         return {
           success: true,
           avatarInfo
@@ -197,15 +197,15 @@ const processAndUploadAvatar = async (avatarData, userId = null) => {
         type: 'default',
         index: avatarData,
       };
-      
+
       await AsyncStorage.setItem('userAvatar', JSON.stringify(avatarInfo));
-      
+
       return {
         success: true,
         avatarInfo
       };
     }
-    
+
     return { success: false, error: 'Invalid avatar data format' };
   } catch (error) {
     console.error("Error in processAndUploadAvatar:", error);

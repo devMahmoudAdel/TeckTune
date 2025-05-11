@@ -17,7 +17,8 @@ export const register = async (email, password) => {
     );
     return userCredential.user;
   } catch (error) {
-    <CheckAlert state="error" title={error.message}/>
+    console.error("Registration error:", error);
+    throw error;
   }
 };
 
@@ -30,7 +31,7 @@ export const login = async (email, password) => {
     );
     return userCredential.user;
   } catch (error) {
-    // throw error;
+    throw error;
   }
 };
 
@@ -38,7 +39,8 @@ export const logout = async () => {
   try {
     await signOut(auth);
   } catch (error) {
-    <CheckAlert state="error" title={error.message}/>
+    <CheckAlert state="error" title={error.message} />
+    throw error;
   }
 };
 
@@ -53,6 +55,7 @@ export const deleteAccount = async (userId) => {
 
     return true;
   } catch (error) {
-    <CheckAlert state="error" title="Error deleting account"/>
+    <CheckAlert state="error" title="Error deleting account" />
+    throw error;
   }
 };
