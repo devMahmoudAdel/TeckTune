@@ -110,8 +110,8 @@ const CartItems = ({ refreshstate }) => {
     let subtotalAmount = 0;
 
     products.forEach((item) => {
-      count += item.quantity;
-      subtotalAmount += item.quantity * item.price;
+      count += item.quantity || 0;
+      subtotalAmount += item.quantity * item.price || 0;
     });
 
     const discountValue = subtotalAmount > 500 ? 20 : 0;
