@@ -35,7 +35,8 @@ const Checkout = () => {
   }, []);
 
   const handleConfirm = async () => {
-    const cart = await getCart();
+    const cartt = await getCart();
+    const cart = cartt.filter((item)=> item.exists);
     if (cart.length === 0) {
       Alert.alert("Your cart is empty");
       return;
