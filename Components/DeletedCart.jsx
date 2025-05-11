@@ -33,11 +33,10 @@ const CartItem = (prodcutInof) => {
 
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={{ uri: prodcutInof.image }} />
-
+      <View style={styles.image}></View>
       <View style={styles.detailsContainer}>
-        <Text style={styles.title} numberOfLines={1}>this is a deleted item</Text>
-        <Text style={styles.price}></Text>
+        <Text style={styles.title} numberOfLines={1}>Not Found</Text>
+        <Text style={styles.price}>this is a deleted item</Text>
       </View>
 
       <View style={styles.counterContainer}>
@@ -70,6 +69,7 @@ const styles = StyleSheet.create({
     width: screen.width * 0.2,
     height: screen.width * 0.2,
     borderRadius: 5,
+    backgroundColor: "#e2e2e2"
   },
   detailsContainer: {
     flex: 1,
