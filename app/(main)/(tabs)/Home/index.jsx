@@ -509,6 +509,8 @@ const styles = StyleSheet.create({
   productDetails: {
     flexDirection: "row",
     justifyContent: "space-between",
+    //one
+    //two 
     alignItems: "center",
     marginTop: 4,
   },
