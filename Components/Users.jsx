@@ -133,7 +133,7 @@ const users = [
       state: "TX",
       zip: "78201",
     },
-    avatar: "https://example.com/avatar7.png",
+    avatar: "https://example.com/avatar6.png",
     role: "admin",
     status: "active",
     createdAt: "2023-07-25",

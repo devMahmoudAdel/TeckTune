@@ -55,6 +55,7 @@ export default function ProductDetails() {
   useEffect(() => {
     try {
       console.log(category);
+      console.log(description);
       const parsedImages = params.imagess ? JSON.parse(params.imagess) : [];
       const validatedImages = parsedImages.map((img) =>
         typeof img === "string" && img.trim() !== "" ? { uri: img } : fallbackImage
@@ -106,6 +107,7 @@ export default function ProductDetails() {
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchDynamicReviews = async () => {
+    if(id)
     try {
       const reviews = await getReviews(id);
       if (Array.isArray(reviews)) {
@@ -142,8 +144,11 @@ export default function ProductDetails() {
   };
 
   useEffect(() => {
-    fetchRecommendations();
+    if (id) {
+      fetchRecommendations();
+    }
   }, [id]);
+  
 
   const handleScroll = (event) => {
     const slideIndex = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -188,7 +193,22 @@ export default function ProductDetails() {
     }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
+    if (guest){
+      router.push("/restricted-modal");
+    }
+    else {
+      try {
+          await addToCart(id);
+          setIsCart(true);
+          router.push("/(main")
+          router.push("/(main)/(tabs)/Cart");
+          <CheckAlert state="success" title="Product added to cart" />;
+      } catch (error) {
+        <CheckAlert state="error" title="Failed to update cart" />;
+      }
+    }
+
     return <CheckAlert state="error" title="Not now" />;
   };
 

@@ -93,6 +93,8 @@ export default function ProductList() {
       const title = product.title?.toLowerCase() || "";
       const description = product.description?.toLowerCase() || "";
       const category = product.category?.toLowerCase() || "";
+      console.log(title)
+      console.log(description)
 
       return keywords.some(
         (keyword) =>

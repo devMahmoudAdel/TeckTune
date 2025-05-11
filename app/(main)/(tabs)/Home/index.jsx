@@ -35,8 +35,7 @@ const { width, height } = Dimensions.get("window");
 const isTablet = width >= 768;
 const isLargeScreen = width >= 1024;
 
-// Responsive layout calculations
-const ITEM_MARGIN = isTablet ? 12 : 8;
+const ITEM_MARGIN = isTablet ? 20 : 10;
 const NUM_COLUMNS = isLargeScreen ? 4 : isTablet ? 3 : 2;
 const ITEM_WIDTH = (width - ITEM_MARGIN * (NUM_COLUMNS + 1)) / NUM_COLUMNS;
 
@@ -479,14 +478,14 @@ const styles = StyleSheet.create({
   productGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "flex-start",
+    justifyContent: "space-between",
     paddingBottom: 15,
-    marginHorizontal: isTablet ? -6 : 0,
   },
+  
   productItem: {
     marginBottom: ITEM_MARGIN,
-    marginHorizontal: ITEM_MARGIN / 2,
   },
+  
   productCard: {
     backgroundColor: "#fff",
     borderRadius: 8,
@@ -597,7 +596,7 @@ const styles = StyleSheet.create({
   refreshedProductRating: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   refreshBadge: {
     position: "absolute",

@@ -187,7 +187,7 @@ export const AuthProvider = ({ children }) => {
       status: "active",
       role: "guest",
       avatarType: "default",
-      avatarUri: require("../assets/avatars/avatar7.png"),
+      avatarUri: require("../assets/adaptive_icon.png"),
       createdAt: new Date().toISOString(),
     };
 

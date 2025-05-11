@@ -38,7 +38,7 @@ const getProduct = async (id) => {
     const productData = productDoc.data();
     const category = await getCategory(productData.category);
     const brand = await getBrand(productData.brand);
-    return { ...productData, category, brand };
+    return { ...productData, category, brand , id : productDoc.id };
   } else {
     <CheckAlert state="error" title="product does not exist" />
   }
@@ -57,6 +57,7 @@ const getAllProducts = async () => {
         ...category,
         ...brand,
         id: docSnap.id,
+        description : docSnap.data().description
       };
     }));
     return products;

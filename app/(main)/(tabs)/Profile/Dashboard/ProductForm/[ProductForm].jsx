@@ -390,16 +390,6 @@ export default function ProductForm() {
           editable={!saving}
         />
 
-        <Text style={styles.label}>Rating (0-5)</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.rating}
-          onChangeText={(text) => setFormData({ ...formData, rating: text })}
-          placeholder="Product rating (0-5)"
-          keyboardType="decimal-pad"
-          editable={!saving}
-        />
-
         <View style={styles.switchContainer}>
           <Text style={styles.label}>Refreshed Product</Text>
           <TouchableOpacity

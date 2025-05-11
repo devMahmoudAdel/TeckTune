@@ -4,7 +4,7 @@ import { View, Text ,StyleSheet,Image} from 'react-native';
 const Splash = () => {
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={require('../assets/splash-icon.png')} resizeMode='cover' />
+      <Image style={styles.image} source={require('../assets/splash_icon.png')} resizeMode='cover' />
     </View>
   );
 }
