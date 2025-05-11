@@ -11,6 +11,9 @@ import {
   TouchableOpacity,
   Pressable,
   RefreshControl,
+  Dimensions,
+  Platform,
+  StatusBar,
 } from "react-native";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -27,7 +30,8 @@ import { getAllProducts } from "../../../../firebase/Product";
 import Loading from "../../../../Components/Loading";
 import Notifications from "../../../../Components/Notifications";
 import Swiper from "../../../../Components/Swiper";
-import { StatusBar } from "react-native";
+
+const { width, height } = Dimensions.get("window");
 
 export default function Home() {
   const { user } = useAuth();
@@ -110,6 +114,7 @@ export default function Home() {
   if (loading) {
     return <Loading />;
   }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -138,14 +143,18 @@ export default function Home() {
                 ) : (
                   <Ionicons
                     name="person"
-                    size={40}
+                    size={width * 0.12}
                     color="black"
                     style={styles.imageProfile}
                   />
                 )}
                 <View>
                   <Text style={styles.helloText}>Hello!</Text>
-                  <Text style={styles.userNameText}>
+                  <Text
+                    style={styles.userNameText}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
                     {user.firstName ? user.firstName + "!" : "Guest!"}
                   </Text>
                 </View>
@@ -167,35 +176,13 @@ export default function Home() {
 
             <Search setFilter={setSearchQuery} />
             <Swiper />
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                paddingHorizontal: 15,
-                marginVertical: 10,
-                width: "95%",
-              }}
-            >
-              <Text style={{ fontSize: 18, fontWeight: "bold", color:"#121212" }}>
-                Top Rated
-              </Text>
+            <View style={styles.topRatedHeader}>
+              <Text style={styles.topRatedText}>Top Rated</Text>
               <Pressable
                 onPress={() => router.push("/(main)/(tabs)/Home/ProductList")}
-                style={{
-                  backgroundColor: "#2f2baa",
-                  // padding: 10,
-                  borderRadius: 20,
-                  height: 40,
-                  justifyContent: "center",
-                  width: 80,
-                  margin:-5,
-                  alignItems: "center",
-                }}
+                style={styles.viewAllButton}
               >
-                <Text style={{ color: "white", fontWeight: "bold" }}>
-                  View All
-                </Text>
+                <Text style={styles.viewAllText}>View All</Text>
               </Pressable>
             </View>
           </>
@@ -206,7 +193,7 @@ export default function Home() {
           alignItems: "center",
         }}
         renderItem={({ item }) => (
-          <View style={{ margin: 5 }}>
+          <View style={{ width: width / 2 - 20, margin: 5 }}>
             <Link
               href={{
                 pathname: `/app/(main)/${item.id}`,
@@ -245,17 +232,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
-    paddingTop: StatusBar.currentHeight + 30 || 0,
+    paddingTop: (StatusBar.currentHeight || 20) + 10,
   },
   header: {
     width: "100%",
-
     paddingHorizontal: 15,
     paddingVertical: 20,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    // backgroundColor: "#eeeeee",
   },
   userContainer: {
     flexDirection: "row",
@@ -273,77 +258,43 @@ const styles = StyleSheet.create({
   },
   notificationIcon: {
     padding: 10,
-    // backgroundColor: "#e5e5e5",
     borderRadius: 25,
   },
   imageProfile: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: width * 0.12,
+    height: width * 0.12,
+    borderRadius: width * 0.06,
     marginHorizontal: 10,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#e5e5e5",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginHorizontal: 20,
-    marginVertical: 10,
-    borderRadius: 10,
-  },
-  inputSearch: {
-    fontSize: 16,
-    marginLeft: 10,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: "80%",
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 15,
-  },
-  notificationCard: {
-    backgroundColor: "#f9f9f9",
-    padding: 10,
-    borderRadius: 8,
-    marginBottom: 10,
-    width: "100%",
-  },
-  notificationTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-  notificationDescription: {
-    fontSize: 14,
-    color: "#555",
-  },
-  closeButton: {
-    marginTop: 20,
-    backgroundColor: "#2f2baa",
-    padding: 10,
-    borderRadius: 5,
-  },
-  closeButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
   },
   profilePic: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: width * 0.12,
+    height: width * 0.12,
+    borderRadius: width * 0.06,
     marginHorizontal: 10,
   },
-
+  topRatedHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 15,
+    marginVertical: 10,
+    width: "95%",
+  },
+  topRatedText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#121212",
+  },
+  viewAllButton: {
+    backgroundColor: "#2f2baa",
+    borderRadius: 20,
+    height: 40,
+    justifyContent: "center",
+    width: width * 0.22,
+    alignItems: "center",
+  },
+  viewAllText: {
+    color: "white",
+    fontWeight: "bold",
+  },
 });

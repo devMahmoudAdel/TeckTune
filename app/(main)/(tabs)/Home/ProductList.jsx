@@ -94,6 +94,7 @@ export default function ProductList() {
           paddingTop: StatusBar.currentHeight + 20,
           flex: 1,
           paddingBottom: height * 0.1,
+          paddingHorizontal : width * 0.009
         },
       ]}
     >
@@ -161,11 +162,11 @@ export default function ProductList() {
 
 const styles = StyleSheet.create({
   header: {
-    justifyContent: "space-between",
+    //justifyContent: "space-between",
     flexDirection: "row",
     width: "92%",
     alignItems: "center",
-    marginBottom: 18,
+    marginBottom: height * 0.0018,
     paddingHorizontal: width * 0.04,
   },
   textHeader: {
