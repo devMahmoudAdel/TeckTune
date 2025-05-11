@@ -1,4 +1,4 @@
-import { Text, View, FlatList, RefreshControl, Platform, StatusBar, StyleSheet, Dimensions } from "react-native";
+import { Text, View, FlatList, RefreshControl, Platform, StatusBar, StyleSheet } from "react-native";
 import Product from "../../../../Components/Product";
 import Entypo from "@expo/vector-icons/Entypo";
 import { useEffect, useMemo, useState } from "react";
@@ -6,8 +6,17 @@ import { useRouter, Link, useLocalSearchParams } from "expo-router";
 import Search from "../../../../Components/Search";
 import Loading from "../../../../Components/Loading";
 import { getAllProducts } from "../../../../firebase/Product";
+import { Dimensions } from "react-native";
 
 const { width, height } = Dimensions.get("window");
+
+const guidelineBaseWidth = 390;
+const guidelineBaseHeight = 844;
+
+ const scale = size => (width / guidelineBaseWidth) * size;
+ const verticalScale = size => (height / guidelineBaseHeight) * size;
+ const moderateScale = (size, factor = 0.5) =>
+  size + (scale(size) - size) * factor;
 
 export default function ProductList() {
   const navigation = useRouter();
@@ -60,17 +69,23 @@ export default function ProductList() {
     return query.toLowerCase().split(/\s+/).filter(Boolean);
   };
 
-  // Filter products based on refreshed flag and search query
+  const numColumns = useMemo(() => {
+    const screenWidth = Dimensions.get("window").width;
+    if (screenWidth >= scale(800)) return 3;
+    return 2;
+  }, []);
+  
+
+
   const filteredProducts = useMemo(() => {
-    // First filter by refreshed status based on filter type
     let productsToFilter = allProducts;
+
     if (filterType === "refreshed") {
       productsToFilter = allProducts.filter(product => product.refreshed);
     } else if (filterType === "regular") {
       productsToFilter = allProducts.filter(product => !product.refreshed);
     }
 
-    // Then apply search filter
     const keywords = getKeywords(searchQuery);
     if (!keywords.length) return productsToFilter;
 
@@ -104,30 +119,26 @@ export default function ProductList() {
       style={[
         containerStyle,
         {
-          paddingTop: StatusBar.currentHeight + 20,
+          paddingTop: StatusBar.currentHeight + verticalScale(20),
           flex: 1,
-          paddingBottom: height * 0.1,
-          paddingHorizontal: width * 0.009
+          paddingBottom: verticalScale(80),
+          paddingHorizontal: scale(10),
         },
       ]}
     >
       <View style={styles.header}>
-        <Entypo
-          name="chevron-left"
-          size={30}
-          color="black"
-          onPress={() => router.back()}
-        />
+        <Entypo name="chevron-left" size={scale(30)} color="black" onPress={() => router.back()} />
         <Text style={styles.textHeader}>
           {filterType === "refreshed" ? "Refreshed Products" : "All Products"}
         </Text>
       </View>
 
       <Search setFilter={setSearchQuery} />
+
       <FlatList
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        numColumns={width > 400 ? 2 : 1}
+        numColumns={numColumns}
         contentContainerStyle={{
           justifyContent: "center",
           alignItems: "center",
@@ -148,7 +159,7 @@ export default function ProductList() {
           </View>
         )}
         renderItem={({ item }) => (
-          <View style={{ margin: 5 }}>
+          <View style={{ margin: scale(5), width: width / numColumns - scale(15) }}>
             <Link
               href={{
                 pathname: `/app/(main)/${item.id}`,
@@ -182,25 +193,24 @@ export default function ProductList() {
 
 const styles = StyleSheet.create({
   header: {
-    //justifyContent: "space-between",
     flexDirection: "row",
     width: "92%",
     alignItems: "center",
-    marginBottom: height * 0.0018,
-    paddingHorizontal: width * 0.04,
+    marginBottom: verticalScale(10),
+    paddingHorizontal: scale(16),
   },
   textHeader: {
     fontWeight: "bold",
-    fontSize: width > 400 ? 22 : 18,
-    marginLeft: 12,
+    fontSize: moderateScale(20),
+    marginLeft: scale(12),
   },
   emptyContainer: {
-    padding: 40,
+    padding: scale(40),
     alignItems: "center",
     justifyContent: "center",
   },
   emptyText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     color: "#666",
     textAlign: "center",
   },

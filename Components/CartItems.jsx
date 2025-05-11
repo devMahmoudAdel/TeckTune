@@ -154,17 +154,17 @@ const CartItems = ({ refreshstate }) => {
         renderItem={({ item }) => (
           item.exists ? (
             <CartItem
-            id={item.id}
-            title={item.title}
-            price={item.price}
-            image={item.images[0]}
-            rating={item.rating}
-            quantity={item.quantity}
-            onUpdateQuantity={handleUpdateQuantity}
-            setRefreshing2={setRefreshing2}
-          />
+              id={item.id}
+              title={item.title}
+              price={item.price}
+              image={item.images[0]}
+              rating={item.rating}
+              quantity={item.quantity}
+              onUpdateQuantity={handleUpdateQuantity}
+              setRefreshing2={setRefreshing2}
+            />
           ) : (
-            <DeletedCart/>
+            <DeletedCart />
           )
         )}
         renderHiddenItem={({ item }) => (
@@ -191,23 +191,25 @@ const CartItems = ({ refreshstate }) => {
               Delivery_Charges={deliveryCharges}
               total={total}
             />
-            <TouchableOpacity
-              style={styles.checkoutButton}
-              onPress={() =>
-                router.push({
-                  pathname: '../../(checkout)/Checkout',
-                  params: {
-                    subtotal: subtotal,
-                    discount: discount,
-                    delivery: deliveryCharges,
-                    count: countItems,
-                    total: total,
-                  },
-                })
-              }
-            >
-              <Text style={styles.textButtonCheckout}>Checkout</Text>
-            </TouchableOpacity>
+            {countItems > 0 && (
+              <TouchableOpacity
+                style={styles.checkoutButton}
+                onPress={() =>
+                  router.push({
+                    pathname: '../../(checkout)/Checkout',
+                    params: {
+                      subtotal: subtotal,
+                      discount: discount,
+                      delivery: deliveryCharges,
+                      count: countItems,
+                      total: total,
+                    },
+                  })
+                }
+              >
+                <Text style={styles.textButtonCheckout}>Checkout</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       />

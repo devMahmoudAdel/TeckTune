@@ -32,11 +32,13 @@ import Notifications from "../../../../Components/Notifications";
 import Swiper from "../../../../Components/Swiper";
 
 const { width, height } = Dimensions.get("window");
-const ITEM_MARGIN = 8; // Smaller margin for mobile
-// Force 2 columns on mobile
-const NUM_COLUMNS = width >= 768 ? (width >= 1200 ? 4 : 3) : 2;
-// Simplified width calculation
-const ITEM_WIDTH = (width - (ITEM_MARGIN * 3)) / 2; // Always 2 columns on mobile
+const isTablet = width >= 768;
+const isLargeScreen = width >= 1024;
+
+// Responsive layout calculations
+const ITEM_MARGIN = isTablet ? 12 : 8;
+const NUM_COLUMNS = isLargeScreen ? 4 : isTablet ? 3 : 2;
+const ITEM_WIDTH = (width - ITEM_MARGIN * (NUM_COLUMNS + 1)) / NUM_COLUMNS;
 
 export default function Home() {
   const { user } = useAuth();
@@ -59,7 +61,7 @@ export default function Home() {
 
   const topRegularProducts = useMemo(() => {
     // Get top-rated regular products
-    const maxProducts = NUM_COLUMNS * 2; // Show 2 rows of products based on number of columns
+    const maxProducts = NUM_COLUMNS * 2; // Show 2 rows of products
     return [...regularProducts]
       .sort((a, b) => b.rating - a.rating)
       .slice(0, maxProducts);
@@ -161,12 +163,12 @@ export default function Home() {
           ) : (
             <Ionicons
               name="person"
-              size={width * 0.085}
+              size={isTablet ? 60 : 50}
               color="#555"
               style={styles.imageProfile}
             />
           )}
-          <View>
+          <View style={styles.userTextContainer}>
             <Text style={styles.helloText}>Welcome back,</Text>
             <Text
               style={styles.userNameText}
@@ -181,7 +183,7 @@ export default function Home() {
           <View style={styles.notificationIconContainer}>
             <MaterialIcons
               name="notifications-none"
-              size={24}
+              size={isTablet ? 28 : 24}
               color="#333"
             />
           </View>
@@ -215,7 +217,7 @@ export default function Home() {
         {regularProducts.length > 0 ? (
           <View style={styles.productGrid}>
             {topRegularProducts.map((item, index) => (
-              <View key={item.id} style={styles.productItem}>
+              <View key={item.id} style={[styles.productItem, { width: ITEM_WIDTH }]}>
                 <Link
                   href={{
                     pathname: `/app/(main)/${item.id}`,
@@ -292,7 +294,7 @@ export default function Home() {
           </View>
 
           <View style={styles.refreshedList}>
-            {refreshedProducts.slice(0, 3).map((item, index) => (
+            {refreshedProducts.slice(0, isTablet ? 4 : 3).map((item, index) => (
               <View
                 key={`refreshed-${item.id}`}
                 style={styles.refreshedItem}
@@ -361,8 +363,8 @@ const styles = StyleSheet.create({
   },
   header: {
     width: "100%",
-    paddingHorizontal: 20,
-    paddingVertical: 22,
+    paddingHorizontal: isTablet ? 30 : 20,
+    paddingVertical: isTablet ? 25 : 22,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -371,51 +373,55 @@ const styles = StyleSheet.create({
   userContainer: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
+  },
+  userTextContainer: {
+    flex: 1,
   },
   profilePic: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: isTablet ? 60 : 50,
+    height: isTablet ? 60 : 50,
+    borderRadius: isTablet ? 30 : 25,
     marginRight: 12,
   },
   imageProfile: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: isTablet ? 60 : 50,
+    height: isTablet ? 60 : 50,
+    borderRadius: isTablet ? 30 : 25,
     marginRight: 12,
     backgroundColor: "#f0f0f0",
     justifyContent: "center",
     alignItems: "center",
   },
   helloText: {
-    fontSize: 14,
+    fontSize: isTablet ? 16 : 14,
     color: "#666",
     marginBottom: 4,
   },
   userNameText: {
-    fontSize: 18,
+    fontSize: isTablet ? 22 : 18,
     fontWeight: "bold",
     color: "#333",
-    width: width * 0.4,
+    maxWidth: isTablet ? '80%' : '70%',
   },
   notificationIconContainer: {
     backgroundColor: "#f0f0f0",
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: isTablet ? 50 : 40,
+    height: isTablet ? 50 : 40,
+    borderRadius: isTablet ? 25 : 20,
     justifyContent: "center",
     alignItems: "center",
   },
   section: {
     marginTop: 15,
     marginBottom: 25,
-    paddingHorizontal: 10,
+    paddingHorizontal: isTablet ? 20 : 10,
   },
   refreshedSection: {
     marginVertical: 10,
     paddingVertical: 20,
     paddingBottom: 30,
-    marginHorizontal: 16,
+    marginHorizontal: isTablet ? 20 : 16,
     marginBottom: 30,
     backgroundColor: "#f5f7ff",
     borderRadius: 16,
@@ -424,11 +430,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 24,
+    marginBottom: isTablet ? 28 : 24,
     paddingHorizontal: 2,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: isTablet ? 24 : 20,
     fontWeight: "bold",
     color: "#333",
   },
@@ -443,7 +449,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   refreshedSectionTitle: {
-    fontSize: 18,
+    fontSize: isTablet ? 22 : 18,
     fontWeight: "bold",
     color: "#333",
   },
@@ -451,25 +457,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#f0f2ff",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: isTablet ? 16 : 12,
+    paddingVertical: isTablet ? 8 : 6,
     borderRadius: 20,
   },
   viewAllText: {
     color: "#2f2baa",
-    fontSize: 14,
+    fontSize: isTablet ? 16 : 14,
     fontWeight: "500",
     marginRight: 5,
   },
   productGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
     paddingBottom: 15,
+    marginHorizontal: isTablet ? -6 : 0,
   },
   productItem: {
-    width: "48%",
-    marginBottom: 15,
+    marginBottom: ITEM_MARGIN,
+    marginHorizontal: ITEM_MARGIN / 2,
   },
   productCard: {
     backgroundColor: "#fff",
@@ -482,12 +489,12 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     borderWidth: 1,
     borderColor: "#eee",
-    height: 230,
+    height: isTablet ? 280 : 230,
     width: "100%",
   },
   imageContainer: {
     width: "100%",
-    height: 120,
+    height: isTablet ? 150 : 120,
     backgroundColor: "#f9f9f9",
   },
   productImage: {
@@ -495,16 +502,16 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   productContent: {
-    padding: 10,
+    padding: isTablet ? 14 : 10,
     flex: 1,
     justifyContent: "space-between",
   },
   productTitle: {
-    fontSize: 14,
+    fontSize: isTablet ? 16 : 14,
     fontWeight: "600",
     color: "#333",
     marginBottom: 6,
-    height: 36,
+    height: isTablet ? 44 : 36,
   },
   productDetails: {
     flexDirection: "row",
@@ -513,7 +520,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   productPrice: {
-    fontSize: 15,
+    fontSize: isTablet ? 17 : 15,
     fontWeight: "bold",
     color: "#2f2baa",
   },
@@ -526,14 +533,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   ratingText: {
-    fontSize: 12,
+    fontSize: isTablet ? 13 : 12,
     color: "#666",
     marginLeft: 3,
     fontWeight: "500",
   },
   refreshedList: {
     width: "100%",
-    paddingHorizontal: 16,
+    paddingHorizontal: isTablet ? 20 : 16,
     paddingBottom: 10,
   },
   refreshedItem: {
@@ -553,25 +560,25 @@ const styles = StyleSheet.create({
   refreshedCard: {
     flexDirection: "row",
     width: "100%",
-    height: 130,
+    height: isTablet ? 160 : 130,
   },
   refreshedImage: {
-    width: 130,
+    width: isTablet ? 160 : 130,
     height: "100%",
   },
   refreshedContent: {
     flex: 1,
-    padding: 16,
+    padding: isTablet ? 20 : 16,
     justifyContent: "space-between",
   },
   refreshedProductTitle: {
-    fontSize: 17,
+    fontSize: isTablet ? 19 : 17,
     fontWeight: "600",
     marginBottom: 6,
     color: "#333",
   },
   refreshedProductPrice: {
-    fontSize: 17,
+    fontSize: isTablet ? 19 : 17,
     color: "#2f2baa",
     fontWeight: "bold",
     marginBottom: 6,
@@ -592,7 +599,7 @@ const styles = StyleSheet.create({
   },
   refreshBadgeText: {
     color: "#fff",
-    fontSize: 12,
+    fontSize: isTablet ? 13 : 12,
     fontWeight: "600",
   },
   emptyContainer: {
@@ -604,7 +611,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   emptyText: {
-    fontSize: 14,
+    fontSize: isTablet ? 16 : 14,
     color: "#777",
     textAlign: "center",
   },
