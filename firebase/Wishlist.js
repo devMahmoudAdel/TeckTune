@@ -22,10 +22,14 @@ const getWishlist = async () => {
     const wishlist = await Promise.all(wishlistSnapshot.docs.map(async (doc) => {
       const data = doc.data();
       const product = await getProduct(data.productId);
-      return {
+      if(product){
+        return {
+        exists:true,
         ...data,
         ...product,
       };
+      }else return{exists:false,id: doc.id};
+      
     }));
     return wishlist;
   } catch (error) {

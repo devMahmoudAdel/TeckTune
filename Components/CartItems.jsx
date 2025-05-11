@@ -22,6 +22,7 @@ import {
 import Empty from './Empty';
 import Loading from './Loading';
 import OrderSummary from './OrderSummary';
+import DeletedCart from './DeletedCart';
 
 const screen = Dimensions.get('window');
 
@@ -79,6 +80,7 @@ const CartItems = ({ refreshstate }) => {
   const fetchProducts = async () => {
     try {
       const cartItems = await getCart();
+      console.log('Cart Items:', cartItems);
       setProducts(cartItems);
     } catch (error) {
       console.error(error);
@@ -150,7 +152,8 @@ const CartItems = ({ refreshstate }) => {
         }
         data={products}
         renderItem={({ item }) => (
-          <CartItem
+          item.exists ? (
+            <CartItem
             id={item.id}
             title={item.title}
             price={item.price}
@@ -160,6 +163,9 @@ const CartItems = ({ refreshstate }) => {
             onUpdateQuantity={handleUpdateQuantity}
             setRefreshing2={setRefreshing2}
           />
+          ) : (
+            <DeletedCart/>
+          )
         )}
         renderHiddenItem={({ item }) => (
           <View style={styles.hiddenContainer}>

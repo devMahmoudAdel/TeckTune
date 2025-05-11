@@ -13,6 +13,7 @@ import Wishlistitem from './Wishlistitem';
 import { getWishlist } from '../firebase/Wishlist';
 import Empty from './Empty';
 import Loading from './Loading';
+import DeletedWish from './DeletedWish';
 
 const screen = Dimensions.get('window');
 
@@ -73,7 +74,8 @@ const Wishlistitems = ({ refreshstate }) => {
       }
       data={products}
       renderItem={({ item }) => (
-        <Pressable>
+        console.log("Item",item),
+        item.exists ? (<Pressable>
           <Wishlistitem
             id={item.id}
             title={item.title}
@@ -83,7 +85,7 @@ const Wishlistitems = ({ refreshstate }) => {
             quantity={item.quantity}
             setRefreshing2={setRefreshing2}
           />
-        </Pressable>
+        </Pressable>) : (<DeletedWish id={item.id} setRefreshing2={setRefreshing2}/>)
       )}
     />
   );
